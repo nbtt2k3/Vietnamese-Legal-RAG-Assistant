@@ -1,0 +1,151 @@
+{
+  "dataset_name": "legal_rag_eval_v2",
+  "cases": [
+    {
+      "case_id": "citation_dieu_117_unaccented",
+      "query": "dieu 117 bo luat dan su 2015 quy dinh gi",
+      "tags": ["citation_lookup", "unaccented", "giao_dich"],
+      "expected_request_type": "citation_lookup",
+      "expected_citations": ["Bộ luật Dân sự, Điều 117"],
+      "expected_source_types": ["bo_luat"],
+      "expected_answer_terms": ["chủ thể", "tự nguyện", "mục đích", "nội dung", "hình thức"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.8,
+      "max_latency_seconds": 30.0
+    },
+    {
+      "case_id": "validity_the_chap_unaccented",
+      "query": "the chap co hieu luc khi nao theo bo luat dan su",
+      "tags": ["validity", "unaccented", "bao_dam"],
+      "expected_request_type": "validity_question",
+      "expected_citations": ["Bộ luật Dân sự, Điều 319"],
+      "expected_source_types": ["bo_luat"],
+      "expected_answer_terms": ["hiệu lực", "thế chấp", "giao kết"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.8,
+      "max_latency_seconds": 30.0
+    },
+    {
+      "case_id": "validity_doi_khang_registration",
+      "query": "Đăng ký biện pháp bảo đảm có ý nghĩa gì đối với hiệu lực đối kháng của thế chấp?",
+      "tags": ["validity", "registration", "bao_dam"],
+      "expected_request_type": "validity_question",
+      "expected_citations": ["Bộ luật Dân sự, Điều 319, Khoản 2"],
+      "expected_source_types": ["bo_luat", "nghi_dinh"],
+      "expected_answer_terms": ["đối kháng", "người thứ ba", "đăng ký"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.7,
+      "max_latency_seconds": 35.0
+    },
+    {
+      "case_id": "scenario_mortgage_paid_later",
+      "query": "Nếu bên mua nhà chưa thanh toán đủ tiền nhưng đã được cấp sổ rồi đem thế chấp ngân hàng thì hợp đồng thế chấp có bị vô hiệu không?",
+      "tags": ["scenario", "an_le", "bao_dam"],
+      "expected_request_type": "scenario_application",
+      "expected_citations": ["Án lệ số 43/2021/AL"],
+      "expected_source_types": ["an_le", "bo_luat"],
+      "expected_answer_terms": ["quyền định đoạt", "án lệ", "thế chấp", "vô hiệu"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.6,
+      "max_latency_seconds": 45.0
+    },
+    {
+      "case_id": "citation_vo_hieu_gia_tao",
+      "query": "Căn cứ nào xác định giao dịch dân sự vô hiệu do giả tạo?",
+      "tags": ["citation_lookup", "vo_hieu"],
+      "expected_request_type": "citation_lookup",
+      "expected_citations": ["Bộ luật Dân sự, Điều 124"],
+      "expected_source_types": ["bo_luat"],
+      "expected_answer_terms": ["giả tạo", "che giấu", "trốn tránh nghĩa vụ", "vô hiệu"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.8,
+      "max_latency_seconds": 30.0
+    },
+    {
+      "case_id": "case_law_question_direct",
+      "query": "Án lệ số 43/2021/AL liên quan gì đến hợp đồng thế chấp?",
+      "tags": ["case_law", "scenario"],
+      "expected_request_type": "case_law_question",
+      "expected_citations": ["Án lệ số 43/2021/AL"],
+      "expected_source_types": ["an_le"],
+      "expected_answer_terms": ["án lệ", "thế chấp", "nhà đất"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.7,
+      "max_latency_seconds": 35.0
+    },
+    {
+      "case_id": "temporal_effective_date_decree_21",
+      "query": "Nghị định 21/2021/NĐ-CP có hiệu lực từ thời điểm nào?",
+      "tags": ["validity", "temporal", "nghi_dinh"],
+      "expected_request_type": "validity_question",
+      "expected_citations": ["Nghị định 21/2021/NĐ-CP"],
+      "expected_source_types": ["nghi_dinh"],
+      "expected_answer_terms": ["hiệu lực", "ngày", "2021"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.7,
+      "max_latency_seconds": 30.0
+    },
+    {
+      "case_id": "conceptual_contract_validity",
+      "query": "Điều kiện có hiệu lực của hợp đồng dân sự là gì?",
+      "tags": ["validity", "contract"],
+      "expected_request_type": "validity_question",
+      "expected_citations": ["Bộ luật Dân sự, Điều 117"],
+      "expected_source_types": ["bo_luat"],
+      "expected_answer_terms": ["chủ thể", "tự nguyện", "mục đích", "nội dung"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.8,
+      "max_latency_seconds": 30.0
+    },
+    {
+      "case_id": "out_of_scope_weather",
+      "query": "Thời tiết Hà Nội hôm nay thế nào?",
+      "tags": ["out_of_scope", "negative"],
+      "expected_request_type": "out_of_scope",
+      "expected_citations": [],
+      "expected_source_types": [],
+      "expected_answer_terms": ["ngoài phạm vi", "pháp luật"],
+      "expected_disclaimer_terms": ["ngoài phạm vi"],
+      "min_confidence_level": "low",
+      "should_answer": false,
+      "max_latency_seconds": 10.0
+    },
+    {
+      "case_id": "insufficient_tax_domain",
+      "query": "Thuế thu nhập cá nhân khi bán cổ phần được tính như thế nào?",
+      "tags": ["insufficient_evidence", "tax"],
+      "expected_request_type": "out_of_scope",
+      "expected_citations": [],
+      "expected_source_types": [],
+      "expected_answer_terms": ["chưa cập nhật", "không đủ căn cứ", "ngoài phạm vi"],
+      "expected_disclaimer_terms": ["không đủ căn cứ"],
+      "min_confidence_level": "low",
+      "should_answer": false,
+      "max_latency_seconds": 20.0
+    },
+    {
+      "case_id": "citation_dieu_319_exact",
+      "query": "Điều 319 Bộ luật Dân sự 2015 quy định gì?",
+      "tags": ["citation_lookup", "bao_dam"],
+      "expected_request_type": "citation_lookup",
+      "expected_citations": ["Bộ luật Dân sự, Điều 319"],
+      "expected_source_types": ["bo_luat"],
+      "expected_answer_terms": ["thế chấp", "hiệu lực", "đối kháng"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.8,
+      "max_latency_seconds": 30.0
+    },
+    {
+      "case_id": "scenario_third_party_registration",
+      "query": "Nếu tài sản thế chấp chưa đăng ký thì có đối kháng với người thứ ba không?",
+      "tags": ["scenario", "validity", "bao_dam"],
+      "expected_request_type": "scenario_application",
+      "expected_citations": ["Bộ luật Dân sự, Điều 319, Khoản 2"],
+      "expected_source_types": ["bo_luat"],
+      "expected_answer_terms": ["đăng ký", "đối kháng", "người thứ ba"],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.7,
+      "max_latency_seconds": 35.0
+    }
+  ]
+}

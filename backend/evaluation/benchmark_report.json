@@ -1,0 +1,18 @@
+[
+  {
+    "query": "Hợp đồng dân sự vô hiệu khi nào?",
+    "latency": 99.46,
+    "intent_match": false,
+    "keyword_hits": 5,
+    "success": false,
+    "candidates_count": 7
+  },
+  {
+    "query": "Tôi sinh năm 2008 thì có được đứng tên mua đất không?",
+    "latency": 106.27,
+    "intent_match": false,
+    "keyword_hits": 3,
+    "success": false,
+    "candidates_count": 17
+  }
+]

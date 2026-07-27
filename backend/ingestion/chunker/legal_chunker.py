@@ -1,0 +1,112 @@
+from typing import List
+from ingestion.chunker.base_chunker import BaseChunker
+from ingestion.chunker.models import Chunk
+from ingestion.chunker.text_splitter import RecursiveCharacterTextSplitter
+
+class LegalChunker(BaseChunker):
+    def __init__(self, chunk_size: int = 1500, chunk_overlap: int = 200):
+        self.splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+
+    def _merge_metadata(self, doc_meta: dict, node_meta: dict) -> dict:
+        """Merge document metadata (so_hieu, ngay_ban_hanh) with node specific hierarchy."""
+        merged = {}
+        merged.update(doc_meta)
+        
+        # Thêm hierarchy
+        if "hierarchy" in node_meta:
+            merged.update(node_meta["hierarchy"])
+        if "statistics" in node_meta:
+            merged.update(node_meta["statistics"])
+        if "legal" in node_meta:
+            merged.update(node_meta["legal"])
+            
+        return merged
+
+    def chunk(self, data: dict) -> List[Chunk]:
+        chunks = []
+        doc_id = data.get("doc_id", "unknown")
+        
+        # Document level metadata (so_hieu, loai_van_ban, co_quan_ban_hanh, ...)
+        global_meta = dict(data.get("metadata", {}).get("document", {}))
+        global_legal_meta = data.get("metadata", {}).get("legal", {})
+        # Carry temporal validity and provenance from the document to every chunk.
+        # The node-level legal metadata below still supplies article citations.
+        global_meta.update(global_legal_meta)
+        
+        # 1. Chunk Điều / Khoản
+        for dieu in data.get("dieu", []):
+            dieu_number = dieu.get("number", "")
+            dieu_meta_raw = dieu.get("metadata", {})
+            dieu_merged_meta = self._merge_metadata(global_meta, dieu_meta_raw)
+            
+            # 1a. Intro text của Điều (phần chữ trước khi vào các khoản)
+            dieu_text = dieu.get("text", "").strip()
+            if dieu_text:
+                full_intro = f"Điều {dieu_number}. {dieu.get('title', '')}\n{dieu_text}".strip()
+                chunks.append(Chunk(
+                    chunk_id=f"{doc_id}_dieu_{dieu_number}_intro",
+                    doc_id=doc_id,
+                    text=full_intro,
+                    metadata=dieu_merged_meta
+                ))
+            
+            # 1b. Các Khoản (và Điểm bên trong)
+            for khoan in dieu.get("khoan", []):
+                khoan_number = khoan.get("number", "")
+                khoan_meta_raw = khoan.get("metadata", {})
+                khoan_merged_meta = self._merge_metadata(global_meta, khoan_meta_raw)
+                
+                dieu_title = dieu.get('title', '')
+                chuong_title = dieu.get('chuong_title', '')
+                chuong_prefix = f"Chương {dieu.get('chuong_number', '')} ({chuong_title}) - " if chuong_title else ""
+                dieu_prefix = f"Điều {dieu_number}" + (f" ({dieu_title})" if dieu_title else "") + " - "
+                
+                parts = [f"{chuong_prefix}{dieu_prefix}Khoản {khoan_number}. {khoan.get('text', '')}"]
+                for diem in khoan.get("diem", []):
+                    parts.append(f"  Điểm {diem.get('id', '')}) {diem.get('text', '')}")
+                
+                khoan_full_text = "\n".join(parts).strip()
+                
+                # Check nếu Khoản quá dài, cần split. Thường thì Khoản khá ngắn (dưới 1500 char)
+                if len(khoan_full_text) > self.splitter.chunk_size:
+                    splits = self.splitter.split_text(khoan_full_text)
+                    for i, split_txt in enumerate(splits):
+                        chunks.append(Chunk(
+                            chunk_id=f"{doc_id}_dieu_{dieu_number}_khoan_{khoan_number}_p{i+1}",
+                            doc_id=doc_id,
+                            text=split_txt,
+                            metadata=khoan_merged_meta
+                        ))
+                else:
+                    chunks.append(Chunk(
+                        chunk_id=f"{doc_id}_dieu_{dieu_number}_khoan_{khoan_number}",
+                        doc_id=doc_id,
+                        text=khoan_full_text,
+                        metadata=khoan_merged_meta
+                    ))
+
+        # 2. Chunk Phụ lục
+        for i, phu_luc in enumerate(data.get("phu_luc", [])):
+            pl_text = f"{phu_luc.get('ten_mau', '')}\n{phu_luc.get('noi_dung', '')}".strip()
+            if not pl_text:
+                continue
+                
+            pl_meta = dict(global_meta)
+            pl_meta["phan_loai"] = "phu_luc"
+            pl_meta["ma_mau"] = phu_luc.get("ma_mau", "")
+            legal_meta = data.get("metadata", {}).get("legal", {})
+            if legal_meta:
+                pl_meta.update(legal_meta)
+            pl_meta["legal_unit_type"] = "phu_luc"
+            pl_meta["legal_role"] = "appendix_form"
+            
+            splits = self.splitter.split_text(pl_text)
+            for j, split_txt in enumerate(splits):
+                chunks.append(Chunk(
+                    chunk_id=f"{doc_id}_phuluc_{i+1}_p{j+1}",
+                    doc_id=doc_id,
+                    text=split_txt,
+                    metadata=pl_meta
+                ))
+                
+        return chunks

@@ -1,0 +1,875 @@
+[
+  {
+    "chunk_id": "an_le_so_432021AL_tinh_huong",
+    "doc_id": "an_le_so_432021AL",
+    "text": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+    "metadata": {
+      "doc_id": "an_le_so_432021AL",
+      "loai_van_ban": "an_le",
+      "so_hieu": "43/2021/AL",
+      "ten": "Về hiệu lực của hợp đồng thế chấp trong trường hợp tài sản thế chấp là nhà đất do bên thế chấp nhận chuyển nhượng của người khác nhưng chưa thanh toán đủ tiền cho bên bán",
+      "ngay_ban_hanh": "2021-03-12",
+      "ngay_hieu_luc": null,
+      "co_quan_ban_hanh": "Tòa án nhân dân tối cao",
+      "phan_loai": "tinh_huong_phap_ly",
+      "keywords": [
+        "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Chưa thanh toán hết tiền mua nhà đất",
+        "Hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Hợp đồng thế chấp",
+        "Đăng ký thế chấp"
+      ],
+      "citation": "Án lệ số 43/2021/AL",
+      "citation_short": "43/2021/AL",
+      "document_role": "case_law",
+      "legal_domain_tags": [
+        "hop_dong",
+        "bao_dam",
+        "tai_san"
+      ],
+      "cited_authorities": [
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 168",
+          "normalized_ref": "Điều 168"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 161",
+          "normalized_ref": "Điều 161"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 439",
+          "normalized_ref": "Điều 439"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2005",
+          "normalized_ref": "Bộ luật Dân sự năm 2005"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2015",
+          "normalized_ref": "Bộ luật Dân sự năm 2015"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 10",
+          "normalized_ref": "Điều 10"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Nghị định số 163/2006/NĐ-CP",
+          "normalized_ref": "Nghị định số 163/2006/NĐ-CP"
+        },
+        {
+          "ref_type": "raw",
+          "ref_text": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K.",
+          "normalized_ref": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "related_documents": [
+        {
+          "relation_type": "case_law_source",
+          "target_doc": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "temporal_validity_note": "an_le_da_cong_bo",
+      "validity_status": "an_le_da_cong_bo",
+      "effective_date": "2021-03-12",
+      "replaced_documents": [],
+      "transition_notes": [],
+      "case_law_role": {
+        "issue": "tinh_huong_phap_ly",
+        "holding": "giai_phap_phap_ly",
+        "source_location": "Đoạn 2 phần “Nhận định của Tòa án”."
+      },
+      "case_law_schema": {
+        "facts_summary": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 g...",
+        "legal_issue": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "holding": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "reasoning_excerpt": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền s..."
+      },
+      "legal_unit_type": "an_le_tinh_huong",
+      "legal_role": "case_issue"
+    }
+  },
+  {
+    "chunk_id": "an_le_so_432021AL_giai_phap",
+    "doc_id": "an_le_so_432021AL",
+    "text": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+    "metadata": {
+      "doc_id": "an_le_so_432021AL",
+      "loai_van_ban": "an_le",
+      "so_hieu": "43/2021/AL",
+      "ten": "Về hiệu lực của hợp đồng thế chấp trong trường hợp tài sản thế chấp là nhà đất do bên thế chấp nhận chuyển nhượng của người khác nhưng chưa thanh toán đủ tiền cho bên bán",
+      "ngay_ban_hanh": "2021-03-12",
+      "ngay_hieu_luc": null,
+      "co_quan_ban_hanh": "Tòa án nhân dân tối cao",
+      "phan_loai": "giai_phap_phap_ly",
+      "keywords": [
+        "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Chưa thanh toán hết tiền mua nhà đất",
+        "Hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Hợp đồng thế chấp",
+        "Đăng ký thế chấp"
+      ],
+      "citation": "Án lệ số 43/2021/AL",
+      "citation_short": "43/2021/AL",
+      "document_role": "case_law",
+      "legal_domain_tags": [
+        "hop_dong",
+        "bao_dam",
+        "tai_san"
+      ],
+      "cited_authorities": [
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 168",
+          "normalized_ref": "Điều 168"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 161",
+          "normalized_ref": "Điều 161"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 439",
+          "normalized_ref": "Điều 439"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2005",
+          "normalized_ref": "Bộ luật Dân sự năm 2005"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2015",
+          "normalized_ref": "Bộ luật Dân sự năm 2015"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 10",
+          "normalized_ref": "Điều 10"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Nghị định số 163/2006/NĐ-CP",
+          "normalized_ref": "Nghị định số 163/2006/NĐ-CP"
+        },
+        {
+          "ref_type": "raw",
+          "ref_text": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K.",
+          "normalized_ref": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "related_documents": [
+        {
+          "relation_type": "case_law_source",
+          "target_doc": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "temporal_validity_note": "an_le_da_cong_bo",
+      "validity_status": "an_le_da_cong_bo",
+      "effective_date": "2021-03-12",
+      "replaced_documents": [],
+      "transition_notes": [],
+      "case_law_role": {
+        "issue": "tinh_huong_phap_ly",
+        "holding": "giai_phap_phap_ly",
+        "source_location": "Đoạn 2 phần “Nhận định của Tòa án”."
+      },
+      "case_law_schema": {
+        "facts_summary": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 g...",
+        "legal_issue": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "holding": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "reasoning_excerpt": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền s..."
+      },
+      "legal_unit_type": "an_le_giai_phap",
+      "legal_role": "case_holding"
+    }
+  },
+  {
+    "chunk_id": "an_le_so_432021AL_trich_dan_p1",
+    "doc_id": "an_le_so_432021AL",
+    "text": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở. Như vậy, hai nhà đất trên thuộc quyền sở hữu của bà L kể từ ngày 07/11/2008, nên bà L có quyền dùng hai nhà đất này thế chấp cho Ngân hàng để vay tiền; ông K, bà H cũng biết và đồng ý cho bà L thế chấp nhà đất trên với Ngân hàng. Hợp đồng thế chấp đã được công chứng, đăng ký thế chấp và đăng ký giao dịch bảo đảm hợp pháp nên có hiệu lực pháp luật. Ông K, bà H cho rằng bà L chưa trả đủ tiền mua nhà đất, còn nợ 2.500.000.000 đồng để yêu cầu hủy hợp đồng mua bán nhà, trả lại 3.000.000.000 đồng đã nhận cho bà L là không có cơ sở. Nếu bà L không trả đủ số tiền mua nhà đất còn thiếu, ông K và bà H có quyền khởi kiện một vụ án khác để yêu cầu bà L thanh toán khoản tiền này… Tòa án cấp phúc thẩm tuyên vô hiệu hợp đồng thế chấp tài sản số 6360-LCP-2009-00949 giữa Ngân hàng với bà L đối với căn nhà số 26Đ và căn nhà số 20/2T, phường Q, quận P, Thành phố Hồ Chí Minh ngày 01/12/2009 là không đúng, ảnh hưởng quyền và lợi ích hợp pháp của nguyên đơn.”.",
+    "metadata": {
+      "doc_id": "an_le_so_432021AL",
+      "loai_van_ban": "an_le",
+      "so_hieu": "43/2021/AL",
+      "ten": "Về hiệu lực của hợp đồng thế chấp trong trường hợp tài sản thế chấp là nhà đất do bên thế chấp nhận chuyển nhượng của người khác nhưng chưa thanh toán đủ tiền cho bên bán",
+      "ngay_ban_hanh": "2021-03-12",
+      "ngay_hieu_luc": null,
+      "co_quan_ban_hanh": "Tòa án nhân dân tối cao",
+      "phan_loai": "an_le_trich_dan",
+      "keywords": [
+        "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Chưa thanh toán hết tiền mua nhà đất",
+        "Hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Hợp đồng thế chấp",
+        "Đăng ký thế chấp"
+      ],
+      "citation": "Án lệ số 43/2021/AL",
+      "citation_short": "43/2021/AL",
+      "document_role": "case_law",
+      "legal_domain_tags": [
+        "hop_dong",
+        "bao_dam",
+        "tai_san"
+      ],
+      "cited_authorities": [
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 168",
+          "normalized_ref": "Điều 168"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 161",
+          "normalized_ref": "Điều 161"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 439",
+          "normalized_ref": "Điều 439"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2005",
+          "normalized_ref": "Bộ luật Dân sự năm 2005"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2015",
+          "normalized_ref": "Bộ luật Dân sự năm 2015"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 10",
+          "normalized_ref": "Điều 10"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Nghị định số 163/2006/NĐ-CP",
+          "normalized_ref": "Nghị định số 163/2006/NĐ-CP"
+        },
+        {
+          "ref_type": "raw",
+          "ref_text": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K.",
+          "normalized_ref": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "related_documents": [
+        {
+          "relation_type": "case_law_source",
+          "target_doc": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "temporal_validity_note": "an_le_da_cong_bo",
+      "validity_status": "an_le_da_cong_bo",
+      "effective_date": "2021-03-12",
+      "replaced_documents": [],
+      "transition_notes": [],
+      "case_law_role": {
+        "issue": "tinh_huong_phap_ly",
+        "holding": "giai_phap_phap_ly",
+        "source_location": "Đoạn 2 phần “Nhận định của Tòa án”."
+      },
+      "case_law_schema": {
+        "facts_summary": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 g...",
+        "legal_issue": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "holding": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "reasoning_excerpt": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền s..."
+      },
+      "legal_unit_type": "an_le_trich_dan",
+      "legal_role": "case_reasoning"
+    }
+  },
+  {
+    "chunk_id": "an_le_so_432021AL_vu_an_p1",
+    "doc_id": "an_le_so_432021AL",
+    "text": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 giấy nhận nợ (ngày 04/12/2009 số tiền vay 7.750.000.000 đồng, ngày 04/12/2009 số tiền vay 250.000.000 đồng) với lãi suất trong hạn 12%/năm, lãi suất quá hạn 150% lãi suất trong hạn, thời hạn vay 12 tháng. Sau đó, hai bên đã ký phụ lục hợp đồng tín dụng số 6360-LAV-200900957/PLHĐ ngày 15/12/2010 thỏa thuận điều chỉnh lãi suất vay trong hạn là 16%/năm. Tài sản bảo đảm cho khoản vay trên gồm: - Quyền sử dụng 298,3m2 đất và nhà ở thuộc thửa đất số 7, tờ bản đồ số 93 tại số 26Đ, phường Q, quận P, Thành phố Hồ Chí Minh theo giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở số 7332/2008/UB.GCN do Ủy ban nhân dân quận P, Thành phố Hồ Chí Minh cấp ngày 07/11/2008 cho bà L. - Quyền sử dụng 113,16m2 đất và nhà ở thuộc thửa đất số 82, MPT 79, tờ bản đồ số 89 tọa lạc tại số 20/2T, phường Q, quận P, Thành phố Hồ Chí Minh theo giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở số 7331/2008/UB.GCN do Ủy ban nhân dân quận P, Thành phố Hồ Chí Minh cấp ngày 07/11/2008 cho bà L.",
+    "metadata": {
+      "doc_id": "an_le_so_432021AL",
+      "loai_van_ban": "an_le",
+      "so_hieu": "43/2021/AL",
+      "ten": "Về hiệu lực của hợp đồng thế chấp trong trường hợp tài sản thế chấp là nhà đất do bên thế chấp nhận chuyển nhượng của người khác nhưng chưa thanh toán đủ tiền cho bên bán",
+      "ngay_ban_hanh": "2021-03-12",
+      "ngay_hieu_luc": null,
+      "co_quan_ban_hanh": "Tòa án nhân dân tối cao",
+      "phan_loai": "noi_dung_vu_an",
+      "keywords": [
+        "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Chưa thanh toán hết tiền mua nhà đất",
+        "Hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Hợp đồng thế chấp",
+        "Đăng ký thế chấp"
+      ],
+      "citation": "Án lệ số 43/2021/AL",
+      "citation_short": "43/2021/AL",
+      "document_role": "case_law",
+      "legal_domain_tags": [
+        "hop_dong",
+        "bao_dam",
+        "tai_san"
+      ],
+      "cited_authorities": [
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 168",
+          "normalized_ref": "Điều 168"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 161",
+          "normalized_ref": "Điều 161"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 439",
+          "normalized_ref": "Điều 439"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2005",
+          "normalized_ref": "Bộ luật Dân sự năm 2005"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2015",
+          "normalized_ref": "Bộ luật Dân sự năm 2015"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 10",
+          "normalized_ref": "Điều 10"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Nghị định số 163/2006/NĐ-CP",
+          "normalized_ref": "Nghị định số 163/2006/NĐ-CP"
+        },
+        {
+          "ref_type": "raw",
+          "ref_text": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K.",
+          "normalized_ref": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "related_documents": [
+        {
+          "relation_type": "case_law_source",
+          "target_doc": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "temporal_validity_note": "an_le_da_cong_bo",
+      "validity_status": "an_le_da_cong_bo",
+      "effective_date": "2021-03-12",
+      "replaced_documents": [],
+      "transition_notes": [],
+      "case_law_role": {
+        "issue": "tinh_huong_phap_ly",
+        "holding": "giai_phap_phap_ly",
+        "source_location": "Đoạn 2 phần “Nhận định của Tòa án”."
+      },
+      "case_law_schema": {
+        "facts_summary": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 g...",
+        "legal_issue": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "holding": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "reasoning_excerpt": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền s..."
+      },
+      "legal_unit_type": "an_le_vu_an",
+      "legal_role": "case_facts"
+    }
+  },
+  {
+    "chunk_id": "an_le_so_432021AL_vu_an_p2",
+    "doc_id": "an_le_so_432021AL",
+    "text": "Bà L đã thế chấp các tài sản trên theo hợp đồng thế chấp tài sản số 6360- LCP-2009-00949 ngày 01/12/2009 đã được công chứng và đăng ký tài sản thế chấp theo quy định của pháp luật. Ngân hàng đã giải ngân cho bà L với tổng số tiền là 8.000.000.000 đồng. Quá trình thực hiện hợp đồng, bà L không thanh toán đầy đủ, đến hạn bà L chỉ trả lãi trong hạn vào ngày 12/5/2010, nên Ngân hàng đã chuyển nợ quá hạn cho hợp đồng tín dụng và các phụ lục hợp đồng. Ngân hàng khởi kiện yêu cầu bà L phải thanh toán số tiền còn nợ tính đến ngày 07/12/2012 là 14.780.416.666 đồng, trong đó nợ gốc 8.000.000.000 đồng, nợ lãi trong hạn 2.879.083.333 đồng, lãi quá hạn 3.901.333.333 đồng. Nếu bà L không trả được nợ thì yêu cầu phát mãi tài sản thế chấp để thu hồi nợ. Bị đơn là bà Nguyễn Thị L trình bày: Bà thừa nhận đã ký hợp đồng tín dụng, các phụ lục hợp đồng, giấy nhận nợ, đồng thời xác nhận số tiền còn nợ Ngân hàng tính đến ngày 07/12/2012 là 14.780.416.666 đồng (gồm nợ gốc 8.000.000.000 đồng, nợ lãi trong hạn 2.879.083.333 đồng, nợ lãi quá hạn 3.901.333.333 đồng) như Ngân hàng trình bày. Bà cam kết thanh toán cho Ngân hàng số tiền còn nợ và tiền lãi phát sinh trong vòng 30 ngày kể từ ngày bản án có hiệu lực pháp luật; nếu không thanh toán được, bà đồng ý phát mãi các tài sản thế chấp để Ngân hàng thu hồi nợ. Tuy nhiên, hai căn nhà đang thế chấp tại Ngân hàng do bà mua của ông Dương Quốc K, bà Phạm Thị Kim H vào năm 2008 với giá 5.500.000.000 đồng.",
+    "metadata": {
+      "doc_id": "an_le_so_432021AL",
+      "loai_van_ban": "an_le",
+      "so_hieu": "43/2021/AL",
+      "ten": "Về hiệu lực của hợp đồng thế chấp trong trường hợp tài sản thế chấp là nhà đất do bên thế chấp nhận chuyển nhượng của người khác nhưng chưa thanh toán đủ tiền cho bên bán",
+      "ngay_ban_hanh": "2021-03-12",
+      "ngay_hieu_luc": null,
+      "co_quan_ban_hanh": "Tòa án nhân dân tối cao",
+      "phan_loai": "noi_dung_vu_an",
+      "keywords": [
+        "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Chưa thanh toán hết tiền mua nhà đất",
+        "Hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Hợp đồng thế chấp",
+        "Đăng ký thế chấp"
+      ],
+      "citation": "Án lệ số 43/2021/AL",
+      "citation_short": "43/2021/AL",
+      "document_role": "case_law",
+      "legal_domain_tags": [
+        "hop_dong",
+        "bao_dam",
+        "tai_san"
+      ],
+      "cited_authorities": [
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 168",
+          "normalized_ref": "Điều 168"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 161",
+          "normalized_ref": "Điều 161"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 439",
+          "normalized_ref": "Điều 439"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2005",
+          "normalized_ref": "Bộ luật Dân sự năm 2005"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2015",
+          "normalized_ref": "Bộ luật Dân sự năm 2015"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 10",
+          "normalized_ref": "Điều 10"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Nghị định số 163/2006/NĐ-CP",
+          "normalized_ref": "Nghị định số 163/2006/NĐ-CP"
+        },
+        {
+          "ref_type": "raw",
+          "ref_text": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K.",
+          "normalized_ref": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "related_documents": [
+        {
+          "relation_type": "case_law_source",
+          "target_doc": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "temporal_validity_note": "an_le_da_cong_bo",
+      "validity_status": "an_le_da_cong_bo",
+      "effective_date": "2021-03-12",
+      "replaced_documents": [],
+      "transition_notes": [],
+      "case_law_role": {
+        "issue": "tinh_huong_phap_ly",
+        "holding": "giai_phap_phap_ly",
+        "source_location": "Đoạn 2 phần “Nhận định của Tòa án”."
+      },
+      "case_law_schema": {
+        "facts_summary": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 g...",
+        "legal_issue": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "holding": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "reasoning_excerpt": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền s..."
+      },
+      "legal_unit_type": "an_le_vu_an",
+      "legal_role": "case_facts"
+    }
+  },
+  {
+    "chunk_id": "an_le_so_432021AL_vu_an_p3",
+    "doc_id": "an_le_so_432021AL",
+    "text": "Tuy nhiên, hai căn nhà đang thế chấp tại Ngân hàng do bà mua của ông Dương Quốc K, bà Phạm Thị Kim H vào năm 2008 với giá 5.500.000.000 đồng. Bà đã thanh toán được 3.000.000.000 đồng, còn nợ ông K, bà H 2.500.000.000 đồng. Hai bên đã làm thủ tục mua bán đầy đủ theo quy định của pháp luật và bà đã đứng tên chủ quyền trên giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở đối với các nhà đất nêu trên. Ông K, bà H vẫn đang quản lý sử dụng hai căn nhà này vì hai bên chưa thực hiện việc giao nhận nhà. Cuối năm 2010, ông K, bà H đã có đơn khởi kiện yêu cầu bà thanh toán số tiền nợ nêu trên, nếu bà không trả được thì sẽ đòi lại nhà, sự việc đang được Tòa án nhân dân quận Tân Phú giải quyết. Người có quyền lợi, nghĩa vụ liên quan: Ồng Dương Quốc K, bà Phạm Thị Kim H trình bày: Ngày 03/11/2008, ông bà có thỏa thuận bán cho bà L hai căn nhà số 26Đ và số 20/2T với giá 5.500.000.000 đồng; bà L đã trả được 3.000.000.000 đồng, còn nợ 2.500.000.000 đồng hẹn đến ngày 03/11/2009 sẽ thanh toán đủ để nhận nhà. Bà L yêu cầu ông bà ký công chứng cho bà L đứng tên nhà đất để bà L thế chấp Ngân hàng. Sau khi vay được tiền từ Ngân hàng, bà L không trả đủ tiền mua nhà cho ông bà. Sau này, ông bà được biết Ngân hàng đã cho bà L vay số tiền vượt quá quy định của Nhà nước. Hiện nay, ông bà vẫn đang quản lý sử dụng hai căn nhà này, ông bà đề nghị được lấy lại nhà và trả lại cho bà L 3.000.000.000 đồng trước đây đã nhận.",
+    "metadata": {
+      "doc_id": "an_le_so_432021AL",
+      "loai_van_ban": "an_le",
+      "so_hieu": "43/2021/AL",
+      "ten": "Về hiệu lực của hợp đồng thế chấp trong trường hợp tài sản thế chấp là nhà đất do bên thế chấp nhận chuyển nhượng của người khác nhưng chưa thanh toán đủ tiền cho bên bán",
+      "ngay_ban_hanh": "2021-03-12",
+      "ngay_hieu_luc": null,
+      "co_quan_ban_hanh": "Tòa án nhân dân tối cao",
+      "phan_loai": "noi_dung_vu_an",
+      "keywords": [
+        "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Chưa thanh toán hết tiền mua nhà đất",
+        "Hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Hợp đồng thế chấp",
+        "Đăng ký thế chấp"
+      ],
+      "citation": "Án lệ số 43/2021/AL",
+      "citation_short": "43/2021/AL",
+      "document_role": "case_law",
+      "legal_domain_tags": [
+        "hop_dong",
+        "bao_dam",
+        "tai_san"
+      ],
+      "cited_authorities": [
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 168",
+          "normalized_ref": "Điều 168"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 161",
+          "normalized_ref": "Điều 161"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 439",
+          "normalized_ref": "Điều 439"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2005",
+          "normalized_ref": "Bộ luật Dân sự năm 2005"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2015",
+          "normalized_ref": "Bộ luật Dân sự năm 2015"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 10",
+          "normalized_ref": "Điều 10"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Nghị định số 163/2006/NĐ-CP",
+          "normalized_ref": "Nghị định số 163/2006/NĐ-CP"
+        },
+        {
+          "ref_type": "raw",
+          "ref_text": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K.",
+          "normalized_ref": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "related_documents": [
+        {
+          "relation_type": "case_law_source",
+          "target_doc": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "temporal_validity_note": "an_le_da_cong_bo",
+      "validity_status": "an_le_da_cong_bo",
+      "effective_date": "2021-03-12",
+      "replaced_documents": [],
+      "transition_notes": [],
+      "case_law_role": {
+        "issue": "tinh_huong_phap_ly",
+        "holding": "giai_phap_phap_ly",
+        "source_location": "Đoạn 2 phần “Nhận định của Tòa án”."
+      },
+      "case_law_schema": {
+        "facts_summary": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 g...",
+        "legal_issue": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "holding": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "reasoning_excerpt": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền s..."
+      },
+      "legal_unit_type": "an_le_vu_an",
+      "legal_role": "case_facts"
+    }
+  },
+  {
+    "chunk_id": "an_le_so_432021AL_vu_an_p4",
+    "doc_id": "an_le_so_432021AL",
+    "text": "Hiện nay, ông bà vẫn đang quản lý sử dụng hai căn nhà này, ông bà đề nghị được lấy lại nhà và trả lại cho bà L 3.000.000.000 đồng trước đây đã nhận. Bản án kinh doanh, thương mại sơ thẩm số 287/2013/KDTM-ST ngày 19/3/2013 của Tòa án nhân dân Thành phố Hồ Chí Minh quyết định: Chấp nhận toàn bộ yêu cầu của nguyên đơn, buộc bà Nguyễn Thị L - Chủ DNTN Nguyễn Tấn Đ có trách nhiệm thanh toán cho Ngân hàng A tổng số nợ tính đến ngày 19/3/2013 là 13.367.083.333 đồng, trong đó nợ vốn vay 8.000.000.000 đồng, lãi trong hạn 921.750.000 đồng, lãi quá hạn 4.445.333.333 đồng và tiền lãi phát sinh từ ngày 20/3/2013 cho đến ngày trả hết vốn vay theo mức lãi suất nợ quá hạn 24%/năm. Thời hạn thanh toán trong vòng 6 tháng sau khi bản án có hiệu lực pháp luật. Quá hạn mà bà Nguyễn Thị L - Chủ DNTN Nguyễn Tấn Đ không thanh toán hoặc không thanh toán đầy đủ thì Ngân hàng A được quyền yêu cầu phát mãi tài sản đã thế chấp là hai nhà đất của bà Nguyễn Thị L để thu hồi nợ, gồm: - Nhà đất có diện tích đất 298,30m2 thuộc thửa 7, tờ bản đồ số 93 (BĐĐC) tọa lạc tại 26Đ, phường Q, quận P, Thành phố Hồ Chí Minh của bà Nguyễn Thị L theo giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở số 7332/2008/UB.GCN ngày 07/11/2008 của Ủy ban nhân dân quận P, Thành phố Hồ Chí Minh.",
+    "metadata": {
+      "doc_id": "an_le_so_432021AL",
+      "loai_van_ban": "an_le",
+      "so_hieu": "43/2021/AL",
+      "ten": "Về hiệu lực của hợp đồng thế chấp trong trường hợp tài sản thế chấp là nhà đất do bên thế chấp nhận chuyển nhượng của người khác nhưng chưa thanh toán đủ tiền cho bên bán",
+      "ngay_ban_hanh": "2021-03-12",
+      "ngay_hieu_luc": null,
+      "co_quan_ban_hanh": "Tòa án nhân dân tối cao",
+      "phan_loai": "noi_dung_vu_an",
+      "keywords": [
+        "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Chưa thanh toán hết tiền mua nhà đất",
+        "Hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Hợp đồng thế chấp",
+        "Đăng ký thế chấp"
+      ],
+      "citation": "Án lệ số 43/2021/AL",
+      "citation_short": "43/2021/AL",
+      "document_role": "case_law",
+      "legal_domain_tags": [
+        "hop_dong",
+        "bao_dam",
+        "tai_san"
+      ],
+      "cited_authorities": [
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 168",
+          "normalized_ref": "Điều 168"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 161",
+          "normalized_ref": "Điều 161"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 439",
+          "normalized_ref": "Điều 439"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2005",
+          "normalized_ref": "Bộ luật Dân sự năm 2005"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2015",
+          "normalized_ref": "Bộ luật Dân sự năm 2015"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 10",
+          "normalized_ref": "Điều 10"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Nghị định số 163/2006/NĐ-CP",
+          "normalized_ref": "Nghị định số 163/2006/NĐ-CP"
+        },
+        {
+          "ref_type": "raw",
+          "ref_text": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K.",
+          "normalized_ref": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "related_documents": [
+        {
+          "relation_type": "case_law_source",
+          "target_doc": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "temporal_validity_note": "an_le_da_cong_bo",
+      "validity_status": "an_le_da_cong_bo",
+      "effective_date": "2021-03-12",
+      "replaced_documents": [],
+      "transition_notes": [],
+      "case_law_role": {
+        "issue": "tinh_huong_phap_ly",
+        "holding": "giai_phap_phap_ly",
+        "source_location": "Đoạn 2 phần “Nhận định của Tòa án”."
+      },
+      "case_law_schema": {
+        "facts_summary": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 g...",
+        "legal_issue": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "holding": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "reasoning_excerpt": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền s..."
+      },
+      "legal_unit_type": "an_le_vu_an",
+      "legal_role": "case_facts"
+    }
+  },
+  {
+    "chunk_id": "an_le_so_432021AL_vu_an_p5",
+    "doc_id": "an_le_so_432021AL",
+    "text": "- Nhà đất có diện tích đất 113,16m2 thuộc thửa 82, MPT 79, tờ bản đồ số 89 (BĐĐC) tọa lạc tại 20/2T, phường Q, quận P, Thành phố Hồ Chí Minh của bà Nguyễn Thị L theo giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở số 7331/2008/UB.GCN ngày 07/11/2008 của Ủy ban nhân dân quận P, Thành phố Hồ Chí Minh. Ngày 02/4/2013, bà Phạm Thị Kim H và bà Nguyễn Thị L đều có đơn kháng cáo. Bản án kinh doanh, thương mại phúc thẩm số 171/2013/KDTM-PT ngày 10/10/2013 của Tòa Phúc thẩm Tòa án nhân dân tối cao tại Thành phố Hồ Chí Minh quyết định sửa bản án sơ thẩm như sau: - Chấp nhận một phần đơn khởi kiện của nguyên đơn Ngân hàng A (Chi nhánh Ngân hàng A quận B). - Buộc bà Nguyễn Thị L - Chủ doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ phải trả cho nguyên đơn tiền vốn 8.000.000.000 đồng, lãi trong hạn 921.750.000 đồng, lãi quá hạn 4.445.333.333 đồng tính đến ngày xét xử sơ thẩm 19/3/2013 tổng cộng là 13.367.083.333 đồng; từ ngày 20/3/2013 cho đến ngày trả hết tiền vốn vay tính lãi theo mức lãi suất quá hạn từng thời điểm theo hợp đồng đã ký kết. - Vô hiệu hợp đồng thế chấp tài sản số 6360-LCP-2009-00949 giữa Ngân hàng A - Chi nhánh B với bà Nguyễn Thị L - Chủ doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ đối với căn nhà số 26Đ, phường Q, quận P, Thành phố Hồ Chí Minh và căn nhà số 20/2T, phường Q, quận P, Thành phố Hồ Chí Minh được ký kết và công chứng ngày 01/12/2009.",
+    "metadata": {
+      "doc_id": "an_le_so_432021AL",
+      "loai_van_ban": "an_le",
+      "so_hieu": "43/2021/AL",
+      "ten": "Về hiệu lực của hợp đồng thế chấp trong trường hợp tài sản thế chấp là nhà đất do bên thế chấp nhận chuyển nhượng của người khác nhưng chưa thanh toán đủ tiền cho bên bán",
+      "ngay_ban_hanh": "2021-03-12",
+      "ngay_hieu_luc": null,
+      "co_quan_ban_hanh": "Tòa án nhân dân tối cao",
+      "phan_loai": "noi_dung_vu_an",
+      "keywords": [
+        "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Chưa thanh toán hết tiền mua nhà đất",
+        "Hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Hợp đồng thế chấp",
+        "Đăng ký thế chấp"
+      ],
+      "citation": "Án lệ số 43/2021/AL",
+      "citation_short": "43/2021/AL",
+      "document_role": "case_law",
+      "legal_domain_tags": [
+        "hop_dong",
+        "bao_dam",
+        "tai_san"
+      ],
+      "cited_authorities": [
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 168",
+          "normalized_ref": "Điều 168"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 161",
+          "normalized_ref": "Điều 161"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 439",
+          "normalized_ref": "Điều 439"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2005",
+          "normalized_ref": "Bộ luật Dân sự năm 2005"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2015",
+          "normalized_ref": "Bộ luật Dân sự năm 2015"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 10",
+          "normalized_ref": "Điều 10"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Nghị định số 163/2006/NĐ-CP",
+          "normalized_ref": "Nghị định số 163/2006/NĐ-CP"
+        },
+        {
+          "ref_type": "raw",
+          "ref_text": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K.",
+          "normalized_ref": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "related_documents": [
+        {
+          "relation_type": "case_law_source",
+          "target_doc": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "temporal_validity_note": "an_le_da_cong_bo",
+      "validity_status": "an_le_da_cong_bo",
+      "effective_date": "2021-03-12",
+      "replaced_documents": [],
+      "transition_notes": [],
+      "case_law_role": {
+        "issue": "tinh_huong_phap_ly",
+        "holding": "giai_phap_phap_ly",
+        "source_location": "Đoạn 2 phần “Nhận định của Tòa án”."
+      },
+      "case_law_schema": {
+        "facts_summary": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 g...",
+        "legal_issue": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "holding": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "reasoning_excerpt": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền s..."
+      },
+      "legal_unit_type": "an_le_vu_an",
+      "legal_role": "case_facts"
+    }
+  },
+  {
+    "chunk_id": "an_le_so_432021AL_vu_an_p6",
+    "doc_id": "an_le_so_432021AL",
+    "text": "Ngân hàng A (Chi nhánh Ngân hàng A quận B) phải trả 02 giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở số 7332/2008/UB.GCN ngày 07/11/2008 và số 7331/2008/UB.GCN ngày 07/11/2008 do Ủy ban nhân dân quận P cấp cho bà Nguyễn Thị L. Ngày 18/12/2013, Ngân hàng A có đơn đề nghị xem xét theo thủ tục giám đốc thẩm đối với bản án kinh doanh, thương mại phúc thẩm nêu trên. Tại Quyết định số 24/2016/KN-KDTM ngày 15/8/2016, Chánh án Tòa án nhân dân tối cao kháng nghị Bản án kinh doanh, thương mại phúc thẩm số 171/2013/KDTM-PT ngày 10/10/2013 của Tòa Phúc thẩm Tòa án nhân dân tối cao tại Thành phố Hồ Chí Minh; đề nghị Hội đồng Thẩm phán Tòa án nhân dân tối cao xét xử giám đốc thẩm, hủy bản án kinh doanh, thương mại phúc thẩm nêu trên; giao hồ sơ vụ án cho Tòa án nhân dân cấp cao tại Thành phố Hồ Chí Minh xét xử lại theo thủ tục phúc thẩm đúng quy định của pháp luật. Tại phiên tòa giám đốc thẩm, đại diện Viện kiểm sát nhân dân tối cao nhất trí với kháng nghị giám đốc thẩm của Chánh án Tòa án nhân dân tối cao..",
+    "metadata": {
+      "doc_id": "an_le_so_432021AL",
+      "loai_van_ban": "an_le",
+      "so_hieu": "43/2021/AL",
+      "ten": "Về hiệu lực của hợp đồng thế chấp trong trường hợp tài sản thế chấp là nhà đất do bên thế chấp nhận chuyển nhượng của người khác nhưng chưa thanh toán đủ tiền cho bên bán",
+      "ngay_ban_hanh": "2021-03-12",
+      "ngay_hieu_luc": null,
+      "co_quan_ban_hanh": "Tòa án nhân dân tối cao",
+      "phan_loai": "noi_dung_vu_an",
+      "keywords": [
+        "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Chưa thanh toán hết tiền mua nhà đất",
+        "Hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở",
+        "Hợp đồng thế chấp",
+        "Đăng ký thế chấp"
+      ],
+      "citation": "Án lệ số 43/2021/AL",
+      "citation_short": "43/2021/AL",
+      "document_role": "case_law",
+      "legal_domain_tags": [
+        "hop_dong",
+        "bao_dam",
+        "tai_san"
+      ],
+      "cited_authorities": [
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 168",
+          "normalized_ref": "Điều 168"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 161",
+          "normalized_ref": "Điều 161"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 439",
+          "normalized_ref": "Điều 439"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2005",
+          "normalized_ref": "Bộ luật Dân sự năm 2005"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Bộ luật Dân sự năm 2015",
+          "normalized_ref": "Bộ luật Dân sự năm 2015"
+        },
+        {
+          "ref_type": "article",
+          "ref_text": "Điều 10",
+          "normalized_ref": "Điều 10"
+        },
+        {
+          "ref_type": "document",
+          "ref_text": "Nghị định số 163/2006/NĐ-CP",
+          "normalized_ref": "Nghị định số 163/2006/NĐ-CP"
+        },
+        {
+          "ref_type": "raw",
+          "ref_text": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K.",
+          "normalized_ref": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "related_documents": [
+        {
+          "relation_type": "case_law_source",
+          "target_doc": "Quyết định giám đốc thẩm số 01/2019/KDTM-GĐT ngày 11/01/2019 của Hội đồng Thẩm phán Tòa án nhân dân tối cao về vụ án kinh doanh thương mại “Tranh chấp hợp đồng tín dụng” tại Thành phố Hồ Chí Minh giữa nguyên đơn là Ngân hàng A với bị đơn là bà Nguyễn Thị L; người có quyền lợi, nghĩa vụ liên quan là bà Phạm Thị Kim H, ông Dương Quốc K."
+        }
+      ],
+      "temporal_validity_note": "an_le_da_cong_bo",
+      "validity_status": "an_le_da_cong_bo",
+      "effective_date": "2021-03-12",
+      "replaced_documents": [],
+      "transition_notes": [],
+      "case_law_role": {
+        "issue": "tinh_huong_phap_ly",
+        "holding": "giai_phap_phap_ly",
+        "source_location": "Đoạn 2 phần “Nhận định của Tòa án”."
+      },
+      "case_law_schema": {
+        "facts_summary": "Tại đơn khởi kiện đề ngày 01/3/2011 và các lời khai tại Tòa án, nguyên đơn là Ngân hàng A (ủy quyền cho bà Trần Thị E) trình bày: Ngân hàng cho bà Nguyễn Thị L - Chủ Doanh nghiệp tư nhân thương mại dịch vụ Nguyễn Tấn Đ vay tổng cộng 8.000.000.000 đồng theo hợp đồng tín dụng số 6360-LAV-200900957 ngày 04/12/2009, phụ lục hợp đồng sửa đổi hợp đồng tín dụng số 01/PL/BS/HĐTD ngày 04/12/2009 và 02 g...",
+        "legal_issue": "Hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng, bên mua đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền sử dụng đất ở nhưng mới thanh toán được một phần tiền mua nhà đất; các bên chưa thực hiện việc giao nhận nhà. Bên mua thế chấp nhà đất cho Ngân hàng, có đăng ký thế chấp theo đúng quy định của pháp luật; bên bán biết và đồng ý để bên mua thế chấp nhà đất nhưng sau đó lại có yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "holding": "Trường hợp này, phải xác định hợp đồng thế chấp có hiệu lực pháp luật, không chấp nhận yêu cầu hủy hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở.",
+        "reasoning_excerpt": "“[2] Về xử lý tài sản thế chấp: Theo các tài liệu có trong hồ sơ vụ án xác định tài sản thế chấp là nhà đất tại số 26Đ và 20/2T nêu trên là của bà L nhận chuyển nhượng của ông Dương Quốc K, bà Phạm Thị Kim H theo các hợp đồng chuyển nhượng quyền sở hữu nhà ở và quyền sử dụng đất ở đã được công chứng ngày 04/11/2008. Ngày 07/11/2008, bà L đã được cấp giấy chứng nhận quyền sở hữu nhà ở và quyền s..."
+      },
+      "legal_unit_type": "an_le_vu_an",
+      "legal_role": "case_facts"
+    }
+  }
+]

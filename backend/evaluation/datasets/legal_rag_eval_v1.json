@@ -1,0 +1,79 @@
+{
+  "dataset_name": "legal_rag_eval_v1",
+  "cases": [
+    {
+      "case_id": "validity_the_chap_basic",
+      "query": "Hợp đồng thế chấp có hiệu lực khi nào theo Bộ luật Dân sự và Nghị định 21/2021/NĐ-CP?",
+      "tags": ["validity", "bao_dam"],
+      "expected_request_type": "validity_question",
+      "expected_citations": [
+        "Bộ luật Dân sự, Điều 319, Khoản 1",
+        "Điều 22, Khoản 1"
+      ],
+      "expected_source_types": ["bo_luat", "nghi_dinh"],
+      "expected_answer_terms": ["hiệu lực", "giao kết", "công chứng", "chứng thực"],
+      "min_confidence_level": "high"
+    },
+    {
+      "case_id": "vo_hieu_gia_tao",
+      "query": "Căn cứ nào để xác định giao dịch dân sự vô hiệu do giả tạo theo Bộ luật Dân sự 2015?",
+      "tags": ["citation_lookup", "vo_hieu"],
+      "expected_request_type": "citation_lookup",
+      "expected_citations": [
+        "Bộ luật Dân sự, Điều 124, Khoản 1",
+        "Bộ luật Dân sự, Điều 124, Khoản 2"
+      ],
+      "expected_source_types": ["bo_luat"],
+      "expected_answer_terms": ["giả tạo", "che giấu", "trốn tránh nghĩa vụ", "vô hiệu"],
+      "min_confidence_level": "high"
+    },
+    {
+      "case_id": "scenario_an_le_43",
+      "query": "Nếu bên mua nhà chưa thanh toán đủ tiền nhưng đã được cấp sổ rồi đem thế chấp ngân hàng thì hợp đồng thế chấp có bị vô hiệu không?",
+      "tags": ["scenario", "an_le", "bao_dam"],
+      "expected_request_type": "scenario_application",
+      "expected_citations": [
+        "Án lệ số 43/2021/AL"
+      ],
+      "expected_source_types": ["an_le", "bo_luat"],
+      "expected_answer_terms": ["quyền định đoạt", "án lệ", "thế chấp", "vô hiệu"],
+      "min_confidence_level": "medium"
+    },
+    {
+      "case_id": "doi_khang_nguoi_thu_ba",
+      "query": "Thế chấp tài sản phát sinh hiệu lực đối kháng với người thứ ba từ thời điểm nào?",
+      "tags": ["validity", "doi_khang"],
+      "expected_request_type": "validity_question",
+      "expected_citations": [
+        "Bộ luật Dân sự, Điều 319, Khoản 2"
+      ],
+      "expected_source_types": ["bo_luat"],
+      "expected_answer_terms": ["đối kháng", "người thứ ba", "đăng ký"],
+      "min_confidence_level": "medium"
+    },
+    {
+      "case_id": "dieu_kien_hieu_luc_giao_dich",
+      "query": "Điều kiện có hiệu lực của giao dịch dân sự theo Bộ luật Dân sự 2015 là gì?",
+      "tags": ["citation_lookup", "giao_dich"],
+      "expected_request_type": "validity_question",
+      "expected_citations": [
+        "Bộ luật Dân sự, Điều 117"
+      ],
+      "expected_source_types": ["bo_luat"],
+      "expected_answer_terms": ["chủ thể", "tự nguyện", "mục đích", "nội dung", "hình thức"],
+      "min_confidence_level": "medium"
+    },
+    {
+      "case_id": "hieu_luc_doi_khang_registration",
+      "query": "Đăng ký biện pháp bảo đảm có ý nghĩa gì đối với hiệu lực đối kháng của thế chấp?",
+      "tags": ["validity", "registration", "bao_dam"],
+      "expected_request_type": "validity_question",
+      "expected_citations": [
+        "Bộ luật Dân sự, Điều 319, Khoản 2"
+      ],
+      "expected_source_types": ["bo_luat", "nghi_dinh"],
+      "expected_answer_terms": ["đăng ký", "hiệu lực đối kháng", "người thứ ba"],
+      "min_confidence_level": "medium"
+    }
+  ]
+}

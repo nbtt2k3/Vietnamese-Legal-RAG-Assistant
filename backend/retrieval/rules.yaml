@@ -1,0 +1,72 @@
+rules:
+  - id: vo_hieu_gia_tao
+    triggers:
+      - "giao dịch dân sự vô hiệu do giả tạo"
+      - "vô hiệu do giả tạo"
+      - "giả tạo"
+    request_type: "citation_lookup"
+    targets:
+      - "Điều 124"
+    phrases:
+      - "giao dịch dân sự vô hiệu do giả tạo"
+      - "giả tạo"
+      - "che giấu"
+      - "trốn tránh nghĩa vụ"
+
+  - id: dieu_kien_co_hieu_luc
+    triggers:
+      - "điều kiện có hiệu lực của giao dịch"
+      - "điều kiện có hiệu lực giao dịch"
+    request_type: "validity_question"
+    targets:
+      - "Điều 117"
+    phrases:
+      - "điều kiện có hiệu lực"
+      - "chủ thể"
+      - "tự nguyện"
+      - "mục đích"
+      - "nội dung"
+      - "hình thức"
+
+  - id: hieu_luc_doi_khang
+    triggers:
+      - "hiệu lực đối kháng"
+      - "đối kháng với người thứ ba"
+      - "đăng ký biện pháp bảo đảm"
+    request_type: "validity_question"
+    targets:
+      - "Điều 319"
+    phrases:
+      - "hiệu lực đối kháng"
+      - "người thứ ba"
+      - "đăng ký"
+      - "thế chấp"
+
+stop_words:
+  - "là gì"
+  - "như thế nào"
+  - "có được"
+  - "không"
+  - "tại"
+  - "quy định"
+  - "nào"
+
+domain_config:
+  source_authority_order:
+    - "bo_luat"
+    - "nghi_quyet"
+    - "nghi_dinh"
+    - "an_le"
+  meta_bonus_weights:
+    "bo_luat": 0.8
+    "luat": 0.6
+    "nghi_dinh": 0.4
+    "thong_tu": 0.2
+  validity_keywords:
+    - "hiệu lực"
+    - "thời điểm"
+    - "có hiệu lực từ"
+    - "công chứng"
+    - "chứng thực"
+    - "thỏa thuận"
+    - "đối kháng"
