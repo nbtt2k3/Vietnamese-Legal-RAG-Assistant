@@ -14,7 +14,7 @@ from app.config import settings
 METADATA_DIR = settings.metadata_dir
 CHUNKS_DIR = settings.chunks_dir
 
-def process_file(file_path: Path, loai_van_ban: str) -> int:
+def process_file(file_path: Path, out_path: Path, loai_van_ban: str) -> int:
     try:
         data = json.loads(file_path.read_text(encoding="utf-8"))
     except Exception as e:
@@ -23,11 +23,6 @@ def process_file(file_path: Path, loai_van_ban: str) -> int:
         
     chunker = ChunkerFactory.get_chunker(loai_van_ban)
     chunks = chunker.chunk(data)
-    
-    out_dir = CHUNKS_DIR / loai_van_ban
-    out_dir.mkdir(parents=True, exist_ok=True)
-    
-    out_path = out_dir / file_path.name
     
     with open(out_path, "w", encoding="utf-8") as f:
         # Lưu thành list of dicts
@@ -66,13 +61,17 @@ def main():
         if args.loai and args.loai != loai_van_ban:
             continue
             
-        files = list(loai_dir.glob("*.json"))
+        files = list(loai_dir.rglob("*.json"))
         if not files:
             continue
             
         print(f"\n[{loai_van_ban}] tìm thấy {len(files)} file")
         for f in files:
-            num_chunks = process_file(f, loai_van_ban)
+            rel_path = f.relative_to(loai_dir)
+            out_path = CHUNKS_DIR / loai_van_ban / rel_path
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            num_chunks = process_file(f, out_path, loai_van_ban)
             if num_chunks > 0:
                 print(f"  ✓ {f.name} -> Tạo được {num_chunks} chunks")
                 total_files += 1

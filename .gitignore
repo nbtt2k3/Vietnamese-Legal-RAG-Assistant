@@ -51,6 +51,7 @@ htmlcov/
 *.sqlite3
 *.sqlite
 qdrant_db/
+backend/data/
 
 # Logs
 logs/

@@ -320,13 +320,22 @@ def run_pipeline(raw_dir: Path = RAW_DIR, parsed_dir: Path = PARSED_DIR, cleaned
             c_dir.mkdir(parents=True, exist_ok=True)
             m_dir.mkdir(parents=True, exist_ok=True)
 
-            files = [f for f in loai_dir.iterdir() if f.suffix.lower() in (".pdf", ".docx")]
+            files = [f for f in loai_dir.rglob("*") if f.is_file() and f.suffix.lower() in (".pdf", ".docx")]
             logger.info(f"[{loai_van_ban}] tìm thấy {len(files)} file")
 
             for file_path in files:
-                p_out = p_dir / f"{file_path.stem}.json"
-                c_out = c_dir / f"{file_path.stem}.json"
-                m_out = m_dir / f"{file_path.stem}.json"
+                rel_path = file_path.relative_to(loai_dir)
+                p_out_dir = p_dir / rel_path.parent
+                c_out_dir = c_dir / rel_path.parent
+                m_out_dir = m_dir / rel_path.parent
+                
+                p_out_dir.mkdir(parents=True, exist_ok=True)
+                c_out_dir.mkdir(parents=True, exist_ok=True)
+                m_out_dir.mkdir(parents=True, exist_ok=True)
+
+                p_out = p_out_dir / f"{file_path.stem}.json"
+                c_out = c_out_dir / f"{file_path.stem}.json"
+                m_out = m_out_dir / f"{file_path.stem}.json"
                 try:
                     parsed_res, cleaned_res, metadata_res = process_file(file_path, loai_van_ban)
                     with open(p_out, "w", encoding="utf-8") as f:

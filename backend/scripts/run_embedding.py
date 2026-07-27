@@ -48,8 +48,10 @@ def main():
         loai_van_ban = loai_dir.name
         if args.loai and args.loai != loai_van_ban: continue
         
-        for f in loai_dir.glob("*.json"):
-            out_file = EMBEDDINGS_DIR / loai_van_ban / f.name
+        for f in loai_dir.rglob("*.json"):
+            rel_path = f.relative_to(loai_dir)
+            out_file = EMBEDDINGS_DIR / loai_van_ban / rel_path
+            out_file.parent.mkdir(parents=True, exist_ok=True)
             files_to_process.append((f, out_file))
             
     print(f"\nTìm thấy {len(files_to_process)} file JSON cần xử lý.")
