@@ -8,7 +8,7 @@ import ChatPage from './ChatPage';
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
-  if (loading) return <div className="flex-center-screen bg-[var(--bg-main)] text-[var(--text-primary)]">Loading...</div>;
+  if (loading) return <div className="flex-center-screen bg-[var(--bg-main)] text-[var(--text-primary)]">Đang tải...</div>;
   if (!user) return <Navigate to="/login" replace />;
   
   return children;

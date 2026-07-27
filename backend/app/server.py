@@ -11,7 +11,7 @@ from generation.pipeline import GenerationPipeline
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting up Legal RAG API Server...")
+    logger.info("Starting up Vietnamese Legal RAG Assistant API Server...")
     from app.database import initialize_database
     initialize_database()
     logger.info("Initializing Generation Pipeline (Loading Models into RAM)...")
@@ -21,8 +21,8 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down API Server...")
 
 app = FastAPI(
-    title="Legal RAG API",
-    description="REST API cho hệ thống Legal Retrieval-Augmented Generation",
+    title="Vietnamese Legal RAG Assistant API",
+    description="REST API cho hệ thống Vietnamese Legal Retrieval-Augmented Generation",
     version="1.0.0",
     lifespan=lifespan
 )

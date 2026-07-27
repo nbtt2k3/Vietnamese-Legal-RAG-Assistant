@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     // If we had a /me endpoint, we would fetch user details here.
     // For now, if token exists, we consider them logged in.
     if (token) {
-      setUser({ username: localStorage.getItem('username') || 'User' });
+      setUser({ username: localStorage.getItem('username') || 'Người dùng' });
     } else {
       setUser(null);
     }
@@ -22,19 +22,33 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (username, password) => {
-    const data = await apiLogin(username, password);
-    localStorage.setItem('access_token', data.access_token);
-    localStorage.setItem('username', data.username);
-    setToken(data.access_token);
-    setUser({ username: data.username });
+    try {
+      const data = await apiLogin(username, password);
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('username', data.username);
+      setToken(data.access_token);
+      setUser({ username: data.username });
+    } catch (error) {
+      if (error.message === 'Incorrect username or password') {
+        throw new Error('Tên đăng nhập hoặc mật khẩu không chính xác');
+      }
+      throw error;
+    }
   };
 
   const register = async (username, password) => {
-    const data = await apiRegister(username, password);
-    localStorage.setItem('access_token', data.access_token);
-    localStorage.setItem('username', data.username);
-    setToken(data.access_token);
-    setUser({ username: data.username });
+    try {
+      const data = await apiRegister(username, password);
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('username', data.username);
+      setToken(data.access_token);
+      setUser({ username: data.username });
+    } catch (error) {
+      if (error.message === 'Username already registered') {
+        throw new Error('Tên đăng nhập đã tồn tại');
+      }
+      throw error;
+    }
   };
 
   const logout = () => {

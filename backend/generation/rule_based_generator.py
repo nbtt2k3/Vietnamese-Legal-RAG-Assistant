@@ -295,7 +295,7 @@ class RuleBasedLegalGenerator:
 
     def _build_disclaimers(self, request_type: str, ranked: list[RetrievedChunk], case_law: list[RetrievedChunk]) -> list[str]:
         notes = [
-            "Câu trả lời này là phân tích hỗ trợ từ hệ thống Legal RAG, không thay thế ý kiến tư vấn pháp lý chính thức.",
+            "Câu trả lời này là phân tích hỗ trợ từ hệ thống Vietnamese Legal RAG Assistant, không thay thế ý kiến tư vấn pháp lý chính thức.",
         ]
         if request_type == "scenario_application":
             notes.append("Với câu hỏi tình huống, kết luận cuối cùng còn phụ thuộc hồ sơ, chứng cứ, thời điểm phát sinh giao dịch và cách Tòa án đánh giá sự kiện.")

@@ -1,8 +1,21 @@
-# React + Vite
+# Vietnamese Legal RAG Assistant - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Giao diện người dùng web cho hệ thống Trợ lý Pháp lý AI (Vietnamese Legal RAG Assistant).
 
-Currently, two official plugins are available:
+## Công nghệ sử dụng
+- **React 18** + **Vite**
+- **TailwindCSS** / Custom CSS (Material Design 3 style)
+- **Lucide Icons** & **Material Symbols**
+- **React Router v7**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Hướng dẫn cài đặt & chạy
+```bash
+# Cài đặt các phụ thuộc
+npm install
+
+# Chạy giao diện ở môi trường phát triển
+npm run dev
+
+# Build sản phẩm
+npm run build
+```

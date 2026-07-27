@@ -3,7 +3,7 @@ from pathlib import Path
 
 class Settings(BaseSettings):
     # App Settings
-    app_name: str = "Legal RAG"
+    app_name: str = "Vietnamese Legal RAG Assistant"
     
     # Paths
     project_root: Path = Path(__file__).parent.parent
