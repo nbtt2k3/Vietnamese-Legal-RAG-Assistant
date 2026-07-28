@@ -128,45 +128,25 @@ class QdrantIndexer:
         
         if old_target and old_target != self.staging_collection:
             logger.info(f"Keeping previous collection for rollback: {old_target}")
-            
-            # Phase 1: Tạo Payload Index để tăng tốc truy vấn Metadata
+
+            # BUG-14 FIX: Tạo Payload Index trên staging_collection (collection thực),
+            # KHÔNG phải trên self.collection_name (alias). Alias forward request đến
+            # staging_collection, nhưng dùng tên tường minh tránh nhầm khi rollback.
             from qdrant_client.http.models import PayloadSchemaType
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="doc_id",
-                field_schema=PayloadSchemaType.KEYWORD,
-            )
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="loai_van_ban",
-                field_schema=PayloadSchemaType.KEYWORD,
-            )
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="citation",
-                field_schema=PayloadSchemaType.TEXT,
-            )
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="text",
-                field_schema=PayloadSchemaType.TEXT,
-            )
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="validity_status",
-                field_schema=PayloadSchemaType.KEYWORD,
-            )
-            # Phase 3 Temporal indices
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="effective_from",
-                field_schema=PayloadSchemaType.KEYWORD,
-            )
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="effective_to",
-                field_schema=PayloadSchemaType.KEYWORD,
-            )
+            for field, schema in [
+                ("doc_id",          PayloadSchemaType.KEYWORD),
+                ("loai_van_ban",    PayloadSchemaType.KEYWORD),
+                ("citation",        PayloadSchemaType.TEXT),
+                ("text",            PayloadSchemaType.TEXT),
+                ("validity_status", PayloadSchemaType.KEYWORD),
+                ("effective_from",  PayloadSchemaType.KEYWORD),
+                ("effective_to",    PayloadSchemaType.KEYWORD),
+            ]:
+                self.client.create_payload_index(
+                    collection_name=self.staging_collection,
+                    field_name=field,
+                    field_schema=schema,
+                )
             logger.info("Đã tạo Payload Index thành công.")
         else:
             logger.info(f"Collection '{self.collection_name}' đã tồn tại.")

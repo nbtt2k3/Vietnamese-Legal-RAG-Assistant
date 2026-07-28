@@ -27,6 +27,8 @@ class GenerationPipeline:
             self.llm = None
 
     def run(self, query: str, history: list = None) -> tuple[LegalAnswer, RetrievalResult]:
+        import time
+        t_pipeline_start = time.time()  # BUG-06 FIX: Đo từ đầu hàm để bao gồm cả retrieval
         retrieval_result = self.retrieval.run(query, history=history)
         
         # GUARDRAILS
@@ -43,18 +45,19 @@ class GenerationPipeline:
             )
             return answer, retrieval_result
 
-        import time
         t0 = time.time()
         fallback_answer = self.rule_based.generate(query, retrieval_result)
         latency_fallback = round(time.time() - t0, 3)
-        
+
         t1 = time.time()
         answer = self.llm.generate(query, retrieval_result, history=history) if self.llm else None
         latency_llm = round(time.time() - t1, 3)
-        
+
         retrieval_result.retrieval_debug["latency_generation_llm"] = latency_llm
         retrieval_result.retrieval_debug["latency_generation_fallback"] = latency_fallback
-        retrieval_result.retrieval_debug["latency_total_pipeline"] = round(time.time() - t0 + retrieval_result.retrieval_debug.get("latency_total_retrieval", 0), 3)
+        # BUG-06 FIX: Tính total pipeline từ t_pipeline_start (trước cả retrieval)
+        # để có con số end-to-end chính xác.
+        retrieval_result.retrieval_debug["latency_total_pipeline"] = round(time.time() - t_pipeline_start, 3)
         if answer is None:
             answer = fallback_answer
         else:
@@ -72,7 +75,8 @@ class GenerationPipeline:
         import asyncio
         import time
         from fastapi.encoders import jsonable_encoder
-        
+
+        t_pipeline_start = time.time()  # BUG-06 FIX: Đo từ đầu hàm
         yield f"data: {json.dumps({'type': 'status', 'content': 'Đang phân tích câu hỏi và truy xuất tài liệu pháp lý...'})}\n\n"
         
         retrieval_result = await asyncio.to_thread(self.retrieval.run, query=query, history=history)
@@ -106,7 +110,8 @@ class GenerationPipeline:
         
         retrieval_result.retrieval_debug["latency_generation_llm"] = latency_llm
         retrieval_result.retrieval_debug["latency_generation_fallback"] = latency_fallback
-        retrieval_result.retrieval_debug["latency_total_pipeline"] = round(time.time() - t0 + retrieval_result.retrieval_debug.get("latency_total_retrieval", 0), 3)
+        # BUG-06 FIX: Tính total pipeline từ t_pipeline_start (trước cả retrieval)
+        retrieval_result.retrieval_debug["latency_total_pipeline"] = round(time.time() - t_pipeline_start, 3)
         
         if answer is None:
             answer = fallback_answer

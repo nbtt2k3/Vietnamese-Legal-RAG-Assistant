@@ -82,9 +82,16 @@ class QueryAnalyzer:
             )
             
         # 2. Cache Lookup for LLM
-        if normalized in self._cache:
+        # BUG-05 FIX: Cache key phải bao gồm history để tránh trả nhầm kết quả
+        # khi cùng câu hỏi nhưng ngữ cảnh hội thoại khác nhau.
+        history_key = ""
+        if history:
+            history_key = "|".join(f"{msg.role}:{msg.content}" for msg in history[-4:])
+        cache_key = f"{normalized}||{history_key}"
+
+        if cache_key in self._cache:
             logger.info("Using cached LLM query analysis.")
-            parsed_dict = self._cache[normalized]
+            parsed_dict = self._cache[cache_key]
         else:
             history_context = ""
             if history:
@@ -130,7 +137,7 @@ CHỈ TRẢ VỀ JSON HỢP LỆ.
                 # Validate with Pydantic Schema
                 validated = LLMQuerySchema(**raw_parsed)
                 parsed_dict = validated.model_dump()
-                self._cache[normalized] = parsed_dict
+                self._cache[cache_key] = parsed_dict
             except Exception as e:
                 logger.error(f"LLM json parse error, validation failure, or timeout: {e}")
                 parsed_dict = {}

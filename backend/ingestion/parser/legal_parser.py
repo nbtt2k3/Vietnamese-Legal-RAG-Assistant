@@ -14,12 +14,12 @@ class LegalParser:
     RE_PHAN   = re.compile(r'^\s*Phần\s+(?:thứ\s+)?([IVXLCDM]+|\d+|nhất|hai|ba|tư|bốn|năm|sáu|bảy|tám|chín|mười[a-z\s]*)\.?\s*(.*)$', re.MULTILINE | re.IGNORECASE)
     RE_CHUONG = re.compile(r'^\s*Chương\s+([IVXLCDM]+|\d+|nhất|hai|ba|tư|bốn|năm|sáu|bảy|tám|chín|mười[a-z\s]*)\.?\s*(.*)$', re.MULTILINE | re.IGNORECASE)
     RE_MUC    = re.compile(r'^\s*Mục\s+(\d+|[IVXLCDM]+)\.?\s*(.*)$', re.MULTILINE | re.IGNORECASE)
-    RE_DIEU   = re.compile(r'^\s*Điều\s+(\d+)\.?\s*(.*)$', re.MULTILINE | re.IGNORECASE)
+    RE_DIEU   = re.compile(r'^\s*(?:Điều|Ðiều|Diều|Điêù|Điểu)\s+(\d+)[.:]?\s*(.*)$', re.MULTILINE | re.IGNORECASE)
 
     # Phụ lục: mẫu văn bản, biểu mẫu — thường tự đánh số "Điều 1, Điều 2..."
     # RIÊNG của nó (vd mẫu Điều lệ), cần tách ra TRƯỚC khi parse Điều,
     # nếu không sẽ bị nối nhầm vào Điều của chính văn bản, gây trùng số.
-    RE_PHU_LUC = re.compile(r'^Phụ lục\b', re.MULTILINE | re.IGNORECASE)
+    RE_PHU_LUC = re.compile(r'^\s*(?:Phụ\s+lục\b|Mẫu\s+số\b)', re.MULTILINE | re.IGNORECASE)
 
     # Khoản: "1. nội dung" — chỉ match khi ở đầu dòng, số + dấu chấm
     RE_KHOAN  = re.compile(r'^\s*(\d{1,3})\.\s+(.*)$')

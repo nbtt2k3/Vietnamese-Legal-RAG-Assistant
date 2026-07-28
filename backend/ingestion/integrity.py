@@ -167,7 +167,6 @@ def compare_chunk_sets(chunks_dir: Path, embeddings_dir: Path) -> dict[str, Any]
 
 def write_manifest(stage: str, inputs: dict[str, Any], outputs: dict[str, Any], metadata: dict[str, Any] | None = None) -> Path:
     """Persist the exact artifact snapshot produced by a stage."""
-    MANIFEST_DIR.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema_version": 1,
         "stage": stage,
@@ -176,8 +175,18 @@ def write_manifest(stage: str, inputs: dict[str, Any], outputs: dict[str, Any], 
         "outputs": outputs,
         "metadata": metadata or {},
     }
-    path = MANIFEST_DIR / f"{stage}_latest.json"
-    temp_path = path.with_suffix(".json.tmp")
-    temp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    temp_path.replace(path)
-    return path
+    manifest_json = json.dumps(payload, ensure_ascii=False, indent=2)
+
+    try:
+        MANIFEST_DIR.mkdir(parents=True, exist_ok=True)
+        path = MANIFEST_DIR / f"{stage}_latest.json"
+        temp_path = path.with_suffix(".json.tmp")
+        temp_path.write_text(manifest_json, encoding="utf-8")
+        temp_path.replace(path)
+        return path
+    except PermissionError:
+        fallback_dir = settings.data_dir / "manifest_fallbacks"
+        fallback_dir.mkdir(parents=True, exist_ok=True)
+        fallback_path = fallback_dir / f"{stage}_latest.json"
+        fallback_path.write_text(manifest_json, encoding="utf-8")
+        return fallback_path

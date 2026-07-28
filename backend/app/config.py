@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     embed_batch_size: int = 32
     # API Keys
     groq_api_key: str | None = None
+    cohere_api_key: str | None = None
     api_key: str | None = None
 
     # Infrastructure

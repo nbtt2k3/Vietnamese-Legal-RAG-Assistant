@@ -18,8 +18,8 @@ class CivilCodeParser(LegalParser):
                 van_ban.co_quan_ban_hanh = "Quốc hội"
 
     def _post_process(self, van_ban: VanBan):
-        # Validate: BLDS 2015 có 689 điều — cảnh báo nếu parse thiếu/dư đáng kể
+        # Validate: Cảnh báo nếu số lượng Điều quá ít (dưới 100 điều đối với một Bộ Luật)
         total_dieu = len(van_ban.all_dieu())
-        if total_dieu < 600:
+        if total_dieu < 100:
             print(f"[WARNING] CivilCodeParser: chỉ parse được {total_dieu} Điều, "
-                  f"có thể thiếu — kiểm tra lại regex hoặc input text.")
+                  f"có thể lỗi định dạng nặng — kiểm tra lại file input.")

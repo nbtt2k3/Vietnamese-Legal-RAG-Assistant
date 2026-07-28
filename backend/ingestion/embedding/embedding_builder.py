@@ -1,16 +1,16 @@
 import json
 from pathlib import Path
 from typing import List, Dict, Any
-from ingestion.embedding.ollama_embedder import OllamaEmbedder
+from ingestion.embedding.embedder_factory import EmbedderFactory
 from tqdm import tqdm
 
 class EmbeddingBuilder:
     """
     Lớp xử lý việc đọc file JSON trong data/chunks,
-    gọi OllamaEmbedder để lấy vector, sau đó xuất ra thư mục đích.
+    gọi EmbedderFactory để lấy vector, sau đó xuất ra thư mục đích.
     """
     def __init__(self, model_name: str = "bge-m3:latest"):
-        self.embedder = OllamaEmbedder(model_name=model_name)
+        self.embedder = EmbedderFactory.get_embedder(model_name=model_name)
         
     def process_file(self, input_path: Path, output_path: Path) -> int:
         """
@@ -28,6 +28,9 @@ class EmbeddingBuilder:
             
         success_count = 0
         pending_chunks = []
+        # BUG-11 FIX: Chỉ đếm các chunk có text thực sự cần embedding.
+        # Chunk không có text là hợp lệ (khoản trống) và không được tính vào expected_count.
+        expected_count = 0
         
         # Dùng tqdm để tạo thanh tiến trình (progress bar) cho từng chunk trong file
         for chunk in tqdm(chunks, desc=f"Embedding {input_path.name}", leave=False):
@@ -35,6 +38,7 @@ class EmbeddingBuilder:
             if not text:
                 continue
 
+            expected_count += 1
             reused = self._try_reuse_embedding(chunk, existing_embeddings)
             if reused:
                 success_count += 1
@@ -56,9 +60,9 @@ class EmbeddingBuilder:
                 else:
                     print(f"[WARN] No embedding for chunk {chunk.get('chunk_id')}")
 
-        if success_count != len(chunks):
+        if success_count != expected_count:
             raise RuntimeError(
-                f"Embedding incomplete for {input_path.name}: {success_count}/{len(chunks)} chunks succeeded."
+                f"Embedding incomplete for {input_path.name}: {success_count}/{expected_count} chunks succeeded."
             )
                 
         # Lưu ra file mới

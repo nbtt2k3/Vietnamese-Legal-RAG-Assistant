@@ -1,6 +1,7 @@
 import time
 import uuid
 import hmac
+import threading
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -12,6 +13,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         # In-memory rate limiting state
         self.rate_limits = {}
+        # BUG-12 FIX: Lock để tránh race condition khi nhiều request cùng đọc/ghi dict
+        self._rate_lock = threading.Lock()
 
     def _apply_response_headers(self, response: Response, request_id: str) -> Response:
         response.headers["X-Request-ID"] = request_id
@@ -113,27 +116,29 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                     rate_limit_exceeded = True
             except Exception as e:
                 logger.warning(f"[Req={request_id}] Redis rate limiting failed, falling back to in-memory: {e}")
-                # In-memory fallback
+                # In-memory fallback (protected by lock to avoid race condition on dict)
                 now = time.time()
                 capacity = settings.rate_limit_capacity
                 refill = settings.rate_limit_refill_per_second
-                limit_state = self.rate_limits.get(client_ip, {"tokens": capacity, "last_updated": now})
-                elapsed = now - limit_state["last_updated"]
-                limit_state["tokens"] = min(capacity, limit_state["tokens"] + elapsed * refill)
-                limit_state["last_updated"] = now
-                
-                if limit_state["tokens"] < 1.0:
-                    rate_limit_exceeded = True
-                else:
-                    limit_state["tokens"] -= 1.0
-                    self.rate_limits[client_ip] = limit_state
-                
-                if len(self.rate_limits) > 10_000:
-                    cutoff = now - settings.rate_limit_ttl_seconds
-                    self.rate_limits = {
-                        ip: state for ip, state in self.rate_limits.items()
-                        if state["last_updated"] >= cutoff
-                    }
+                with self._rate_lock:
+                    limit_state = self.rate_limits.get(client_ip, {"tokens": capacity, "last_updated": now})
+                    elapsed = now - limit_state["last_updated"]
+                    limit_state["tokens"] = min(capacity, limit_state["tokens"] + elapsed * refill)
+                    limit_state["last_updated"] = now
+
+                    if limit_state["tokens"] < 1.0:
+                        rate_limit_exceeded = True
+                    else:
+                        limit_state["tokens"] -= 1.0
+                        self.rate_limits[client_ip] = limit_state
+
+                    if len(self.rate_limits) > 10_000:
+                        cutoff = now - settings.rate_limit_ttl_seconds
+                        # BUG-12 FIX: Dict reassignment cũng nằm trong lock để đảm bảo atomic
+                        self.rate_limits = {
+                            ip: state for ip, state in self.rate_limits.items()
+                            if state["last_updated"] >= cutoff
+                        }
 
         if rate_limit_exceeded:
             logger.warning(f"[Req={request_id}] Rate limit exceeded for IP: {client_ip}")

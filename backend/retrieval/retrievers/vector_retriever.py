@@ -1,4 +1,4 @@
-from ingestion.embedding.ollama_embedder import OllamaEmbedder
+from ingestion.embedding.embedder_factory import EmbedderFactory
 from retrieval.models import QueryIntent, RetrievedChunk
 from retrieval.repository import QdrantRepository
 from retrieval.retrievers.base import BaseRetriever
@@ -14,8 +14,7 @@ class VectorRetriever(BaseRetriever):
         self,
         embed_model: str | None = None,
     ):
-        model_to_use = embed_model or settings.embedding_model_name
-        self.embedder = OllamaEmbedder(model_name=model_to_use)
+        self.embedder = EmbedderFactory.get_embedder(model_name=embed_model)
 
     def retrieve(self, repository: QdrantRepository, query_intent: QueryIntent, limit: int = 20) -> list[RetrievedChunk]:
         query_text = " ; ".join(query_intent.query_variants) if query_intent.query_variants else query_intent.normalized_query

@@ -70,8 +70,11 @@ def health_check(request: Request):
             status["status"] = "degraded"
             
         try:
-            # Check Ollama availability
-            is_avail = pipeline.generator.is_available()
+            # BUG-08 FIX: pipeline.generator không tồn tại; dùng pipeline.llm đúng.
+            # Thêm is_avail = False mặc định để tránh UnboundLocalError nếu llm là None.
+            is_avail = False
+            if pipeline.llm and hasattr(pipeline.llm, "is_available"):
+                is_avail = pipeline.llm.is_available()
             status["services"]["ollama"] = "ok" if is_avail else "down"
             if not is_avail:
                 status["status"] = "degraded"

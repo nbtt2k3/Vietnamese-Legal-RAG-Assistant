@@ -1,6 +1,7 @@
 from generation.models import AnswerSection, LegalAnswer
 from generation.utils import chunk_to_citation, dedupe_citations, clean_whitespace
 from retrieval.models import RetrievalResult, RetrievedChunk
+from retrieval.text_utils import normalize_for_match
 
 
 class RuleBasedLegalGenerator:
@@ -62,13 +63,29 @@ class RuleBasedLegalGenerator:
         ranked = self._select_ranked_non_case(retrieval_result)
         scored = sorted(
             ranked,
-            key=lambda item: self._generation_priority_score(item, intent.loai_yeu_cau, intent.key_phrases, intent.scenario_terms),
+            key=lambda item: self._generation_priority_score(
+                item,
+                intent.loai_yeu_cau,
+                intent.citation_targets,
+                intent.key_phrases,
+                intent.scenario_terms,
+                intent.normalized_query,
+            ),
             reverse=True,
         )
 
         if intent.loai_yeu_cau == "citation_lookup":
             # A citation lookup often needs multiple clauses of the same article.
             return scored[:4]
+
+        if intent.loai_yeu_cau == "validity_question" and intent.citation_targets:
+            focused = [
+                item
+                for item in scored
+                if self._matches_generation_target(item, intent.citation_targets)
+            ]
+            if focused:
+                return focused[:4]
 
         selected: list[RetrievedChunk] = []
         seen_docs: set[str] = set()
@@ -80,6 +97,30 @@ class RuleBasedLegalGenerator:
             if len(selected) >= 4:
                 break
         return selected
+
+    def _matches_generation_target(self, item: RetrievedChunk, citation_targets: list[str]) -> bool:
+        metadata = item.metadata
+        haystack = normalize_for_match(
+            " ".join(
+                [
+                    item.chunk_id,
+                    item.doc_id,
+                    str(metadata.get("citation", "")),
+                    str(metadata.get("so_hieu", "")),
+                    str(metadata.get("ten", "")),
+                    str(metadata.get("dieu_title", "")),
+                ]
+            )
+        )
+        for target in citation_targets:
+            target_norm = normalize_for_match(target)
+            if target_norm and target_norm in haystack:
+                return True
+            if target_norm.startswith("nghi dinh "):
+                number_part = target_norm.replace("nghi dinh ", "", 1).strip()
+                if number_part and number_part in haystack:
+                    return True
+        return False
 
     def _select_ranked_non_case(self, retrieval_result: RetrievalResult) -> list[RetrievedChunk]:
         return [
@@ -109,8 +150,10 @@ class RuleBasedLegalGenerator:
         self,
         item: RetrievedChunk,
         request_type: str,
+        citation_targets: list[str],
         key_phrases: list[str],
         scenario_terms: list[str],
+        normalized_query: str = "",
     ) -> float:
         score = float(item.scores.get("final", 0.0))
         metadata = item.metadata
@@ -124,6 +167,14 @@ class RuleBasedLegalGenerator:
                 item.text.lower(),
             ]
         )
+        normalized_haystack = normalize_for_match(haystack)
+
+        for target in citation_targets:
+            target_lower = normalize_for_match(target)
+            if target_lower and target_lower in normalized_haystack:
+                score += 12.0
+            if "nghi dinh" in target_lower and target_lower.replace("nghi dinh ", "") in normalized_haystack:
+                score += 12.0
 
         if request_type == "citation_lookup":
             if source == "bo_luat":
@@ -135,6 +186,9 @@ class RuleBasedLegalGenerator:
                 score += 5.0
             if source == "nghi_dinh":
                 score += 4.0
+            if "thời điểm" in normalized_query.lower() or "ngày hiệu lực" in " ".join(key_phrases).lower():
+                if "hiệu lực thi hành" in haystack:
+                    score += 10.0
             for kw in self.validity_keywords:
                 if kw in haystack:
                     score += 2.0

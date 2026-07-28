@@ -8,25 +8,9 @@ class LegalReranker:
     def __init__(self, model_name: str | None = None):
         if model_name is None:
             model_name = str(settings.project_root / "data" / "models" / "BAAI" / "bge-reranker-v2-m3")
-            
-        logger.info(f"Loading CrossEncoder Reranker: {model_name}")
-        if not settings.cross_encoder_reranking_enabled:
-            logger.info("Cross-encoder reranking is disabled; using deterministic hybrid fallback.")
-            self.encoder = None
-            return
-        if not Path(model_name).is_dir():
-            logger.warning(
-                "Local reranker model is unavailable; using deterministic hybrid fallback. "
-                "Download and configure a local model before enabling cross-encoder reranking."
-            )
-            self.encoder = None
-            return
-        try:
-            self.encoder = CrossEncoder(model_name, max_length=512)
-        except Exception as e:
-            logger.error(f"Failed to load CrossEncoder: {e}")
-            self.encoder = None
-            
+
+        # BUG-01 FIX: Khởi tạo meta_bonus_weights TRƯỚC các early return
+        # để tránh AttributeError nếu encoder bị disabled hoặc model không tìm thấy.
         self.meta_bonus_weights = {
             "bo_luat": 0.8,
             "luat": 0.6,
@@ -44,6 +28,24 @@ class LegalReranker:
         except Exception as e:
             logger.warning(f"Failed to load meta_bonus_weights: {e}")
 
+        logger.info(f"Loading CrossEncoder Reranker: {model_name}")
+        if not settings.cross_encoder_reranking_enabled:
+            logger.info("Cross-encoder reranking is disabled; using deterministic hybrid fallback.")
+            self.encoder = None
+            return
+        if not Path(model_name).is_dir():
+            logger.warning(
+                "Local reranker model is unavailable; using deterministic hybrid fallback. "
+                "Download and configure a local model before enabling cross-encoder reranking."
+            )
+            self.encoder = None
+            return
+        try:
+            self.encoder = CrossEncoder(model_name, max_length=512)
+        except Exception as e:
+            logger.error(f"Failed to load CrossEncoder: {e}")
+            self.encoder = None
+
     def rerank(self, query_intent: QueryIntent, candidates: list[RetrievedChunk], top_k: int = 12) -> list[RetrievedChunk]:
         if not candidates:
             return []
@@ -51,11 +53,11 @@ class LegalReranker:
         # If model failed to load, fallback to original score or 0
         if not self.encoder:
             for item in candidates:
-                item.scores["final"] = item.scores.get(
-                    "hybrid",
-                    item.scores.get("vector", 0.0)
-                    + item.scores.get("lexical", 0.0)
-                    + item.scores.get("metadata", 0.0),
+                item.scores["final"] = (
+                    item.scores.get("hybrid", 0.0)
+                    + 0.05 * item.scores.get("metadata", 0.0)
+                    + 0.005 * item.scores.get("lexical", 0.0)
+                    + 0.01 * item.scores.get("vector", 0.0)
                 )
             candidates.sort(key=lambda item: item.scores.get("final", 0.0), reverse=True)
             return self._diversify(candidates, top_k)

@@ -237,7 +237,7 @@ def to_serializable(obj):
     raise TypeError(f"Không serialize được: {type(obj)}")
 
 
-def process_file(file_path: Path, loai_van_ban: str) -> tuple[dict, dict]:
+def process_file(file_path: Path, loai_van_ban: str) -> tuple[dict, dict, dict]:  # parsed, cleaned, metadata
     loader = LoaderFactory.get_loader(str(file_path))
     loaded = loader.load(str(file_path))
     source_metadata = build_source_metadata(file_path)

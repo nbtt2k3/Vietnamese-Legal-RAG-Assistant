@@ -24,26 +24,32 @@ class EvidenceBuilder:
         for item in scored_non_case:
             if item.doc_id in seen_docs:
                 continue
-                
+
             is_valid_for_core = self._is_core_eligible(item, query_intent)
 
             if is_valid_for_core and len(bundle.core_authorities) < 5:
                 bundle.core_authorities.append(item)
                 seen_docs.add(item.doc_id)
             elif not self._is_appendix_noise(item, query_intent) and len(bundle.supporting_authorities) < 6:
+                # BUG-07 FIX: Thêm doc_id vào seen_docs cả khi đưa vào supporting_authorities
+                # để tránh cùng tài liệu xuất hiện ở cả core lẫn supporting.
                 bundle.supporting_authorities.append(item)
-                
+                seen_docs.add(item.doc_id)
+
             if len(bundle.core_authorities) >= 5 and len(bundle.supporting_authorities) >= 6:
                 break
 
         for item in scored_non_case:
             if len(bundle.supporting_authorities) >= 6:
                 break
-            if item in bundle.core_authorities or item in bundle.supporting_authorities:
+            # BUG-07 FIX: Kiểm tra doc_id thay vì object identity (object identity
+            # không bắt được hai RetrievedChunk khác nhau cùng doc_id).
+            if item.doc_id in seen_docs:
                 continue
             if self._is_appendix_noise(item, query_intent):
                 continue
             bundle.supporting_authorities.append(item)
+            seen_docs.add(item.doc_id)
 
         for item in ranked:
             for note in item.metadata.get("transition_notes", []) or []:

@@ -1,7 +1,7 @@
 import time
 from retrieval.evidence_builder import EvidenceBuilder
 from retrieval.expander import CrossDocumentExpander
-from retrieval.models import QueryIntent, RetrievalResult, RetrievedChunk
+from retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
 from retrieval.query_analyzer import QueryAnalyzer
 from retrieval.repository import QdrantRepository
 from retrieval.reranker import LegalReranker
@@ -30,6 +30,29 @@ class RetrievalPipeline:
         t0 = time.time()
         query_intent = self.query_analyzer.analyze(query, force_deterministic=force_deterministic, history=history)
         latency["query_analyzer"] = round(time.time() - t0, 3)
+
+        if query_intent.loai_yeu_cau == "out_of_scope":
+            debug = {
+                "retriever_hits": {},
+                "merged_candidates": 0,
+                "expanded_candidates": 0,
+                "source_distribution": {},
+                "latency": latency,
+                "latency_total_retrieval": round(time.time() - t0, 3),
+            }
+            return RetrievalResult(
+                query_intent=query_intent,
+                candidates=[],
+                evidence=EvidenceBundle(),
+                confidence={
+                    "level": "low",
+                    "citation_match": False,
+                    "multi_source_support": False,
+                    "time_match": False,
+                    "candidate_count": 0,
+                },
+                retrieval_debug=debug,
+            )
         
         with QdrantRepository() as repository:
             t1 = time.time()
@@ -49,6 +72,11 @@ class RetrievalPipeline:
             t3 = time.time()
             expansions = self.expander.expand(query_intent, initial_ranked, repository)
             for item in expansions:
+                # BUG-04 FIX: Gán hybrid score cho chunk mới từ expander.
+                # Không có hybrid score → bị xếp hạng bằng 0 trong final rerank,
+                # bất kể nội dung liên quan đến mức nào.
+                if "hybrid" not in item.scores:
+                    item.scores["hybrid"] = item.scores.get("cross_ref", 0.0)
                 existing = merged.get(item.chunk_id)
                 if existing:
                     existing.merge(item)
@@ -118,11 +146,16 @@ class RetrievalPipeline:
         # Phase 4 Reciprocal Rank Fusion (RRF)
         if merged:
             k_rrf = 60
-            for item in merged.values():
-                item.scores["hybrid"] = 0.0
+            rrf_sources = {"vector", "lexical", "metadata", "bm25"}
 
-            sources = ["vector", "lexical", "metadata", "bm25"]
-            for source in sources:
+            # Chỉ reset hybrid=0 cho các chunk đã có ít nhất 1 điểm từ retriever thông thường.
+            # Expander chunks (chỉ có "cross_ref") giữ nguyên hybrid score đã gán ở BUG-04 fix
+            # để không bị underrank trong final rerank.
+            for item in merged.values():
+                if any(src in item.scores for src in rrf_sources):
+                    item.scores["hybrid"] = 0.0
+
+            for source in rrf_sources:
                 # Sort items by score in descending order
                 sorted_items = sorted(
                     [item for item in merged.values() if source in item.scores],
@@ -186,3 +219,19 @@ class RetrievalPipeline:
                 item.relevance_label = "medium"
             else:
                 item.relevance_label = "low"
+            self._ensure_numbered_citation(item)
+
+    def _ensure_numbered_citation(self, item: RetrievedChunk) -> None:
+        citation = str(item.metadata.get("citation", "")).strip()
+        so_hieu = str(item.metadata.get("so_hieu", "")).strip()
+        loai = str(item.metadata.get("loai_van_ban", "")).strip()
+        if not citation or not so_hieu or so_hieu in citation:
+            return
+        display_names = {
+            "nghi_dinh": "Nghị định",
+            "nghi_quyet": "Nghị quyết",
+            "thong_tu": "Thông tư",
+        }
+        prefix = display_names.get(loai)
+        if prefix:
+            item.metadata["citation"] = f"{prefix} {so_hieu} - {citation}"

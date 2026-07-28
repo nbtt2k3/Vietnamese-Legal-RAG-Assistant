@@ -108,5 +108,15 @@ class LegalChunker(BaseChunker):
                     text=split_txt,
                     metadata=pl_meta
                 ))
-                
+
+        seen_ids = set()
+        duplicate_ids = []
+        for chunk in chunks:
+            if chunk.chunk_id in seen_ids:
+                duplicate_ids.append(chunk.chunk_id)
+            seen_ids.add(chunk.chunk_id)
+        if duplicate_ids:
+            sample = ", ".join(sorted(set(duplicate_ids))[:10])
+            raise ValueError(f"Duplicate chunk_id(s) generated for {doc_id}: {sample}")
+
         return chunks

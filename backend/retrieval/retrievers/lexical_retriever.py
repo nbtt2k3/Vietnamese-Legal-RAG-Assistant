@@ -19,22 +19,24 @@ class LexicalRetriever(BaseRetriever):
 
     def _get_bm25_index(self, repository: QdrantRepository):
         global _GLOBAL_BM25_INDEX, _GLOBAL_PAYLOADS_LEN, _GLOBAL_PAYLOADS, _BM25_LOCK
-        
-        # Check current collection size quickly
-        try:
-            current_count = repository.client.count(collection_name=repository.collection_name, exact=True).count
-        except Exception:
-            current_count = -1
-            
+
+        # BUG-02 FIX: Toàn bộ check + rebuild nằm trong critical section để tránh TOCTOU.
+        # Trước đây current_count được đọc ngoài lock → hai thread có thể cùng thấy
+        # index cần rebuild và double-rebuild, gây inconsistent state.
         with _BM25_LOCK:
+            try:
+                current_count = repository.client.count(collection_name=repository.collection_name, exact=True).count
+            except Exception:
+                current_count = -1
+
             if _GLOBAL_BM25_INDEX is None or _GLOBAL_PAYLOADS_LEN != current_count or _GLOBAL_PAYLOADS is None:
                 _GLOBAL_PAYLOADS = repository.all_payloads()
-                
+
                 if not _GLOBAL_PAYLOADS:
                     _GLOBAL_BM25_INDEX = None
                     _GLOBAL_PAYLOADS_LEN = 0
                     return None, []
-                    
+
                 tokenized_corpus = []
                 for p in _GLOBAL_PAYLOADS:
                     text = p.get("text", "")
@@ -45,7 +47,7 @@ class LexicalRetriever(BaseRetriever):
                     tokenized_corpus.append(tokenize_for_bm25(f"{text} {meta_text}"))
                 _GLOBAL_BM25_INDEX = BM25Okapi(tokenized_corpus)
                 _GLOBAL_PAYLOADS_LEN = len(_GLOBAL_PAYLOADS)
-                
+
             return _GLOBAL_BM25_INDEX, _GLOBAL_PAYLOADS
 
     def retrieve(self, repository: QdrantRepository, query_intent: QueryIntent, limit: int = 20) -> list[RetrievedChunk]:
