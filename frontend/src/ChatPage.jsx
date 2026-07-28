@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 
 const DEFAULT_MESSAGE = {
   role: 'ai',
+  isGreeting: true,
   content: 'Xin chào! Tôi là Trợ lý Pháp lý AI. Tôi có thể giúp bạn tra cứu các quy định, luật định và giải đáp các thắc mắc về pháp luật Việt Nam. Bạn cần tôi giúp gì hôm nay?'
 };
 

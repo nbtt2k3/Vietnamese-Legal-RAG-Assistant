@@ -12,7 +12,8 @@ def test_query_analyzer_basic_extraction():
     # Let's test the fallback path for determinism
     intent = analyzer.analyze("hành vi trộm cắp tài sản bị xử phạt như thế nào", force_deterministic=True)
     
-    assert intent.loai_yeu_cau == "general_legal_question"
+    assert intent.loai_yeu_cau == "scenario_application"
+    assert intent.citation_targets
     # Actually, the fallback extracts words > 2 chars. 
     # "trộm cắp" might be split to "trộm", "cắp", but it does extract keywords.
 
@@ -33,7 +34,7 @@ def test_query_analyzer_out_of_scope():
     analyzer = QueryAnalyzer()
     
     intent = analyzer.analyze("Thời tiết hôm nay thế nào?", force_deterministic=True)
-    assert intent.loai_yeu_cau == "general_legal_question"
+    assert intent.loai_yeu_cau == "out_of_scope"
 
 
 def test_query_analyzer_deterministic_keeps_scenario_terms():
@@ -62,6 +63,20 @@ def test_query_analyzer_llm_fallback_keeps_rule_scenario_terms(monkeypatch):
     assert "thanh toán" in intent.scenario_terms
     assert "ngân hàng" in intent.scenario_terms
     assert "thanh toán" in intent.query_variants
+
+
+def test_query_analyzer_llm_fallback_keeps_rule_keywords(monkeypatch):
+    analyzer = QueryAnalyzer()
+    monkeypatch.setattr(analyzer, "_call_llm", lambda prompt: (_ for _ in ()).throw(RuntimeError("boom")))
+
+    intent = analyzer.analyze(
+        "Bộ luật Dân sự 2015 quy định gì?",
+        force_deterministic=False,
+    )
+
+    assert intent.keywords
+    assert "2015" in intent.keywords
+    assert "Bộ luật Dân sự 2015 quy định gì?" in intent.query_variants
 
 
 def test_evidence_builder_excludes_case_law_for_validity_question():

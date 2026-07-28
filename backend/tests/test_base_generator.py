@@ -76,7 +76,10 @@ def test_hallucination_penalty():
     # Because E2 was hallucinative, the confidence should drop to low
     assert answer.confidence["invalid_evidence_used"] is True
     assert answer.confidence["level"] == "low"
-    assert any("Hallucination" in d for d in answer.disclaimers)
+    assert answer.confidence["human_review_required"] is True
+    assert "invalid_evidence_used" in answer.confidence["human_review_reasons"]
+    assert any("căn cứ không tồn tại" in d for d in answer.disclaimers)
+    assert not any("Hallucination" in d for d in answer.disclaimers)
 
 
 def test_claim_without_evidence_is_penalized():
@@ -109,7 +112,10 @@ def test_claim_without_evidence_is_penalized():
 
     assert answer.confidence["claims_without_evidence"] is True
     assert answer.confidence["level"] == "low"
+    assert answer.confidence["human_review_required"] is True
+    assert "claims_without_evidence" in answer.confidence["human_review_reasons"]
     assert any("không có căn cứ hợp lệ" in d for d in answer.disclaimers)
+    assert not any(" evidence " in f" {d} " for d in answer.disclaimers)
 
 
 def test_weakly_supported_claim_is_penalized_even_with_valid_evidence_id():
@@ -142,4 +148,7 @@ def test_weakly_supported_claim_is_penalized_even_with_valid_evidence_id():
 
     assert answer.confidence["weakly_supported_claims"] is True
     assert answer.confidence["level"] == "low"
+    assert answer.confidence["human_review_required"] is True
+    assert "weakly_supported_claims" in answer.confidence["human_review_reasons"]
     assert any("mức khớp nội dung" in d for d in answer.disclaimers)
+    assert not any(" evidence " in f" {d} " for d in answer.disclaimers)

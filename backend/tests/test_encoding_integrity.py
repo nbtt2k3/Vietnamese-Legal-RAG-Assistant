@@ -22,8 +22,10 @@ def test_representative_vietnamese_strings_are_stored_correctly():
             "Trả lời câu hỏi pháp lý Việt Nam",
             "Không bịa thêm căn cứ ngoài context",
         ],
-        PROJECT_ROOT / "frontend" / "src" / "App.jsx": [
+        PROJECT_ROOT / "frontend" / "src" / "ChatPage.jsx": [
             "Xin chào",
+        ],
+        PROJECT_ROOT / "frontend" / "src" / "components" / "MessageBubble.jsx": [
             "Trợ lý Pháp lý AI",
         ],
     }

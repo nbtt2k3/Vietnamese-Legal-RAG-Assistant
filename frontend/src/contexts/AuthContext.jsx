@@ -1,13 +1,16 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { login as apiLogin, register as apiRegister } from '../api';
-
-const AuthContext = createContext();
-
-export const useAuth = () => useContext(AuthContext);
+import { useState, useEffect } from 'react';
+import {
+  clearAccessToken,
+  getStoredAccessToken,
+  login as apiLogin,
+  register as apiRegister,
+  storeAccessToken,
+} from '../api';
+import { AuthContext } from './auth-context';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('access_token'));
+  const [token, setToken] = useState(getStoredAccessToken());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +27,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       const data = await apiLogin(username, password);
-      localStorage.setItem('access_token', data.access_token);
+      storeAccessToken(data.access_token);
       localStorage.setItem('username', data.username);
       setToken(data.access_token);
       setUser({ username: data.username });
@@ -39,7 +42,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (username, password) => {
     try {
       const data = await apiRegister(username, password);
-      localStorage.setItem('access_token', data.access_token);
+      storeAccessToken(data.access_token);
       localStorage.setItem('username', data.username);
       setToken(data.access_token);
       setUser({ username: data.username });
@@ -52,7 +55,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('access_token');
+    clearAccessToken();
     localStorage.removeItem('username');
     setToken(null);
     setUser(null);

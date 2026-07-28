@@ -26,7 +26,7 @@ class OllamaLegalGenerator(BaseLLMGenerator):
         prompt = self.prompt_builder.build(query, retrieval_result)
         system = (
             "Bạn là trợ lý pháp lý Việt Nam. "
-            "Chỉ dùng evidence được cung cấp. "
+            "Chỉ dùng các căn cứ được cung cấp. "
             "Trả về JSON hợp lệ, không thêm markdown."
         )
         try:

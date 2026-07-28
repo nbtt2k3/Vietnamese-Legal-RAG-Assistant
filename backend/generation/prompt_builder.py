@@ -37,17 +37,17 @@ class LegalPromptBuilder:
             "requirements": [
                 "Không bịa thêm căn cứ ngoài context.",
                 "BẮT BUỘC SỬ DỤNG TRÍCH DẪN: Ở mỗi câu khẳng định pháp lý, phải chèn ID của căn cứ theo định dạng [E1], [E2] ngay trong câu.",
-                "Mỗi item trong quy_dinh_phap_luat và ap_dung_so_bo bắt buộc phải có evidence_ids không rỗng, và evidence_ids chỉ được lấy từ danh sách evidence được cung cấp.",
-                "Nếu không tìm thấy evidence trực tiếp hỗ trợ một nhận định, không được đưa nhận định đó vào kết luận; hãy ghi vào missing_facts hoặc uncertainty.",
-                "Reasoning phải giải thích vì sao snippet/citation được chọn hỗ trợ claim, không chỉ lặp lại kết luận.",
+                "Mỗi mục trong quy_dinh_phap_luat và ap_dung_so_bo bắt buộc phải có evidence_ids không rỗng, và evidence_ids chỉ được lấy từ danh sách căn cứ được cung cấp.",
+                "Nếu không tìm thấy căn cứ trực tiếp hỗ trợ một nhận định, không được đưa nhận định đó vào kết luận; hãy ghi vào missing_facts hoặc uncertainty.",
+                "Phần reasoning phải giải thích vì sao đoạn trích và nguồn trích dẫn được chọn hỗ trợ nhận định, không chỉ lặp lại kết luận.",
                 "TÍNH TOÁN TOÁN HỌC: Nếu tình huống liên quan đến tiền, lãi suất, bồi thường, BẮT BUỘC phải viết rõ phép tính (vd: 20% x 500 triệu = 100 triệu) và đối chiếu với trần luật định.",
                 "Không dùng ngôn ngữ nước đôi (như 'có thể không phải trả') đối với các quy định mang tính cấm đoán tuyệt đối (vd: vượt trần lãi suất thì Tòa án không công nhận).",
                 "Nêu rõ nếu kết luận còn phụ thuộc thêm tình tiết.",
                 "Ưu tiên Bộ luật Dân sự, sau đó văn bản hướng dẫn, rồi án lệ nếu phù hợp.",
-                "GROUNDING ORDER: Dùng evidence_group='core_authority' làm căn cứ quy phạm chính; chỉ dùng case_law_support để minh họa hoặc áp dụng tương tự, không thay thế điều luật.",
-                "Không khẳng định chắc chắn khi evidence chỉ cho thấy hướng phân tích.",
+                "THỨ TỰ ƯU TIÊN CĂN CỨ: Dùng evidence_group='core_authority' làm căn cứ quy phạm chính; chỉ dùng case_law_support để minh họa hoặc áp dụng tương tự, không thay thế điều luật.",
+                "Không khẳng định chắc chắn khi căn cứ chỉ cho thấy hướng phân tích.",
                 "POLICY ABSTENTION: Nếu tình trạng hiệu lực của căn cứ (validity_status) là 'chua_xac_dinh' hoặc trống, TUYỆT ĐỐI không được kết luận văn bản đó 'đang còn hiệu lực' hoặc 'chắc chắn áp dụng được'.",
-                "SOURCE VERIFICATION: Nếu source_verification_status không phải 'official_verified', phải nêu rằng nguồn hiện chỉ được ghi nhận từ tệp/local checksum, chưa phải xác minh pháp lý chính thức."
+                "KIỂM TRA NGUỒN: Nếu source_verification_status không phải 'official_verified', phải nêu bằng tiếng Việt dễ hiểu rằng nguồn hiện mới được ghi nhận từ tệp nội bộ và mã kiểm tra toàn vẹn, chưa được xác minh trực tiếp từ nguồn có thẩm quyền."
             ],
             "output_schema": {
                 "quy_dinh_phap_luat": [{"claim": "string", "reasoning": "string", "evidence_ids": ["string"]}],

@@ -3,14 +3,23 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from app.database import get_db
 from app.models import User
-from app.auth import verify_password, get_password_hash, create_access_token
-from pydantic import BaseModel
+from app.auth import verify_password, get_password_hash, create_access_token, validate_password_policy
+from pydantic import BaseModel, Field, field_validator
 
 auth_router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 class UserCreate(BaseModel):
-    username: str
-    password: str
+    username: str = Field(min_length=3, max_length=64, pattern=r"^[A-Za-z0-9_.-]+$")
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("password")
+    @classmethod
+    def password_must_meet_policy(cls, value: str) -> str:
+        try:
+            validate_password_policy(value)
+        except ValueError as exc:
+            raise ValueError(str(exc)) from exc
+        return value
 
 @auth_router.post("/register", status_code=status.HTTP_201_CREATED)
 def register(user: UserCreate, db: Session = Depends(get_db)):

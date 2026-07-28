@@ -9,6 +9,44 @@ from app.config import settings
 from app.logger import logger
 from generation.pipeline import GenerationPipeline
 
+
+def _check_pipeline_dependencies(pipeline) -> dict:
+    status = {
+        "status": "ok",
+        "services": {
+            "qdrant": "unknown",
+            "ollama": "unknown",
+        }
+    }
+
+    if not pipeline:
+        return status
+
+    try:
+        from retrieval.repository import QdrantRepository
+        with QdrantRepository() as repo:
+            repo.client.get_collections()
+        status["services"]["qdrant"] = "ok"
+    except Exception as e:
+        logger.warning("Health check failed for qdrant: %s", e)
+        status["services"]["qdrant"] = "down"
+        status["status"] = "degraded"
+
+    try:
+        is_avail = False
+        if pipeline.llm and hasattr(pipeline.llm, "is_available"):
+            is_avail = pipeline.llm.is_available()
+        status["services"]["ollama"] = "ok" if is_avail else "down"
+        if not is_avail:
+            status["status"] = "degraded"
+    except Exception as e:
+        logger.warning("Health check failed for ollama: %s", e)
+        status["services"]["ollama"] = "down"
+        status["status"] = "degraded"
+
+    return status
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting up Vietnamese Legal RAG Assistant API Server...")
@@ -86,4 +124,34 @@ def health_check(request: Request):
     return JSONResponse(
         status_code=200 if status["status"] == "ok" else 503,
         content=status
+    )
+
+
+@app.get("/live")
+def liveness_check():
+    return {"status": "ok"}
+
+
+@app.get("/ready")
+def readiness_check(request: Request):
+    pipeline = getattr(request.app.state, "generation_pipeline", None)
+    if not pipeline:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "initializing",
+                "services": {
+                    "pipeline": "down",
+                    "qdrant": "unknown",
+                    "ollama": "unknown",
+                },
+            },
+        )
+
+    status = _check_pipeline_dependencies(pipeline)
+    status["services"]["pipeline"] = "ok"
+    ready = status["status"] == "ok"
+    return JSONResponse(
+        status_code=200 if ready else 503,
+        content={"status": "ready" if ready else "degraded", "services": status["services"]},
     )

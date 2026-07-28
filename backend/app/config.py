@@ -1,3 +1,4 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
@@ -60,6 +61,18 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
+
+    @model_validator(mode="after")
+    def validate_production_security(self):
+        if not self.is_production:
+            return self
+        if self.secret_key == "supersecretkey" or len(self.secret_key) < 32:
+            raise ValueError("SECRET_KEY must be overridden with at least 32 characters in production")
+        if not self.api_key or len(self.api_key) < 16:
+            raise ValueError("API_KEY must be set with at least 16 characters in production")
+        if "*" in self.cors_origins:
+            raise ValueError("ALLOWED_ORIGINS must not include '*' in production")
+        return self
     
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

@@ -1,5 +1,6 @@
 import re
 
+from retrieval.constraints import article_matches, exact_constraints
 from retrieval.models import QueryIntent, RetrievedChunk
 from retrieval.repository import QdrantRepository
 from retrieval.retrievers.base import BaseRetriever
@@ -37,7 +38,7 @@ class MetadataRetriever(BaseRetriever):
         normalized_dieu_title = normalize_for_match(dieu_title)
         source = payload.get("loai_van_ban")
         validity = str(payload.get("validity_status", "")).lower()
-        constraints = self._exact_constraints(query_intent)
+        constraints = exact_constraints(query_intent)
 
         if query_intent.loai_yeu_cau not in ("validity_question", "case_law_question") and validity == "het_hieu_luc":
             return 0.0
@@ -51,6 +52,8 @@ class MetadataRetriever(BaseRetriever):
         if constraints["article_numbers"]:
             if str(payload.get("dieu_number", "")) in constraints["article_numbers"]:
                 score += 25.0
+            elif article_matches(payload, constraints["article_numbers"]):
+                score += 18.0
             elif query_intent.loai_yeu_cau == "citation_lookup":
                 return 0.0
 
@@ -108,38 +111,3 @@ class MetadataRetriever(BaseRetriever):
         if re.search(r"Điều\s+\d+", str(payload.get("citation", "")), flags=re.IGNORECASE):
             score += 0.2
         return score
-
-    def _exact_constraints(self, query_intent: QueryIntent) -> dict[str, set[str]]:
-        haystack = normalize_for_match(
-            " ".join([query_intent.raw_query, query_intent.normalized_query, *query_intent.citation_targets])
-        )
-        article_numbers = set(re.findall(r"\bdieu\s+(\d+[a-z]?)\b", haystack))
-
-        doc_ids: set[str] = set()
-        source_types: set[str] = set()
-        if "bo luat" in haystack or "luat" in haystack or (article_numbers and ("dan su" in haystack or "hinh su" in haystack)):
-            source_types.add("bo_luat")
-            if "dan su" in haystack:
-                doc_ids.add("bo_luat_91_2015_QH13")
-            if "hinh su" in haystack:
-                doc_ids.add("bo_luat_100_2015_QH13")
-
-        if "nghi dinh" in haystack:
-            source_types.add("nghi_dinh")
-            decree_match = re.search(r"\b(\d{1,4})\s*/\s*(\d{4})", haystack)
-            if decree_match:
-                number, year = decree_match.groups()
-                doc_ids.add(f"nghi_dinh_{number}_{year}_ND_CP")
-
-        if "nghi quyet" in haystack:
-            source_types.add("nghi_quyet")
-            resolution_match = re.search(r"\b(\d{1,3})\s*/\s*(\d{4})", haystack)
-            if resolution_match:
-                number, year = resolution_match.groups()
-                doc_ids.add(f"nghi_quyet_{number.zfill(2)}_{year}_NQ_HDTP")
-
-        return {
-            "article_numbers": article_numbers,
-            "doc_ids": doc_ids,
-            "source_types": source_types,
-        }

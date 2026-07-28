@@ -1,5 +1,11 @@
 from generation.models import AnswerSection, Claim, LegalAnswer
-from generation.utils import chunk_to_citation, dedupe_citations
+from generation.utils import (
+    build_human_review_signal,
+    build_source_validity_confidence,
+    build_source_validity_disclaimers,
+    chunk_to_citation,
+    dedupe_citations,
+)
 from retrieval.models import RetrievalResult
 
 class BaseLLMGenerator:
@@ -89,17 +95,18 @@ class BaseLLMGenerator:
         uncertainty = str(data.get("uncertainty", "")).strip()
         
         if conflict:
-            disclaimers.append("LƯU Ý: Đã phát hiện mâu thuẫn pháp lý trong các căn cứ áp dụng.")
+            disclaimers.append("Cảnh báo: Đã phát hiện mâu thuẫn pháp lý trong các căn cứ áp dụng.")
         if invalid_e_ids_used:
-            disclaimers.append("CẢNH BÁO: AI đã tạo ra căn cứ không tồn tại trong hồ sơ (Hallucination). Vui lòng đối chiếu kỹ.")
+            disclaimers.append("Cảnh báo: Hệ thống đã tham chiếu đến căn cứ không tồn tại trong hồ sơ truy xuất. Vui lòng đối chiếu kỹ.")
         if claims_without_evidence:
-            disclaimers.append("CẢNH BÁO: Một số nhận định pháp lý không có căn cứ hợp lệ trong evidence được truy xuất.")
+            disclaimers.append("Cảnh báo: Một số nhận định pháp lý không có căn cứ hợp lệ trong phần tài liệu được truy xuất.")
         if weakly_supported_claims:
-            disclaimers.append("CẢNH BÁO: Một số nhận định có trích dẫn nhưng mức khớp nội dung với evidence còn yếu; cần đối chiếu lại nguồn.")
+            disclaimers.append("Cảnh báo: Một số nhận định có trích dẫn nhưng mức khớp nội dung với tài liệu được truy xuất còn yếu; cần đối chiếu lại nguồn.")
         if uncertainty and uncertainty.lower() not in ("không", "none", "", "null"):
             disclaimers.append(f"Chưa chắc chắn: {uncertainty}")
+        disclaimers.extend(build_source_validity_disclaimers(raw_items))
         if not valid_e_ids:
-            disclaimers.append("TỪ CHỐI TRẢ LỜI: Không tìm thấy căn cứ pháp lý phù hợp trong hệ thống.")
+            disclaimers.append("Không thể trả lời: Không tìm thấy căn cứ pháp lý phù hợp trong hệ thống.")
             sections = [AnswerSection(title="Từ chối trả lời", content="Câu hỏi của bạn nằm ngoài phạm vi hoặc hệ thống chưa cập nhật văn bản liên quan.")]
         
         citations = []
@@ -127,6 +134,7 @@ class BaseLLMGenerator:
             "grounded_claim_count": grounded_claims,
             "total_claim_count": total_claims,
             "grounding_coverage": round(grounded_claims / total_claims, 3) if total_claims else None,
+            **build_source_validity_confidence(raw_items),
         }
         
         if (
@@ -137,6 +145,10 @@ class BaseLLMGenerator:
             or (uncertainty and uncertainty.lower() not in ("không", "none", "", "null"))
         ):
             confidence_data["level"] = "low"
+
+        request_type = getattr(getattr(retrieval_result, "query_intent", None), "loai_yeu_cau", "")
+        review_signal = build_human_review_signal(request_type, confidence_data, raw_items)
+        confidence_data.update(review_signal)
 
         return LegalAnswer(
             query=query,

@@ -160,9 +160,9 @@ CHỈ TRẢ VỀ JSON HỢP LỆ.
             if item not in source_priority:
                 source_priority.append(item)
 
-        keywords = parsed.get("keywords") or []
-        key_phrases = parsed.get("key_phrases") or []
-        citations = parsed.get("citation_targets") or []
+        keywords = parsed.get("keywords") or rule_result["keywords"]
+        key_phrases = parsed.get("key_phrases") or rule_result.get("key_phrases", [])
+        citations = parsed.get("citation_targets") or rule_result["citation_targets"]
         scenario_terms = list(
             dict.fromkeys((parsed.get("scenario_terms") or []) + rule_result.get("scenario_terms", []))
         )

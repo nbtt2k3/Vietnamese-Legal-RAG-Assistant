@@ -55,6 +55,7 @@ class LegalRetrievalMetadataExtractor(BaseMetadataExtractor):
         related_documents = self._normalize_relationships(document.sua_doi_bo_sung)
         validity = self._extract_validity_metadata(document)
         source = self._source_metadata(document)
+        validity = self._apply_source_validity_override(validity, source)
         return {
             "citation": f"{canonical_name} ({document.so_hieu})",
             "citation_short": f"{self._display_document_type(document.loai_van_ban)} số {document.so_hieu}",
@@ -80,11 +81,11 @@ class LegalRetrievalMetadataExtractor(BaseMetadataExtractor):
             "source_verified_at": source.get("source_verified_at"),
             "effective_from": validity["effective_from"],
             "effective_to": validity["effective_to"],
-            "repeal_reason": None,
-            "source_of_validity": "unverified_parsed_text",
+            "repeal_reason": validity["repeal_reason"],
+            "source_of_validity": validity["source_of_validity"],
             "validity_basis": validity["validity_basis"],
             "validity_confidence": validity["validity_confidence"],
-            "validity_checked_at": None,
+            "validity_checked_at": validity["validity_checked_at"],
         }
 
     def _build_case_law_legal_metadata(self, node: AnLe) -> dict[str, Any]:
@@ -92,6 +93,19 @@ class LegalRetrievalMetadataExtractor(BaseMetadataExtractor):
         if node.nguon_an_le:
             joined_refs.append(node.nguon_an_le)
         source = self._source_metadata(node)
+        validity = self._apply_source_validity_override(
+            {
+                "validity_status": "an_le_da_cong_bo",
+                "effective_from": node.ngay_cong_bo,
+                "effective_to": None,
+                "repeal_reason": None,
+                "source_of_validity": "unverified_parsed_text",
+                "validity_basis": "case_law_publication_date_parsed",
+                "validity_confidence": "medium",
+                "validity_checked_at": None,
+            },
+            source,
+        )
         return {
             "citation": f"Án lệ số {node.so_an_le}",
             "citation_short": node.so_an_le,
@@ -111,11 +125,11 @@ class LegalRetrievalMetadataExtractor(BaseMetadataExtractor):
             ),
             "cited_authorities": self._extract_references_from_strings(joined_refs),
             "related_documents": self._normalize_case_law_source(node.nguon_an_le),
-            "temporal_validity_note": "an_le_da_cong_bo",
-            "validity_status": "an_le_da_cong_bo",
-            "effective_date": node.ngay_cong_bo,
-            "effective_from": node.ngay_cong_bo,
-            "effective_to": None,
+            "temporal_validity_note": validity["validity_status"],
+            "validity_status": validity["validity_status"],
+            "effective_date": validity["effective_from"],
+            "effective_from": validity["effective_from"],
+            "effective_to": validity["effective_to"],
             "replaced_documents": [],
             "transition_notes": [],
             "url": source.get("source_url"),
@@ -127,10 +141,10 @@ class LegalRetrievalMetadataExtractor(BaseMetadataExtractor):
             "source_checksum_sha256": source.get("source_checksum_sha256"),
             "source_verification_status": source.get("source_verification_status"),
             "source_verified_at": source.get("source_verified_at"),
-            "source_of_validity": "unverified_parsed_text",
-            "validity_basis": "case_law_publication_date_parsed",
-            "validity_confidence": "medium",
-            "validity_checked_at": None,
+            "source_of_validity": validity["source_of_validity"],
+            "validity_basis": validity["validity_basis"],
+            "validity_confidence": validity["validity_confidence"],
+            "validity_checked_at": validity["validity_checked_at"],
             "case_law_role": {
                 "issue": "tinh_huong_phap_ly",
                 "holding": "giai_phap_phap_ly",
@@ -386,6 +400,9 @@ class LegalRetrievalMetadataExtractor(BaseMetadataExtractor):
             "effective_to": None,
             "validity_basis": validity_basis,
             "validity_confidence": validity_confidence,
+            "validity_checked_at": None,
+            "source_of_validity": "unverified_parsed_text",
+            "repeal_reason": None,
         }
 
     def _parse_effective_date_from_text(self, text: str) -> str | None:
@@ -413,7 +430,51 @@ class LegalRetrievalMetadataExtractor(BaseMetadataExtractor):
             "source_url": source.get("source_url"),
             "source_verification_status": source.get("source_verification_status", "unverified"),
             "source_verified_at": source.get("source_verified_at"),
+            "source_registry_status": source.get("source_registry_status"),
+            "validity_status": source.get("validity_status"),
+            "validity_basis": source.get("validity_basis"),
+            "validity_confidence": source.get("validity_confidence"),
+            "validity_checked_at": source.get("validity_checked_at"),
+            "source_of_validity": source.get("source_of_validity"),
+            "effective_from": source.get("effective_from"),
+            "effective_to": source.get("effective_to"),
+            "repeal_reason": source.get("repeal_reason"),
         }
+
+    def _apply_source_validity_override(
+        self,
+        validity: dict[str, Any],
+        source: dict[str, Any],
+    ) -> dict[str, Any]:
+        official_validity_sources = {
+            "official_registry",
+            "csdl_quoc_gia_vbpl",
+            "cong_bao_chinh_phu",
+            "csdl_an_le_tandtc",
+        }
+        if source.get("source_verification_status") != "official_verified":
+            return validity
+        if str(source.get("source_of_validity", "")).strip() not in official_validity_sources:
+            return validity
+        if not source.get("validity_checked_at") or not source.get("validity_status"):
+            return validity
+        if str(source.get("validity_confidence", "")).strip().lower() != "high":
+            return validity
+
+        verified = dict(validity)
+        for key in (
+            "validity_status",
+            "effective_from",
+            "effective_to",
+            "repeal_reason",
+            "source_of_validity",
+            "validity_basis",
+            "validity_confidence",
+            "validity_checked_at",
+        ):
+            if source.get(key) is not None:
+                verified[key] = source[key]
+        return verified
 
     def _is_likely_legal_doc_reference(self, ref_text: str) -> bool:
         lowered = ref_text.lower()

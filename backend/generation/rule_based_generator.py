@@ -1,5 +1,13 @@
 from generation.models import AnswerSection, LegalAnswer
-from generation.utils import chunk_to_citation, dedupe_citations, clean_whitespace
+from generation.utils import (
+    build_human_review_signal,
+    build_source_validity_confidence,
+    build_source_validity_disclaimers,
+    chunk_to_citation,
+    clean_whitespace,
+    dedupe_citations,
+)
+from retrieval.domain_policy import is_scenario_domain_compatible
 from retrieval.models import RetrievalResult, RetrievedChunk
 from retrieval.text_utils import normalize_for_match
 
@@ -46,14 +54,19 @@ class RuleBasedLegalGenerator:
         for i, cit in enumerate(raw_citations):
             cit.evidence_id = f"E{i+1}"
         citations = raw_citations
+        evidence_items = primary + supporting + case_law
+        confidence = self._build_confidence_note(retrieval_result, evidence_items)
+        review_signal = build_human_review_signal(intent.loai_yeu_cau, confidence, evidence_items)
+        confidence.update(review_signal)
+        disclaimers = self._build_disclaimers(intent.loai_yeu_cau, ranked, case_law, evidence_items)
 
         return LegalAnswer(
             query=query,
             short_answer=short_answer,
             sections=sections,
             citations=citations,
-            confidence=self._build_confidence_note(retrieval_result),
-            disclaimers=self._build_disclaimers(intent.loai_yeu_cau, ranked, case_law),
+            confidence=confidence,
+            disclaimers=disclaimers,
             retrieval_debug=retrieval_result.retrieval_debug,
             answer_method="rule_based",
         )
@@ -76,7 +89,7 @@ class RuleBasedLegalGenerator:
 
         if intent.loai_yeu_cau == "citation_lookup":
             # A citation lookup often needs multiple clauses of the same article.
-            return scored[:4]
+            return self._order_same_article_units(scored[:4])
 
         if intent.loai_yeu_cau == "validity_question" and intent.citation_targets:
             focused = [
@@ -85,7 +98,7 @@ class RuleBasedLegalGenerator:
                 if self._matches_generation_target(item, intent.citation_targets)
             ]
             if focused:
-                return focused[:4]
+                return self._order_same_article_units(focused[:4])
 
         selected: list[RetrievedChunk] = []
         seen_docs: set[str] = set()
@@ -97,6 +110,32 @@ class RuleBasedLegalGenerator:
             if len(selected) >= 4:
                 break
         return selected
+
+    def _order_same_article_units(self, items: list[RetrievedChunk]) -> list[RetrievedChunk]:
+        ordered: list[RetrievedChunk] = []
+        index = 0
+        while index < len(items):
+            item = items[index]
+            doc_id = item.doc_id
+            article = str(item.metadata.get("dieu_number", "")).strip()
+            group = [item]
+            index += 1
+            while index < len(items):
+                next_item = items[index]
+                if next_item.doc_id != doc_id or str(next_item.metadata.get("dieu_number", "")).strip() != article:
+                    break
+                group.append(next_item)
+                index += 1
+            if article and len(group) > 1:
+                group.sort(key=self._legal_unit_order_key)
+            ordered.extend(group)
+        return ordered
+
+    def _legal_unit_order_key(self, item: RetrievedChunk) -> tuple[int, str]:
+        value = str(item.metadata.get("khoan_number", "")).strip()
+        if value.isdigit():
+            return (int(value), "")
+        return (10_000, value)
 
     def _matches_generation_target(self, item: RetrievedChunk, citation_targets: list[str]) -> bool:
         metadata = item.metadata
@@ -123,10 +162,12 @@ class RuleBasedLegalGenerator:
         return False
 
     def _select_ranked_non_case(self, retrieval_result: RetrievalResult) -> list[RetrievedChunk]:
+        intent = retrieval_result.query_intent
         return [
             item
             for item in retrieval_result.candidates
             if item.metadata.get("document_role") != "case_law"
+            and is_scenario_domain_compatible(item, intent)
         ]
 
     def _select_case_law(self, retrieval_result: RetrievalResult) -> list[RetrievedChunk]:
@@ -137,6 +178,8 @@ class RuleBasedLegalGenerator:
         seen_docs: set[str] = set()
         for item in retrieval_result.candidates:
             if item.metadata.get("document_role") != "case_law":
+                continue
+            if not is_scenario_domain_compatible(item, intent):
                 continue
             if item.doc_id in seen_docs:
                 continue
@@ -231,17 +274,16 @@ class RuleBasedLegalGenerator:
         return "Cần dựa vào điều khoản về hiệu lực và thời điểm phát sinh hiệu lực của giao dịch để trả lời chính xác."
 
     def _build_scenario_short_answer(self, primary: list[RetrievedChunk], case_law: list[RetrievedChunk]) -> str:
-        if case_law:
-            return (
-                "Với dữ kiện hiện tại, chưa nên kết luận tuyệt đối giao dịch vô hiệu hay có hiệu lực; "
-                "cần đối chiếu quyền định đoạt tài sản, điều kiện có hiệu lực của giao dịch và hướng giải quyết trong án lệ liên quan."
-            )
         if primary:
+            citations = [str(item.metadata.get("citation", item.chunk_id)) for item in primary[:2]]
+            if case_law:
+                citations.extend(str(item.metadata.get("citation", item.chunk_id)) for item in case_law[:1])
             return (
-                "Với dữ kiện hiện tại, kết luận pháp lý còn phụ thuộc vào quyền của bên đem tài sản đi bảo đảm "
-                "và điều kiện có hiệu lực của giao dịch."
+                "Với dữ kiện hiện tại, chưa nên kết luận tuyệt đối; cần đối chiếu tình tiết thực tế với "
+                + "; ".join(citations)
+                + "."
             )
-        return "Tình huống này cần đối chiếu thêm quyền sở hữu, quyền định đoạt và các điều kiện có hiệu lực của giao dịch."
+        return "Tình huống này cần đối chiếu thêm hồ sơ, chứng cứ và các căn cứ pháp luật trực tiếp liên quan trước khi kết luận."
 
     def _build_citation_short_answer(self, primary: list[RetrievedChunk]) -> str:
         if primary:
@@ -315,8 +357,8 @@ class RuleBasedLegalGenerator:
         notes = []
         citations = []
         if request_type == "scenario_application":
-            notes.append("- Cần kiểm tra thêm hợp đồng gốc, giấy tờ về quyền sở hữu/quyền sử dụng, thời điểm đăng ký bảo đảm và trạng thái thanh toán thực tế.")
-            notes.append("- Nếu tranh chấp có yếu tố người thứ ba ngay tình hoặc đăng ký bảo đảm, nên đối chiếu thêm quy định về hiệu lực đối kháng và án lệ gần nhất.")
+            notes.append("- Cần kiểm tra thêm hồ sơ, chứng cứ, thời điểm phát sinh sự kiện và vai trò của từng chủ thể trước khi áp dụng căn cứ pháp luật.")
+            notes.append("- Nếu tình huống có nhiều quan hệ pháp luật chồng lấn, cần tách từng vấn đề để tránh dùng nhầm căn cứ giữa các lĩnh vực.")
         elif request_type == "validity_question":
             notes.append("- Nên tách bạch giữa hiệu lực của hợp đồng/giao dịch và hiệu lực đối kháng với người thứ ba vì đây là hai lớp pháp lý khác nhau.")
             notes.append("- Nếu văn bản có yêu cầu công chứng, chứng thực hoặc đăng ký, cần kiểm tra thêm mốc thời gian thực tế của từng thủ tục.")
@@ -336,8 +378,9 @@ class RuleBasedLegalGenerator:
             citations=dedupe_citations(citations, limit=2),
         )
 
-    def _build_confidence_note(self, retrieval_result: RetrievalResult) -> dict:
+    def _build_confidence_note(self, retrieval_result: RetrievalResult, evidence_items: list[RetrievedChunk]) -> dict:
         confidence = dict(retrieval_result.confidence)
+        confidence.update(build_source_validity_confidence(evidence_items))
         level = confidence.get("level", "low")
         if level == "high":
             confidence["generator_note"] = "Câu trả lời có nhiều căn cứ hỗ trợ hoặc khớp trực tiếp với nguồn truy xuất."
@@ -347,10 +390,17 @@ class RuleBasedLegalGenerator:
             confidence["generator_note"] = "Căn cứ truy xuất còn mỏng, không nên dùng như kết luận cuối cùng."
         return confidence
 
-    def _build_disclaimers(self, request_type: str, ranked: list[RetrievedChunk], case_law: list[RetrievedChunk]) -> list[str]:
+    def _build_disclaimers(
+        self,
+        request_type: str,
+        ranked: list[RetrievedChunk],
+        case_law: list[RetrievedChunk],
+        evidence_items: list[RetrievedChunk],
+    ) -> list[str]:
         notes = [
             "Câu trả lời này là phân tích hỗ trợ từ hệ thống Vietnamese Legal RAG Assistant, không thay thế ý kiến tư vấn pháp lý chính thức.",
         ]
+        notes.extend(build_source_validity_disclaimers(evidence_items))
         if request_type == "scenario_application":
             notes.append("Với câu hỏi tình huống, kết luận cuối cùng còn phụ thuộc hồ sơ, chứng cứ, thời điểm phát sinh giao dịch và cách Tòa án đánh giá sự kiện.")
         if not ranked:

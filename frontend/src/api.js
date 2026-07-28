@@ -1,7 +1,30 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const TOKEN_STORAGE_KEY = 'access_token';
+
+export const getStoredAccessToken = () => {
+  const sessionToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+  if (sessionToken) return sessionToken;
+
+  const legacyToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (legacyToken) {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY, legacyToken);
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
+  return legacyToken;
+};
+
+export const storeAccessToken = (token) => {
+  sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+};
+
+export const clearAccessToken = () => {
+  sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+};
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('access_token');
+  const token = getStoredAccessToken();
   const headers = {
     'x-api-key': localStorage.getItem('legal_assistant_api_key') || '',
   };
@@ -85,7 +108,7 @@ export const getConversationMessages = async (conversationId) => {
   }
 };
 
-export const sendChatQuery = async (query, history = [], retrievalOnly = false) => {
+export const sendChatQuery = async (query, retrievalOnly = false) => {
   try {
     const response = await fetch(`${API_BASE_URL}/chat`, {
       method: 'POST',
@@ -93,7 +116,7 @@ export const sendChatQuery = async (query, history = [], retrievalOnly = false) 
         'Content-Type': 'application/json',
         ...getAuthHeaders(),
       },
-      body: JSON.stringify({ query, retrieval_only: retrievalOnly, conversation_history: history }),
+      body: JSON.stringify({ query, retrieval_only: retrievalOnly }),
     });
 
     if (!response.ok) {

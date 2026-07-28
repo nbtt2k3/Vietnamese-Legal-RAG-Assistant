@@ -11,11 +11,20 @@ from generation.pipeline import GenerationPipeline
 from evaluation.llm_judge import LLMJudge
 
 class LegalRAGEvaluator:
-    def __init__(self, dataset_path: str, use_llm: bool = False, use_llm_judge: bool | None = None, pipeline=None, llm_judge=None):
+    def __init__(
+        self,
+        dataset_path: str,
+        use_llm: bool = False,
+        use_llm_judge: bool | None = None,
+        pipeline=None,
+        llm_judge=None,
+        case_pass_threshold: float = 0.7,
+    ):
         self.dataset_name, self.cases = load_eval_dataset(dataset_path)
         self.pipeline = pipeline or GenerationPipeline(use_llm=use_llm)
         self.use_llm_judge = settings.llm_judge_enabled if use_llm_judge is None else use_llm_judge
         self.llm_judge = llm_judge or (LLMJudge() if self.use_llm_judge else None)
+        self.case_pass_threshold = case_pass_threshold
 
     def run(self) -> EvaluationReport:
         case_reports = [self._evaluate_case(case) for case in self.cases]
@@ -74,6 +83,8 @@ class LegalRAGEvaluator:
         
         # Phase 7 TruLens-like Triad (LLM-as-a-judge)
         if self.use_llm_judge:
+            if hasattr(self.llm_judge, "last_reasons"):
+                self.llm_judge.last_reasons.clear()
             context_text = "\n".join([item.text for item in retrieval.candidates[:5]])
             metrics["answer_relevance"] = self.llm_judge.evaluate_answer_relevance(case.query, answer_text)
             metrics["faithfulness"] = self.llm_judge.evaluate_faithfulness(answer_text, context_text)
@@ -99,7 +110,7 @@ class LegalRAGEvaluator:
             case_id=case.case_id,
             query=case.query,
             score=round(score, 4),
-            passed=score >= 0.7,
+            passed=score >= self.case_pass_threshold,
             metrics={key: round(value, 4) for key, value in metrics.items()},
             notes=notes,
             observed=observed,
@@ -258,9 +269,9 @@ class LegalRAGEvaluator:
     def _aggregate_metrics(self, case_reports: list[CaseEvaluation]) -> dict[str, float]:
         if not case_reports:
             return {}
-        keys = list(case_reports[0].metrics.keys())
+        keys = sorted({key for item in case_reports for key in item.metrics})
         aggregate = {
-            key: round(mean([item.metrics[key] for item in case_reports]), 4)
+            key: round(mean([item.metrics[key] for item in case_reports if key in item.metrics]), 4)
             for key in keys
         }
         latencies = sorted(

@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Inter:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 :root {
@@ -429,6 +429,7 @@ html, body {
 .blur-\[100px\] { filter: blur(100px); }
 .grayscale { filter: grayscale(100%); }
 .pointer-events-none { pointer-events: none; }
+.pointer-events-auto { pointer-events: auto; }
 .outline-none { outline: 2px solid transparent; outline-offset: 2px; }
 .focus\:ring-2:focus { box-shadow: 0 0 0 2px var(--tw-ring-color); outline: none; }
 .focus\:ring-secondary\/50:focus { --tw-ring-color: color-mix(in srgb, var(--secondary) 50%, transparent); }

@@ -11,9 +11,11 @@ The project demonstrates a practical Legal RAG stack: document ingestion, legal-
 - Metadata-aware chunking with citations, source type, legal role, validity fields, and document relationships.
 - Hybrid retrieval using metadata, lexical matching, vector retrieval, reranking, and fallback logic.
 - Grounded generation with evidence IDs, citation validation, confidence signals, and hallucination controls.
+- Human-review gating signals for low-confidence, weakly grounded, unverified, or fact-sensitive answers.
 - Evaluation suite covering citation recall, answer terms, source type recall, grounding coverage, abstention, latency, and LLM-as-a-judge metrics.
 - FastAPI backend with request IDs, rate limiting, request size limit, security headers, CORS config, Prometheus instrumentation, and API key support.
 - React/Vite frontend with streaming chat UI, citations, feedback, and configurable API base URL.
+- GitHub Actions quality gates for backend/RAG regression, encoding validation, frontend lint, and frontend build.
 
 ## Architecture
 
@@ -44,6 +46,8 @@ flowchart LR
 ```
 
 For a fuller architecture explanation, see [docs/architecture.md](docs/architecture.md).
+For corpus update rules and source verification requirements, see [docs/corpus-governance.md](docs/corpus-governance.md).
+For human review triggers, see [docs/human-review-policy.md](docs/human-review-policy.md).
 
 ## Repository Structure
 
@@ -145,6 +149,7 @@ Validation commands:
 
 ```bash
 python scripts/validate_encoding.py . ../frontend --include-data
+python scripts/validate_source_registry.py --path data/source_registry.json
 python scripts/validate_chunks.py
 python scripts/validate_embeddings.py
 python scripts/validate_index.py
@@ -170,7 +175,8 @@ npm run build
 
 Current regression status:
 
-- Backend/RAG tests: `35 passed`
+- Backend full test suite: `88 passed`
+- Targeted RAG/retrieval/evaluation suite: `50 passed`
 - Encoding validation: passed
 - Frontend lint: passed
 - Frontend build: passed
@@ -203,6 +209,7 @@ See [docs/evaluation-summary.md](docs/evaluation-summary.md) for the current eva
 The backend includes:
 
 - API key enforcement in production.
+- Production fail-fast validation for weak secrets, weak API keys, and wildcard CORS.
 - Configurable CORS.
 - Request body size limit.
 - Redis token bucket rate limiting with in-memory fallback.
@@ -211,12 +218,16 @@ The backend includes:
 - Redacted structured logging.
 - Prometheus metrics endpoint.
 - Health check endpoint.
+- Separate liveness (`/live`) and readiness (`/ready`) probes for production orchestration.
+- CI quality gates in `.github/workflows/quality-gates.yml`.
+- Corpus governance validation through `backend/scripts/validate_source_registry.py`.
+- Human-review flags exposed through answer confidence and surfaced in the frontend.
 
 ## Limitations
 
 - Full end-to-end benchmark can be slow because it loads local reranker/model resources.
 - The project is suitable for portfolio, demo, staging, or internal pilot usage, not direct legal advice in public production.
-- Legal corpus update, legal review workflow, monitoring dashboards, and CI/CD deployment gates still need to be added for production-grade use.
+- Human review operations, monitoring dashboards, and full deployment gates still need to be added for production-grade use.
 
 ## Portfolio Value
 

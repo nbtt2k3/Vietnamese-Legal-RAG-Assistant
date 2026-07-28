@@ -14,6 +14,7 @@ from ingestion.loader.loader_factory import LoaderFactory
 from ingestion.parser.parser_factory import ParserFactory
 from ingestion.cleaner.cleaner_factory import CleanerFactory
 from ingestion.metadata.metadata_factory import MetadataFactory
+from ingestion.source_registry import apply_source_registry
 from ingestion.parser.structure import LoaiVanBan, VanBan, AnLe
 from app.logger import logger
 from app.config import settings
@@ -73,7 +74,7 @@ def build_raw_text(loaded: dict) -> str:
     return unicodedata.normalize("NFC", text)
 
 
-def build_source_metadata(file_path: Path) -> dict:
+def build_source_metadata(file_path: Path, doc_id: str | None = None) -> dict:
     """Record local-source provenance without claiming legal-source verification."""
     resolved_path = file_path.resolve()
     digest = hashlib.sha256()
@@ -86,7 +87,7 @@ def build_source_metadata(file_path: Path) -> dict:
     except ValueError:
         relative_path = resolved_path.as_posix()
 
-    return {
+    metadata = {
         "source_file": relative_path,
         "source_format": file_path.suffix.lower().lstrip("."),
         "source_checksum_sha256": digest.hexdigest(),
@@ -94,6 +95,9 @@ def build_source_metadata(file_path: Path) -> dict:
         "source_verification_status": "local_checksum_only",
         "source_verified_at": None,
     }
+    if doc_id:
+        return apply_source_registry(metadata, doc_id=doc_id)
+    return metadata
 
 
 def guess_so_hieu(raw_text: str) -> str:
@@ -240,10 +244,10 @@ def to_serializable(obj):
 def process_file(file_path: Path, loai_van_ban: str) -> tuple[dict, dict, dict]:  # parsed, cleaned, metadata
     loader = LoaderFactory.get_loader(str(file_path))
     loaded = loader.load(str(file_path))
-    source_metadata = build_source_metadata(file_path)
 
     raw_text = build_raw_text(loaded)
     doc_id = file_path.stem   # dùng tên file làm doc_id, đơn giản & dễ trace
+    source_metadata = build_source_metadata(file_path, doc_id=doc_id)
 
     parser = ParserFactory.get_parser(loai_van_ban)
 
@@ -376,6 +380,7 @@ def run_pipeline(raw_dir: Path = RAW_DIR, parsed_dir: Path = PARSED_DIR, cleaned
                         doc.source_verified_at = legal_meta.get("source_verified_at")
                         doc.validity_basis = legal_meta.get("validity_basis")
                         doc.validity_confidence = legal_meta.get("validity_confidence")
+                        doc.validity_checked_at = legal_meta.get("validity_checked_at")
 
                         db.query(DocumentRelationship).filter(
                             DocumentRelationship.source_doc_id == metadata_res["doc_id"]

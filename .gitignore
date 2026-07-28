@@ -52,6 +52,9 @@ htmlcov/
 *.sqlite
 qdrant_db/
 backend/data/
+!backend/data/
+backend/data/*
+!backend/data/source_registry.json
 
 # Logs
 logs/

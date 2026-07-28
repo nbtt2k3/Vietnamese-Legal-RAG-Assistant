@@ -2,6 +2,7 @@ import json
 
 from evaluation.evaluator import LegalRAGEvaluator
 from evaluation.llm_judge import LLMJudge
+from evaluation.models import CaseEvaluation
 from generation.models import CitationRecord, LegalAnswer
 from retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
 
@@ -21,19 +22,18 @@ class FailingJudgeClient:
 
 class FakeJudge:
     def __init__(self):
-        self.last_reasons = {
-            "answer_relevance": "direct",
-            "faithfulness": "grounded",
-            "context_precision": "useful",
-        }
+        self.last_reasons = {}
 
     def evaluate_answer_relevance(self, query: str, answer: str) -> float:
+        self.last_reasons["answer_relevance"] = "direct"
         return 0.9
 
     def evaluate_faithfulness(self, answer: str, context: str) -> float:
+        self.last_reasons["faithfulness"] = "grounded"
         return 0.8
 
     def evaluate_context_precision(self, query: str, context: str) -> float:
+        self.last_reasons["context_precision"] = "useful"
         return 0.7
 
 
@@ -131,6 +131,24 @@ def test_evaluator_records_llm_judge_metrics_and_reasons(tmp_path):
     assert case.observed["llm_judge_reasons"]["faithfulness"] == "grounded"
 
 
+def test_evaluator_does_not_leak_stale_llm_judge_reasons(tmp_path):
+    judge = FakeJudge()
+    judge.last_reasons["availability"] = "old health check"
+    evaluator = LegalRAGEvaluator(
+        dataset_path=_dataset(tmp_path),
+        use_llm=False,
+        use_llm_judge=True,
+        pipeline=FakePipeline(),
+        llm_judge=judge,
+    )
+
+    report = evaluator.run()
+    reasons = report.cases[0].observed["llm_judge_reasons"]
+
+    assert "availability" not in reasons
+    assert reasons["answer_relevance"] == "direct"
+
+
 def test_evaluator_uses_deterministic_mode_by_default(tmp_path, monkeypatch):
     from app.config import settings
 
@@ -146,3 +164,28 @@ def test_evaluator_uses_deterministic_mode_by_default(tmp_path, monkeypatch):
 
     assert "answer_relevance" not in case.metrics
     assert "llm_judge_reasons" not in case.observed
+
+
+def test_aggregate_metrics_keeps_optional_metric_keys():
+    evaluator = LegalRAGEvaluator.__new__(LegalRAGEvaluator)
+    report = evaluator._aggregate_metrics(
+        [
+            CaseEvaluation(
+                case_id="c1",
+                query="q1",
+                score=1.0,
+                passed=True,
+                metrics={"request_type_match": 1.0},
+            ),
+            CaseEvaluation(
+                case_id="c2",
+                query="q2",
+                score=1.0,
+                passed=True,
+                metrics={"request_type_match": 0.0, "faithfulness": 0.8},
+            ),
+        ]
+    )
+
+    assert report["request_type_match"] == 0.5
+    assert report["faithfulness"] == 0.8

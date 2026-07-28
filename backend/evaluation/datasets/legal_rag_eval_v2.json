@@ -404,6 +404,165 @@
       "min_confidence_level": "low",
       "should_answer": false,
       "max_latency_seconds": 10.0
+    },
+    {
+      "case_id": "source_governance_blds_official",
+      "query": "Nguồn Bộ luật Dân sự 2015 trong hệ thống đã được xác minh chính thức chưa?",
+      "tags": [
+        "source_governance",
+        "validity",
+        "dan_su"
+      ],
+      "expected_request_type": "validity_question",
+      "expected_citations": [
+        "Bộ luật Dân sự"
+      ],
+      "expected_source_types": [
+        "bo_luat"
+      ],
+      "expected_answer_terms": [
+        "Bộ luật Dân sự",
+        "hiệu lực",
+        "2017"
+      ],
+      "expected_disclaimer_terms": [
+        "nguồn",
+        "xác minh"
+      ],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.7,
+      "max_latency_seconds": 30.0
+    },
+    {
+      "case_id": "source_governance_unverified_case_law",
+      "query": "Án lệ số 55/2022/AL hiện còn áp dụng chắc chắn không?",
+      "tags": [
+        "source_governance",
+        "case_law",
+        "validity"
+      ],
+      "expected_request_type": "case_law_question",
+      "expected_citations": [
+        "Án lệ số 55/2022/AL"
+      ],
+      "expected_source_types": [
+        "an_le"
+      ],
+      "expected_answer_terms": [
+        "án lệ",
+        "áp dụng",
+        "hiệu lực"
+      ],
+      "expected_disclaimer_terms": [
+        "nguồn",
+        "xác minh"
+      ],
+      "min_confidence_level": "low",
+      "min_grounding_coverage": 0.6,
+      "max_latency_seconds": 35.0
+    },
+    {
+      "case_id": "multi_document_security_registration",
+      "query": "Khi đăng ký thế chấp quyền sử dụng đất thì cần đối chiếu Bộ luật Dân sự và nghị định nào?",
+      "tags": [
+        "multi_document",
+        "bao_dam",
+        "registration"
+      ],
+      "expected_request_type": "scenario_application",
+      "expected_citations": [
+        "Bộ luật Dân sự, Điều 319",
+        "Nghị định 99/2022/NĐ-CP"
+      ],
+      "expected_source_types": [
+        "bo_luat",
+        "nghi_dinh"
+      ],
+      "expected_answer_terms": [
+        "thế chấp",
+        "đăng ký",
+        "đối kháng"
+      ],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.7,
+      "max_latency_seconds": 40.0
+    },
+    {
+      "case_id": "insufficient_missing_contract_facts",
+      "query": "Hợp đồng của tôi có vô hiệu không nếu tôi chỉ nói là bên kia không giữ lời?",
+      "tags": [
+        "insufficient_facts",
+        "scenario",
+        "contract"
+      ],
+      "expected_request_type": "scenario_application",
+      "expected_citations": [
+        "Bộ luật Dân sự, Điều 117"
+      ],
+      "expected_source_types": [
+        "bo_luat"
+      ],
+      "expected_answer_terms": [
+        "chưa đủ",
+        "tình tiết",
+        "vô hiệu"
+      ],
+      "expected_missing_facts_terms": [
+        "chủ thể",
+        "tự nguyện",
+        "mục đích",
+        "nội dung"
+      ],
+      "min_confidence_level": "low",
+      "min_grounding_coverage": 0.6,
+      "max_latency_seconds": 35.0
+    },
+    {
+      "case_id": "temporal_replaced_security_decree",
+      "query": "Nghị định 21/2021/NĐ-CP thay thế những văn bản nào về giao dịch bảo đảm?",
+      "tags": [
+        "temporal",
+        "multi_document",
+        "bao_dam"
+      ],
+      "expected_request_type": "validity_question",
+      "expected_citations": [
+        "Nghị định 21/2021/NĐ-CP"
+      ],
+      "expected_source_types": [
+        "nghi_dinh"
+      ],
+      "expected_answer_terms": [
+        "Nghị định 163/2006/NĐ-CP",
+        "Nghị định 11/2012/NĐ-CP",
+        "thay thế"
+      ],
+      "min_confidence_level": "medium",
+      "min_grounding_coverage": 0.7,
+      "max_latency_seconds": 35.0
+    },
+    {
+      "case_id": "negative_specific_tax_not_in_corpus",
+      "query": "Thuế giá trị gia tăng khi chuyển nhượng quyền sử dụng đất được tính ra sao?",
+      "tags": [
+        "negative",
+        "tax",
+        "insufficient_evidence"
+      ],
+      "expected_request_type": "out_of_scope",
+      "expected_citations": [],
+      "expected_source_types": [],
+      "expected_answer_terms": [
+        "ngoài phạm vi",
+        "chưa cập nhật",
+        "không đủ căn cứ"
+      ],
+      "expected_disclaimer_terms": [
+        "không đủ căn cứ"
+      ],
+      "min_confidence_level": "low",
+      "should_answer": false,
+      "max_latency_seconds": 20.0
     }
   ]
 }

@@ -23,6 +23,16 @@ _INJECTION_PATTERNS = [
     re.compile(r"quên\s*tất\s*cả"),
 ]
 
+
+def _sanitize_log_value(value: object, max_length: int = 500) -> str:
+    text = str(value or "")
+    text = re.sub(r"[\r\n\t]+", " ", text)
+    text = re.sub(r"\s{2,}", " ", text).strip()
+    if len(text) <= max_length:
+        return text
+    return f"{text[:max_length - 3]}..."
+
+
 class QueryRequest(BaseModel):
     query: str = Field(min_length=1, max_length=12_000)
     retrieval_only: bool = False
@@ -233,16 +243,22 @@ async def chat_stream_endpoint(request: QueryRequest, req: Request, db: Session 
 
 class FeedbackRequest(BaseModel):
     message_id: str | int = Field(..., description="ID của tin nhắn")
-    query: str = Field(..., description="Câu hỏi của user")
-    rating: int = Field(..., description="1 cho thumbs up, -1 cho thumbs down, 0 cho neutral")
-    comment: str | None = Field(None, description="Nhận xét chi tiết")
+    query: str = Field(..., min_length=1, max_length=12_000, description="Câu hỏi của user")
+    rating: int = Field(..., ge=-1, le=1, description="1 cho thumbs up, -1 cho thumbs down, 0 cho neutral")
+    comment: str | None = Field(None, max_length=2_000, description="Nhận xét chi tiết")
 
 @api_router.post("/api/v1/feedback")
 async def feedback_endpoint(request: FeedbackRequest, req: Request) -> Dict[str, Any]:
     req_id = getattr(req.state, "request_id", "unknown")
     
     # Ở Phase này, ghi log ra file để thu thập dataset (vì chưa có DB schema riêng cho Feedback)
-    log_msg = f"[FEEDBACK] Req={req_id} | MsgID={request.message_id} | Rating={request.rating} | Query='{request.query}' | Comment='{request.comment or ''}'"
+    log_msg = (
+        f"[FEEDBACK] Req={req_id} "
+        f"| MsgID={_sanitize_log_value(request.message_id, max_length=80)} "
+        f"| Rating={request.rating} "
+        f"| Query='{_sanitize_log_value(request.query)}' "
+        f"| Comment='{_sanitize_log_value(request.comment or '')}'"
+    )
     logger.info(log_msg)
     
     return {"status": "success", "message": "Cảm ơn bạn đã đóng góp ý kiến!"}

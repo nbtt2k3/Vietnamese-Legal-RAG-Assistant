@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { getConversations, deleteConversation } from '../api';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ currentConversationId, onSelectConversation }) => {
@@ -12,7 +12,7 @@ const Sidebar = ({ currentConversationId, onSelectConversation }) => {
 
   const hasMounted = useRef(false);
 
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     try {
       const data = await getConversations();
       setConversations(data);
@@ -23,11 +23,11 @@ const Sidebar = ({ currentConversationId, onSelectConversation }) => {
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [currentConversationId, onSelectConversation]);
 
   useEffect(() => {
     fetchConversations();
-  }, [currentConversationId]);
+  }, [fetchConversations]);
 
   const handleNewChat = () => {
     onSelectConversation(null);

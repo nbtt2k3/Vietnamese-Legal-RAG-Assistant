@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
 import bcrypt
@@ -10,6 +10,19 @@ from app.database import get_db
 from app.models import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
+
+def validate_password_policy(password: str) -> None:
+    if len(password) < 8:
+        raise ValueError("Password must be at least 8 characters")
+    if len(password.encode("utf-8")) > 72:
+        raise ValueError("Password must not exceed 72 bytes")
+    if password.strip() != password:
+        raise ValueError("Password must not start or end with whitespace")
+    if password.lower() in {"password", "password123", "12345678", "phase0-password"}:
+        raise ValueError("Password is too common")
+    if password.isdigit() or password.isalpha():
+        raise ValueError("Password must contain a mix of letters and non-letters")
 
 def verify_password(plain_password, hashed_password):
     password_bytes = plain_password.encode('utf-8')[:72]

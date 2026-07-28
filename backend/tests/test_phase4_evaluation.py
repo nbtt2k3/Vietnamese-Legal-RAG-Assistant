@@ -3,6 +3,7 @@ import json
 from evaluation.dataset_loader import load_eval_dataset
 from evaluation.evaluator import LegalRAGEvaluator
 from evaluation.models import EvalCase
+from evaluation.quality_gate import evaluate_quality_gate
 from evaluation.reporting import report_to_markdown
 from generation.models import CitationRecord, LegalAnswer
 from retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
@@ -12,10 +13,12 @@ def test_eval_dataset_v2_loads_extended_case_fields():
     dataset_name, cases = load_eval_dataset("evaluation/datasets/legal_rag_eval_v2.json")
 
     assert dataset_name == "legal_rag_eval_v2"
-    assert len(cases) >= 10
+    assert len(cases) >= 20
     assert any(case.should_answer is False for case in cases)
     assert any(case.max_latency_seconds is not None for case in cases)
     assert any(case.min_grounding_coverage > 0 for case in cases)
+    assert any("source_governance" in case.tags for case in cases)
+    assert any(case.expected_disclaimer_terms for case in cases)
 
 
 class FakePipeline:
@@ -153,3 +156,43 @@ def test_evaluator_scores_expected_abstention(tmp_path):
     assert case.metrics["abstention_correctness"] == 1.0
     assert case.observed["abstained"] is True
     assert case.passed is True
+
+
+def test_quality_gate_reports_failures_for_low_metrics(tmp_path):
+    dataset = {
+        "dataset_name": "unit_gate",
+        "cases": [
+            {
+                "case_id": "weak_case",
+                "query": "Điều 117 là gì?",
+                "expected_request_type": "citation_lookup",
+                "expected_citations": ["Bộ luật Dân sự, Điều 117"],
+                "expected_source_types": ["bo_luat"],
+                "expected_answer_terms": ["điều kiện"],
+                "min_confidence_level": "medium",
+            }
+        ],
+    }
+    dataset_path = tmp_path / "dataset.json"
+    dataset_path.write_text(json.dumps(dataset, ensure_ascii=False), encoding="utf-8")
+
+    answer = LegalAnswer(
+        query="Điều 117 là gì?",
+        short_answer="Không rõ.",
+        citations=[],
+        confidence={"level": "low", "grounding_coverage": 0.0},
+        disclaimers=[],
+        answer_method="unit",
+    )
+    evaluator = LegalRAGEvaluator(
+        dataset_path=str(dataset_path),
+        use_llm=False,
+        use_llm_judge=False,
+        pipeline=FakePipeline(answer, _retrieval_result()),
+    )
+
+    report = evaluator.run()
+    gate = evaluate_quality_gate(report, thresholds={"pass_rate": 1.0, "generation_citation_recall": 1.0})
+
+    assert gate.passed is False
+    assert any("generation_citation_recall" in failure for failure in gate.failures)

@@ -64,7 +64,7 @@ Key responsibilities:
 - Rate limiting.
 - API key enforcement in production.
 - Security headers.
-- Health checks and Prometheus metrics.
+- Health checks, separate liveness/readiness probes, and Prometheus metrics.
 
 ### `ingestion/`
 
@@ -76,6 +76,7 @@ Main stages:
 - Parse legal structure.
 - Clean text.
 - Extract metadata.
+- Validate official source and validity evidence through the source registry.
 - Chunk by legal document structure.
 - Generate embeddings.
 - Index into Qdrant.
@@ -105,6 +106,7 @@ Important components:
 - Ollama/Groq generator options.
 - Base generator validation.
 - Citation and evidence grounding checks.
+- Human-review gating for low-confidence, unverified, weakly grounded, or fact-sensitive answers.
 
 ### `evaluation/`
 
@@ -145,9 +147,7 @@ RAG quality can regress silently. The evaluation module provides repeatable benc
 
 The project is currently strongest as a portfolio-grade or internal pilot system. Before public production usage, it should add:
 
-- CI/CD quality gates.
+- Full deployment gates beyond the current regression CI workflow.
 - Monitoring dashboard and alerting.
-- Readiness endpoint.
 - E2E tests.
-- Legal corpus update workflow.
-- Human review workflow for high-risk legal answers.
+- Operational staffing and escalation process for human-reviewed high-risk legal answers.

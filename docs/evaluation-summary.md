@@ -5,10 +5,12 @@
 The current regression suite passes:
 
 ```text
-Backend/RAG tests: 35 passed
+Backend full test suite: 88 passed
+Targeted RAG/retrieval/evaluation suite: 50 passed
 Encoding validation: passed
 Frontend lint: passed
 Frontend build: passed
+CI quality gate workflow: added
 ```
 
 The tests cover:
@@ -77,6 +79,14 @@ cd backend
 python scripts/evaluate_system.py --dataset evaluation/datasets/legal_rag_eval_v2.json --no-llm-judge --json
 ```
 
+Production-style quality gate:
+
+```bash
+python scripts/evaluate_system.py --dataset evaluation/datasets/legal_rag_eval_v2.json --no-llm-judge --gate
+```
+
+The gate fails the process when aggregate Legal RAG metrics fall below the configured thresholds, including pass rate, average score, request type match, citation recall, grounded citation precision, grounding threshold, abstention correctness, invalid evidence checks, and latency budget.
+
 Optional LLM judge:
 
 ```bash
@@ -90,6 +100,7 @@ Full end-to-end evaluation with local model/reranker loading can exceed a short 
 For CV and portfolio purposes, the current evidence is:
 
 - Unit/regression tests pass.
+- CI quality gates run backend/RAG regression, encoding validation, frontend lint, and frontend build.
 - Evaluation framework exists.
 - Dataset v2 exists.
 - Deterministic and LLM-judge metrics are implemented.
@@ -101,7 +112,7 @@ Before using this project as a production system:
 
 1. Run the full v2 benchmark with warm cache.
 2. Save JSON and Markdown reports under `backend/evaluation/reports/`.
-3. Add benchmark thresholds to CI.
+3. Add full benchmark thresholds to deployment CI once runtime/model caching is available.
 4. Track latency percentiles over time.
 5. Add a small API smoke benchmark that does not require all models to be cold-loaded.
 

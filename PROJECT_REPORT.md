@@ -18,6 +18,9 @@ The project implements an end-to-end Legal RAG application with:
 - Evaluation benchmarks for retrieval and generation quality.
 - FastAPI backend and React frontend.
 - Production-readiness improvements such as API hardening, request IDs, rate limiting, security headers, and configuration via environment variables.
+- Deployment probes for liveness and readiness checks.
+- Corpus governance validation for official source and validity metadata.
+- Human-review gating for low-confidence, weakly grounded, unverified, or fact-sensitive answers.
 
 ## 3. Technical Architecture
 
@@ -80,12 +83,17 @@ The project was improved through multiple phases:
 - API hardening and production configuration.
 - Frontend lint/build quality gate.
 - LLM judge hardening with timeout, safe fallback, and judge reasons.
+- Liveness/readiness probes for production orchestration.
+- CI quality gates for backend/RAG regression, encoding validation, frontend lint, and frontend build.
+- Source registry validation and a documented corpus update workflow.
+- Machine-readable human-review signals and frontend review warnings.
 
 ## 6. Current Quality Status
 
 Regression checks currently pass:
 
-- Backend/RAG tests: `35 passed`
+- Backend full test suite: `88 passed`
+- Targeted RAG/retrieval/evaluation suite: `50 passed`
 - Encoding validation: passed
 - Frontend lint: passed
 - Frontend build: passed
@@ -97,9 +105,9 @@ The system is suitable for portfolio demonstration, technical interview discussi
 The project is not yet ready for public legal-production usage because:
 
 - Full benchmark execution can be slow due to local model/reranker loading.
-- CI/CD quality gates are not yet implemented.
+- CI quality gates are implemented for regression checks, but full deployment gates and benchmark automation are still limited.
 - Monitoring dashboards and alerting are not yet configured.
-- Legal corpus update and legal review workflows are not yet formalized.
+- Human legal review operations for high-risk answers are not yet staffed or integrated outside the app.
 - Frontend component/e2e tests are not yet implemented.
 
 ## 8. What This Project Demonstrates
@@ -125,4 +133,4 @@ As a Technical Lead, I would approve this system for:
 - Staging environment.
 - Internal pilot with clear disclaimers.
 
-I would not approve it for public legal-production use until benchmark automation, monitoring, legal corpus governance, and human review workflows are added.
+I would not approve it for public legal-production use until benchmark automation, monitoring, and operational human review staffing are added.

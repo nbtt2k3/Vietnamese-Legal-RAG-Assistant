@@ -27,7 +27,7 @@ class GroqLegalGenerator(BaseLLMGenerator):
         prompt = self.prompt_builder.build(query, retrieval_result)
         system = (
             "Bạn là trợ lý pháp lý Việt Nam. "
-            "Chỉ dùng evidence được cung cấp. "
+            "Chỉ dùng các căn cứ được cung cấp. "
             "Trả về JSON hợp lệ với cấu trúc sau: {\"short_answer\": \"\", \"quy_dinh_phap_luat\": [{\"claim\": \"\", \"reasoning\": \"\", \"evidence_ids\": [\"E1\"]}], \"ap_dung_so_bo\": [], \"tinh_tiet_can_bo_sung\": [], \"rui_ro_phap_ly\": [], \"buoc_tiep_theo\": [], \"conflict_detected\": false, \"uncertainty\": \"\"}. "
             "Không xuất thêm markdown, không xuất block ```json."
         )

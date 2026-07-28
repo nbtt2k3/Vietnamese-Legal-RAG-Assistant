@@ -1,4 +1,5 @@
 from retrieval.models import EvidenceBundle, QueryIntent, RetrievedChunk
+from retrieval.domain_policy import is_scenario_domain_compatible
 
 
 class EvidenceBuilder:
@@ -30,7 +31,7 @@ class EvidenceBuilder:
             if is_valid_for_core and len(bundle.core_authorities) < 5:
                 bundle.core_authorities.append(item)
                 seen_docs.add(item.doc_id)
-            elif not self._is_appendix_noise(item, query_intent) and len(bundle.supporting_authorities) < 6:
+            elif self._is_supporting_eligible(item, query_intent) and len(bundle.supporting_authorities) < 6:
                 # BUG-07 FIX: Thêm doc_id vào seen_docs cả khi đưa vào supporting_authorities
                 # để tránh cùng tài liệu xuất hiện ở cả core lẫn supporting.
                 bundle.supporting_authorities.append(item)
@@ -46,7 +47,7 @@ class EvidenceBuilder:
             # không bắt được hai RetrievedChunk khác nhau cùng doc_id).
             if item.doc_id in seen_docs:
                 continue
-            if self._is_appendix_noise(item, query_intent):
+            if not self._is_supporting_eligible(item, query_intent):
                 continue
             bundle.supporting_authorities.append(item)
             seen_docs.add(item.doc_id)
@@ -108,12 +109,20 @@ class EvidenceBuilder:
     def _is_core_eligible(self, item: RetrievedChunk, query_intent: QueryIntent) -> bool:
         if self._is_appendix_noise(item, query_intent):
             return False
+        if not is_scenario_domain_compatible(item, query_intent):
+            return False
 
         if query_intent.loai_yeu_cau == "loan_interest_rate":
             source_type = str(item.metadata.get("loai_van_ban", ""))
             return source_type in ("bo_luat", "nghi_quyet")
 
         return True
+
+    def _is_supporting_eligible(self, item: RetrievedChunk, query_intent: QueryIntent) -> bool:
+        return (
+            not self._is_appendix_noise(item, query_intent)
+            and is_scenario_domain_compatible(item, query_intent)
+        )
 
     def _is_appendix_noise(self, item: RetrievedChunk, query_intent: QueryIntent) -> bool:
         metadata = item.metadata

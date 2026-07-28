@@ -1,4 +1,6 @@
 import time
+from ingestion.source_registry import enrich_metadata_from_source_registry
+from retrieval.constraints import exact_constraints, payload_matches_exact_constraints
 from retrieval.evidence_builder import EvidenceBuilder
 from retrieval.expander import CrossDocumentExpander
 from retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
@@ -62,6 +64,7 @@ class RetrievalPipeline:
             # Giới hạn ứng viên để tránh cross-encoder bị timeout
             # Sort candidates by the new hybrid score
             candidates_list = list(merged.values())
+            self._enrich_candidate_source_metadata(candidates_list)
             candidates_list.sort(key=lambda x: x.scores.get("hybrid", 0), reverse=True)
             candidates_list = candidates_list[:40]
             
@@ -86,6 +89,7 @@ class RetrievalPipeline:
             
             t4 = time.time()
             ranked = self.reranker.rerank(query_intent, list(merged.values()), top_k=candidate_limit)
+            self._enrich_candidate_source_metadata(ranked)
             self._annotate_display_relevance(ranked)
             latency["reranker_final"] = round(time.time() - t4, 3)
             
@@ -142,6 +146,9 @@ class RetrievalPipeline:
                         existing.merge(item)
                     else:
                         merged[item.chunk_id] = item
+
+        if query_intent.loai_yeu_cau in {"citation_lookup", "validity_question"}:
+            merged = self._filter_exact_lookup_candidates(query_intent, merged, debug)
                     
         # Phase 4 Reciprocal Rank Fusion (RRF)
         if merged:
@@ -169,6 +176,41 @@ class RetrievalPipeline:
 
         debug["merged_candidates"] = len(merged)
         return merged, debug
+
+    def _enrich_candidate_source_metadata(self, items: list[RetrievedChunk]) -> None:
+        for item in items:
+            item.metadata = enrich_metadata_from_source_registry(item.metadata, doc_id=item.doc_id)
+
+    def _filter_exact_lookup_candidates(
+        self,
+        query_intent: QueryIntent,
+        merged: dict[str, RetrievedChunk],
+        debug: dict[str, object],
+    ) -> dict[str, RetrievedChunk]:
+        constraints = exact_constraints(query_intent)
+        if not any(constraints.values()):
+            return merged
+
+        filtered = {
+            chunk_id: item
+            for chunk_id, item in merged.items()
+            if payload_matches_exact_constraints(
+                {
+                    **item.metadata,
+                    "doc_id": item.doc_id,
+                    "chunk_id": item.chunk_id,
+                    "text": item.text,
+                },
+                constraints,
+            )
+        }
+        if filtered:
+            debug["exact_lookup_filtered_candidates"] = len(merged) - len(filtered)
+            return filtered
+
+        debug["exact_lookup_filtered_candidates"] = 0
+        debug["exact_lookup_filter_skipped"] = True
+        return merged
 
     def _build_confidence(
         self,

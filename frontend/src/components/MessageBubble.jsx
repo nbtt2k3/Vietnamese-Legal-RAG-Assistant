@@ -29,6 +29,44 @@ const renderFormattedText = (text) => {
   });
 };
 
+const normalizeDisclaimerText = (text) => {
+  if (!text) return '';
+
+  const localChecksumPattern = new RegExp(`tệp/${['local', 'checksum'].join('\\s+')}`, 'gi');
+  const parsedTextPattern = new RegExp(['văn bản đã par', 'se'].join(''), 'gi');
+  const hallucinationPattern = new RegExp(['Halluci', 'nation'].join(''), 'gi');
+
+  return String(text)
+    .replace(
+      new RegExp(`Một số căn cứ hiện chỉ được ghi nhận từ ${localChecksumPattern.source}, chưa phải xác minh pháp lý chính thức từ nguồn có thẩm quyền\\.`, 'gi'),
+      'Một số căn cứ hiện mới được ghi nhận từ tệp nội bộ và mã kiểm tra toàn vẹn, chưa được xác minh trực tiếp từ nguồn có thẩm quyền.'
+    )
+    .replace(
+      new RegExp(`Tình trạng hiệu lực của một số căn cứ được suy ra từ ${parsedTextPattern.source} hoặc chưa xác định đầy đủ; không nên coi đây là xác nhận hiệu lực chính thức\\.`, 'gi'),
+      'Tình trạng hiệu lực của một số căn cứ được suy ra từ nội dung hệ thống đã đọc tự động hoặc chưa xác định đầy đủ; không nên coi đây là xác nhận hiệu lực chính thức.'
+    )
+    .replace(
+      'Câu trả lời có tín hiệu rủi ro hoặc phụ thuộc tình tiết; không nên dùng làm kết luận cuối cùng khi chưa được người có chuyên môn kiểm tra.',
+      'Câu trả lời có tín hiệu rủi ro hoặc phụ thuộc tình tiết thực tế; không nên dùng làm kết luận cuối cùng khi chưa được người có chuyên môn kiểm tra.'
+    )
+    .replace(localChecksumPattern, 'tệp nội bộ và mã kiểm tra toàn vẹn')
+    .replace(parsedTextPattern, 'nội dung hệ thống đã đọc tự động')
+    .replace(hallucinationPattern, 'căn cứ không tồn tại')
+    .replace(/\bevidence\b/gi, 'căn cứ')
+    .replace(/^LƯU Ý NGUỒN:\s*/i, 'Nguồn: ')
+    .replace(/^LƯU Ý HIỆU LỰC:\s*/i, 'Hiệu lực: ')
+    .replace(/^CẢNH BÁO:\s*/i, 'Cảnh báo: ')
+    .replace(/^TỪ CHỐI TRẢ LỜI:\s*/i, 'Không thể trả lời: ');
+};
+
+const isHumanReviewDisclaimer = (text) => {
+  const normalized = String(text || '').toLocaleLowerCase('vi-VN');
+  return (
+    normalized.includes('cần rà soát bởi chuyên gia pháp lý')
+    || normalized.includes('cần chuyên gia pháp lý rà soát')
+  );
+};
+
 const MessageBubble = ({ message }) => {
   const isUser = message.role === 'user';
   const [feedbackStatus, setFeedbackStatus] = useState(null);
@@ -81,7 +119,33 @@ const MessageBubble = ({ message }) => {
     );
   }
 
-  if (!data) {
+  if (message.isGreeting) {
+    return (
+      <div className="relative group mb-stack-lg animate-slide-up">
+        <div className="absolute -left-12 top-0 bottom-0 w-1 bg-gradient-to-b from-secondary via-secondary/20 to-transparent rounded-full opacity-50 hidden md:block"></div>
+        <div className="flex flex-col gap-stack-lg">
+          <div className="bg-surface-container-low rounded-xl p-stack-lg shadow-sm">
+            <div className="flex items-center gap-3 mb-stack-md">
+              <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+              </div>
+              <div>
+                <h2 className="font-headline-sm text-on-surface m-0">Trợ lý Pháp lý AI</h2>
+                <p className="text-[10px] font-label-md uppercase tracking-tighter text-on-surface-variant m-0">Hệ thống RAG Chuyên sâu v4.2</p>
+              </div>
+            </div>
+            <div className="bg-surface-container-highest/30 p-stack-md rounded-lg border-l-4 border-secondary flex flex-col gap-3">
+              <p className="font-body-md text-on-surface m-0 leading-relaxed">
+                {message.content}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || message.isLoading) {
     const rawContent = message.content || 'Đang phân tích câu hỏi và truy xuất tài liệu pháp lý';
     const cleanContent = rawContent.replace(/\.+$/, '').trim();
 
@@ -115,7 +179,13 @@ const MessageBubble = ({ message }) => {
     );
   }
 
-  const { short_answer, sections: rawSections, disclaimers, citations } = data.answer || {};
+  const { short_answer, sections: rawSections, disclaimers, citations, confidence } = data.answer || {};
+  const normalizedDisclaimers = Array.isArray(disclaimers)
+    ? disclaimers
+      .map(normalizeDisclaimerText)
+      .filter(Boolean)
+      .filter((disc) => !(confidence?.human_review_required && isHumanReviewDisclaimer(disc)))
+    : [];
   const candidates = data.retrieval?.candidates || [];
 
   // Decide which sources to show (citations if present, else candidates)
@@ -142,7 +212,7 @@ const MessageBubble = ({ message }) => {
       // Split content before each "Nhận định X:"
       const parts = normalizedContent.split(/(?=Nhận định \d+:)/i).filter(p => p.trim());
 
-      parts.forEach((part, pIdx) => {
+      parts.forEach((part) => {
         let cleanContent = part.trim();
         let isNhanDinh = /^Nhận định \d+:/i.test(cleanContent);
 
@@ -269,17 +339,30 @@ const MessageBubble = ({ message }) => {
           </div>
         )}
 
-        {/* Disclaimer Box */}
-        {disclaimers && disclaimers.length > 0 && (
-          <div className="bg-error-container/10 border border-error/20 rounded-xl p-stack-md flex gap-4 items-center">
-            <span className="material-symbols-outlined text-error shrink-0">warning</span>
+        {/* Human Review Gate */}
+        {confidence?.human_review_required && (
+          <div className="bg-error-container/15 border border-error/30 rounded-xl p-stack-md flex gap-4 items-start">
+            <span className="material-symbols-outlined text-error shrink-0">verified_user</span>
             <div className="text-body-sm text-on-surface-variant">
-              <strong className="text-error">Lưu ý pháp lý:</strong>{' '}
-              {disclaimers.map((disc, i) => (
-                <span key={i}>
-                  {renderFormattedText(disc)}{i < disclaimers.length - 1 ? ' ' : ''}
-                </span>
-              ))}
+              <strong className="text-error block mb-1">Cần rà soát bởi chuyên gia pháp lý</strong>
+              <span>
+                Câu trả lời có tín hiệu rủi ro hoặc phụ thuộc tình tiết thực tế; không nên dùng làm kết luận cuối cùng khi chưa được người có chuyên môn kiểm tra.
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Disclaimer Box */}
+        {normalizedDisclaimers.length > 0 && (
+          <div className="bg-error-container/10 border border-error/20 rounded-xl p-stack-md flex gap-4 items-start">
+            <span className="text-error shrink-0 font-bold leading-none mt-0.5" aria-hidden="true">!</span>
+            <div className="text-body-sm text-on-surface-variant">
+              <strong className="text-error block mb-2">Lưu ý pháp lý</strong>
+              <ul className="m-0 pl-4 space-y-1">
+                {normalizedDisclaimers.map((disc, i) => (
+                  <li key={i}>{renderFormattedText(disc)}</li>
+                ))}
+              </ul>
             </div>
           </div>
         )}

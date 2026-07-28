@@ -74,7 +74,13 @@ class RuleBasedAnalyzer:
                     result["citation_targets"].append(match.group(0))
             result["key_phrases"] = ["hiệu lực", "ngày hiệu lực", "thi hành"]
             result["is_sufficient"] = True
-        elif "dieu kien" in haystack_plain and "hieu luc" in haystack_plain and "hop dong" in haystack_plain:
+        elif (
+            "hieu luc" in haystack_plain
+            and (
+                ("dieu kien" in haystack_plain and "hop dong" in haystack_plain)
+                or "giao dich dan su" in haystack_plain
+            )
+        ):
             result["loai_yeu_cau"] = "validity_question"
             result["citation_targets"].append("Điều 117")
             result["key_phrases"] = ["điều kiện có hiệu lực", "giao dịch dân sự", "hợp đồng"]
