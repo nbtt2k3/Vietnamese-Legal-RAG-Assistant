@@ -2,8 +2,8 @@ import json
 
 import ollama
 
-from app.config import settings
-from app.logger import logger
+from app.core.config import settings
+from app.core.logging import logger
 
 
 class LLMJudge:

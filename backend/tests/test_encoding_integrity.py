@@ -13,12 +13,12 @@ def test_source_files_are_utf8_without_common_mojibake_tokens():
 
 def test_representative_vietnamese_strings_are_stored_correctly():
     checks = {
-        PROJECT_ROOT / "backend" / "retrieval" / "rule_analyzer.py": [
+        PROJECT_ROOT / "backend" / "rag" / "retrieval" / "rule_analyzer.py": [
             "Điều 5",
             "thế chấp",
             "hiệu lực giao dịch",
         ],
-        PROJECT_ROOT / "backend" / "generation" / "prompt_builder.py": [
+        PROJECT_ROOT / "backend" / "rag" / "generation" / "prompt_builder.py": [
             "Trả lời câu hỏi pháp lý Việt Nam",
             "Không bịa thêm căn cứ ngoài context",
         ],

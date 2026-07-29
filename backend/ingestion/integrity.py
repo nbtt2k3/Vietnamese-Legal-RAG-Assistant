@@ -7,7 +7,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from app.config import settings
+from app.core.config import settings
 
 MANIFEST_DIR = settings.data_dir / "manifests"
 

@@ -21,7 +21,7 @@ class OllamaEmbedder:
             response = self.client.embeddings(model=self.model_name, prompt=text)
             return response.get("embedding", [])
         except Exception as e:
-            from app.logger import logger
+            from app.core.logging import logger
             logger.warning(f"Ollama embedding failed for model {self.model_name}: {e}")
             return []
             

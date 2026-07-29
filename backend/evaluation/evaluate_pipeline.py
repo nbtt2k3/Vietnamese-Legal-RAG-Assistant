@@ -6,8 +6,8 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from retrieval.pipeline import RetrievalPipeline
-from app.logger import logger
+from rag.retrieval.pipeline import RetrievalPipeline
+from app.core.logging import logger
 
 def create_sample_dataset():
     """Tạo một dataset mẫu để đánh giá"""

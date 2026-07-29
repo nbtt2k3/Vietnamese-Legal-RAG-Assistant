@@ -13,7 +13,7 @@ from qdrant_client.http.models import (
     VectorParams,
 )
 from tqdm import tqdm
-from app.logger import logger
+from app.core.logging import logger
 
 class QdrantIndexer:
     def __init__(self, db_path: str = "data/qdrant_db", collection_name: str = "legal_docs", vector_size: int = 1024, recreate: bool = False):
@@ -27,7 +27,7 @@ class QdrantIndexer:
         self.collection_name = collection_name
         self.vector_size = vector_size
         
-        from app.config import settings
+        from app.core.config import settings
         
         # Khởi tạo client lưu vào file cục bộ
         # Nếu muốn dùng in-memory thì truyền location=":memory:"

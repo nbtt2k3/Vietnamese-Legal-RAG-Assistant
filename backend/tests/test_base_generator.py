@@ -1,6 +1,6 @@
 import pytest
-from generation.base_generator import BaseLLMGenerator
-from retrieval.models import RetrievalResult, EvidenceBundle, RetrievedChunk
+from rag.generation.base_generator import BaseLLMGenerator
+from rag.retrieval.models import RetrievalResult, EvidenceBundle, RetrievedChunk
 
 def test_base_llm_generator_parsing():
     generator = BaseLLMGenerator()

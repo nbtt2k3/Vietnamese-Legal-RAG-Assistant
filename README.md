@@ -53,10 +53,19 @@ For human review triggers, see [docs/human-review-policy.md](docs/human-review-p
 
 ```text
 backend/
-  app/                 FastAPI app, API routes, middleware, database config
+  app/                 FastAPI application layer
+    api/               dependencies, middleware, v1 endpoints, request/response schemas
+    core/              settings, logging, security helpers
+    db/                SQLAlchemy base/session/init and ORM models
+    repositories/      database access helpers
+    services/          API-facing business logic and health checks
+    factory.py         FastAPI app factory
+    lifespan.py        startup/shutdown lifecycle
+    server.py          ASGI entrypoint
   ingestion/           loaders, parsers, cleaners, chunkers, metadata, embeddings, indexing
-  retrieval/           query analyzer, retrievers, reranker, evidence builder
-  generation/          prompt builder, rule-based/LLM generators, grounding checks
+  rag/
+    retrieval/         query analyzer, retrievers, reranker, evidence builder
+    generation/        prompt builder, rule-based/LLM generators, grounding checks
   evaluation/          datasets, evaluator, reporting, LLM judge
   scripts/             ingestion, validation, evaluation, indexing entrypoints
   tests/               regression tests for encoding, retrieval, generation, evaluation, API hardening
@@ -175,7 +184,7 @@ npm run build
 
 Current regression status:
 
-- Backend full test suite: `88 passed`
+- Backend full test suite: `94 passed`
 - Targeted RAG/retrieval/evaluation suite: `50 passed`
 - Encoding validation: passed
 - Frontend lint: passed

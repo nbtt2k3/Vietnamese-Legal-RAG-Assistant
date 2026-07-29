@@ -8,8 +8,8 @@ sys.path.append(str(project_root))
 
 from ingestion.indexing.indexer import QdrantIndexer
 from ingestion.integrity import compare_chunk_sets, compare_qdrant_chunks, json_inventory, write_manifest
-from app.logger import logger
-from app.config import settings
+from app.core.config import settings
+from app.core.logging import logger
 
 def main():
     if hasattr(sys.stdout, "reconfigure"):

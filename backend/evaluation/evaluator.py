@@ -4,8 +4,8 @@ import time
 from evaluation.dataset_loader import load_eval_dataset
 from evaluation.models import CaseEvaluation, EvalCase, EvaluationReport
 from evaluation.utils import best_match_ratio, confidence_at_least
-from app.config import settings
-from generation.pipeline import GenerationPipeline
+from app.core.config import settings
+from rag.generation.pipeline import GenerationPipeline
 
 
 from evaluation.llm_judge import LLMJudge

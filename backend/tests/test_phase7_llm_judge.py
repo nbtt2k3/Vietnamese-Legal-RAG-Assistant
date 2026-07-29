@@ -3,8 +3,8 @@ import json
 from evaluation.evaluator import LegalRAGEvaluator
 from evaluation.llm_judge import LLMJudge
 from evaluation.models import CaseEvaluation
-from generation.models import CitationRecord, LegalAnswer
-from retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
+from rag.generation.models import CitationRecord, LegalAnswer
+from rag.retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
 
 
 class FakeJudgeClient:
@@ -150,7 +150,7 @@ def test_evaluator_does_not_leak_stale_llm_judge_reasons(tmp_path):
 
 
 def test_evaluator_uses_deterministic_mode_by_default(tmp_path, monkeypatch):
-    from app.config import settings
+    from app.core.config import settings
 
     monkeypatch.setattr(settings, "llm_judge_enabled", False)
     evaluator = LegalRAGEvaluator(

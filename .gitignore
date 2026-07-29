@@ -51,10 +51,29 @@ htmlcov/
 *.sqlite3
 *.sqlite
 qdrant_db/
+
+# Backend data policy:
+# Track only lightweight governance/documentation files. Do not commit raw legal
+# files, generated parsed artifacts, embeddings, local model caches, SQLite DBs,
+# or Qdrant storage.
 backend/data/
 !backend/data/
 backend/data/*
 !backend/data/source_registry.json
+!backend/data/README.md
+backend/data/raw/
+backend/data/parsed/
+backend/data/cleaned/
+backend/data/metadata/
+backend/data/chunks/
+backend/data/embeddings/
+backend/data/manifests/
+backend/data/manifest_fallbacks/
+backend/data/models/
+backend/data/qdrant_db/
+backend/data/*.db
+backend/data/*.sqlite
+backend/data/*.sqlite3
 
 # Logs
 logs/

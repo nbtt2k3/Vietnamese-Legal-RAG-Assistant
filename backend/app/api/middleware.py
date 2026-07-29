@@ -5,8 +5,8 @@ import threading
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.logger import logger
-from app.config import settings
+from app.core.config import settings
+from app.core.logging import logger
 
 class SecurityMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):

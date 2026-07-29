@@ -55,7 +55,7 @@ flowchart TD
 
 ### `app/`
 
-Contains the FastAPI server, API routes, middleware, configuration, database setup, and logging.
+Contains the FastAPI application layer. It is organized into small HTTP, service, repository, core infrastructure, and database modules so API routes stay thin and domain code remains testable.
 
 Key responsibilities:
 
@@ -65,6 +65,55 @@ Key responsibilities:
 - API key enforcement in production.
 - Security headers.
 - Health checks, separate liveness/readiness probes, and Prometheus metrics.
+
+Current structure:
+
+```text
+app/
+  api/
+    deps.py
+    middleware.py
+    v1/
+      router.py
+      endpoints/
+        auth.py
+        chat.py
+        conversations.py
+        feedback.py
+        health.py
+      schemas/
+        auth.py
+        chat.py
+  core/
+    config.py
+    logging.py
+    security.py
+  db/
+    base.py
+    config.py
+    init.py
+    session.py
+    models/
+      conversation.py
+      document.py
+      document_relationship.py
+      user.py
+  repositories/
+    conversation_repository.py
+    user_repository.py
+  services/
+    auth_service.py
+    chat_service.py
+    conversation_service.py
+    feedback_service.py
+    health_service.py
+    security_policy.py
+  factory.py
+  lifespan.py
+  server.py
+```
+
+HTTP endpoints receive and validate requests, services handle application behavior, repositories isolate SQLAlchemy queries, and `rag/retrieval` plus `rag/generation` remain the RAG domain runtime.
 
 ### `ingestion/`
 
@@ -81,7 +130,7 @@ Main stages:
 - Generate embeddings.
 - Index into Qdrant.
 
-### `retrieval/`
+### `rag/retrieval/`
 
 Handles query understanding and evidence retrieval.
 
@@ -95,7 +144,7 @@ Important components:
 - Evidence builder.
 - Accent-insensitive Vietnamese matching utilities.
 
-### `generation/`
+### `rag/generation/`
 
 Creates final answers from retrieved evidence.
 

@@ -9,7 +9,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from ingestion.chunker.chunker_factory import ChunkerFactory
 from ingestion.integrity import directory_inventory, json_inventory, write_manifest
-from app.config import settings
+from app.core.config import settings
 
 METADATA_DIR = settings.metadata_dir
 CHUNKS_DIR = settings.chunks_dir

@@ -1,6 +1,6 @@
-from generation.utils import chunk_to_citation
-from retrieval.models import RetrievedChunk
-from retrieval.pipeline import RetrievalPipeline
+from rag.generation.utils import chunk_to_citation
+from rag.retrieval.models import RetrievedChunk
+from rag.retrieval.pipeline import RetrievalPipeline
 
 
 def _chunk(index: int) -> RetrievedChunk:

@@ -8,7 +8,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from ingestion.embedding.embedding_builder import EmbeddingBuilder
 from ingestion.integrity import json_inventory, write_manifest
-from app.config import settings
+from app.core.config import settings
 from tqdm import tqdm
 import time
 

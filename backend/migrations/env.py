@@ -9,8 +9,8 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # Import your models here
-from app.database import Base
-from app.models import *  # This ensures all models are registered with Base
+from app.db.base import Base
+from app.db.models import *  # This ensures all models are registered with Base
 
 # this is the Alembic Config object
 config = context.config
@@ -34,7 +34,7 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 def run_migrations_online() -> None:
-    from app.database_config import db_settings
+    from app.db.config import db_settings
     # Override URL with config setting dynamically
     db_url = db_settings.db_url
     

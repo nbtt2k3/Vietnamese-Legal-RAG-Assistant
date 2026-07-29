@@ -46,7 +46,7 @@ class EmbeddingBuilder:
                 
             pending_chunks.append(chunk)
 
-        from app.config import settings
+        from app.core.config import settings
         batch_size = settings.embed_batch_size
         for start in range(0, len(pending_chunks), batch_size):
             batch = pending_chunks[start:start + batch_size]

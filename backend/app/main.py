@@ -2,10 +2,8 @@ import argparse
 import json
 import sys
 
-from generation.pipeline import GenerationPipeline
-from retrieval.pipeline import RetrievalPipeline
-from app.api.router import api_router
-from app.api.auth_router import auth_router
+from rag.generation.pipeline import GenerationPipeline
+from rag.retrieval.pipeline import RetrievalPipeline
 
 
 def main():

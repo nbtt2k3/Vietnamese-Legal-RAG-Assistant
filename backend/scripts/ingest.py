@@ -16,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from ingestion.pipeline import run_pipeline, process_file
 from ingestion.integrity import directory_inventory, file_sha256, write_manifest
-from app.config import settings
+from app.core.config import settings
 
 RAW_DIR = settings.raw_dir
 PARSED_DIR = settings.parsed_dir

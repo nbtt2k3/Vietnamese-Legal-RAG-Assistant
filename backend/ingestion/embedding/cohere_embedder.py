@@ -24,7 +24,7 @@ class CohereEmbedder:
             )
             return response.embeddings[0]
         except Exception as e:
-            from app.logger import logger
+            from app.core.logging import logger
             logger.warning(f"Cohere embedding failed for query: {e}")
             return []
             

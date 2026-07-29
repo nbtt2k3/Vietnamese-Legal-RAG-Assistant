@@ -5,8 +5,8 @@ from evaluation.evaluator import LegalRAGEvaluator
 from evaluation.models import EvalCase
 from evaluation.quality_gate import evaluate_quality_gate
 from evaluation.reporting import report_to_markdown
-from generation.models import CitationRecord, LegalAnswer
-from retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
+from rag.generation.models import CitationRecord, LegalAnswer
+from rag.retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
 
 
 def test_eval_dataset_v2_loads_extended_case_fields():

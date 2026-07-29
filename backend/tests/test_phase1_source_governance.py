@@ -1,6 +1,6 @@
-from generation.base_generator import BaseLLMGenerator
-from generation.rule_based_generator import RuleBasedLegalGenerator
-from retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
+from rag.generation.base_generator import BaseLLMGenerator
+from rag.generation.rule_based_generator import RuleBasedLegalGenerator
+from rag.retrieval.models import EvidenceBundle, QueryIntent, RetrievalResult, RetrievedChunk
 
 
 def _unverified_chunk() -> RetrievedChunk:

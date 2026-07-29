@@ -1,7 +1,7 @@
 import pytest
-from retrieval.evidence_builder import EvidenceBuilder
-from retrieval.models import RetrievedChunk
-from retrieval.query_analyzer import QueryAnalyzer, QueryIntent
+from rag.retrieval.evidence_builder import EvidenceBuilder
+from rag.retrieval.models import RetrievedChunk
+from rag.retrieval.query_analyzer import QueryAnalyzer, QueryIntent
 
 def test_query_analyzer_basic_extraction():
     analyzer = QueryAnalyzer()
@@ -20,7 +20,7 @@ def test_query_analyzer_basic_extraction():
 def test_query_analyzer_history_injection():
     analyzer = QueryAnalyzer()
     
-    from app.api.router import Message
+    from app.api.v1.schemas.chat import Message
     history = [
         Message(role="user", content="Tôi muốn hỏi về tội giết người"),
         Message(role="ai", content="Tội giết người được quy định tại Bộ luật Hình sự."),

@@ -16,10 +16,10 @@ from ingestion.cleaner.cleaner_factory import CleanerFactory
 from ingestion.metadata.metadata_factory import MetadataFactory
 from ingestion.source_registry import apply_source_registry
 from ingestion.parser.structure import LoaiVanBan, VanBan, AnLe
-from app.logger import logger
-from app.config import settings
-from app.database import SessionLocal
-from app.models import Document, DocumentRelationship
+from app.core.config import settings
+from app.core.logging import logger
+from app.db.models import Document, DocumentRelationship
+from app.db.session import SessionLocal
 import copy
 
 RAW_DIR = settings.raw_dir
@@ -300,7 +300,7 @@ def run_pipeline(raw_dir: Path = RAW_DIR, parsed_dir: Path = PARSED_DIR, cleaned
     stats = {"success": 0, "failed": 0, "errors": []}
 
     try:
-        from app.database import initialize_database
+        from app.db.init import initialize_database
         initialize_database()
         
         for loai_dir in raw_dir.iterdir():

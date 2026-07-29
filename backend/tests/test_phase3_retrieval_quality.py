@@ -1,13 +1,13 @@
-from retrieval.models import QueryIntent, RetrievalResult, RetrievedChunk
-from retrieval.evidence_builder import EvidenceBuilder
-from retrieval.pipeline import RetrievalPipeline
-from retrieval.query_analyzer import QueryAnalyzer
-from retrieval.constraints import exact_constraints
-from retrieval.document_resolver import resolve_document_ids, source_types_from_text
-from retrieval.retrievers.lexical_retriever import LexicalRetriever
-from retrieval.retrievers.metadata_retriever import MetadataRetriever
-from retrieval.text_utils import contains_normalized, tokenize_for_bm25
-from generation.rule_based_generator import RuleBasedLegalGenerator
+from rag.retrieval.models import QueryIntent, RetrievalResult, RetrievedChunk
+from rag.retrieval.evidence_builder import EvidenceBuilder
+from rag.retrieval.pipeline import RetrievalPipeline
+from rag.retrieval.query_analyzer import QueryAnalyzer
+from rag.retrieval.constraints import exact_constraints
+from rag.retrieval.document_resolver import resolve_document_ids, source_types_from_text
+from rag.retrieval.retrievers.lexical_retriever import LexicalRetriever
+from rag.retrieval.retrievers.metadata_retriever import MetadataRetriever
+from rag.retrieval.text_utils import contains_normalized, tokenize_for_bm25
+from rag.generation.rule_based_generator import RuleBasedLegalGenerator
 
 
 def test_document_resolver_uses_registry_aliases_instead_of_code_doc_id_constants():

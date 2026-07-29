@@ -5,7 +5,7 @@
 The current regression suite passes:
 
 ```text
-Backend full test suite: 88 passed
+Backend full test suite: 94 passed
 Targeted RAG/retrieval/evaluation suite: 50 passed
 Encoding validation: passed
 Frontend lint: passed

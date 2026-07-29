@@ -7,7 +7,7 @@ Chạy: python -m scripts.validate_processed
 import json
 import sys
 from pathlib import Path
-from app.config import settings
+from app.core.config import settings
 
 PARSED_DIR = settings.parsed_dir
 

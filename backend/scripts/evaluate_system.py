@@ -13,7 +13,7 @@ if str(ROOT_DIR) not in sys.path:
 from evaluation.evaluator import LegalRAGEvaluator
 from evaluation.quality_gate import evaluate_quality_gate
 from evaluation.reporting import report_to_markdown
-from app.config import settings
+from app.core.config import settings
 
 
 def main():

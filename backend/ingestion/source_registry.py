@@ -3,7 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from app.config import settings
+from app.core.config import settings
 
 
 OFFICIAL_VERIFICATION_STATUS = "official_verified"

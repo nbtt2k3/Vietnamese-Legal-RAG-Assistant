@@ -8,10 +8,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.api.auth_router import auth_router, get_db
-from app.auth import create_access_token, validate_password_policy
-from app.config import Settings, settings
-from app.database import Base
+from app.api.v1.endpoints.auth import router as auth_router
+from app.core.security import create_access_token, validate_password_policy
+from app.core.config import Settings, settings
+from app.db.base import Base
+from app.db.session import get_db
 
 
 def build_auth_test_client():

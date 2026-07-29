@@ -2,10 +2,11 @@ import redis.asyncio as redis_asyncio
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.router import _sanitize_log_value, api_router
 from app.api.middleware import SecurityMiddleware
+from app.api.v1.router import api_router
 from app.server import app as server_app
-from app.config import settings
+from app.core.config import settings
+from app.services.security_policy import sanitize_log_value as _sanitize_log_value
 
 
 def _build_app() -> FastAPI:
@@ -158,6 +159,18 @@ def test_readiness_reports_initializing_without_pipeline():
     assert body["services"]["pipeline"] == "down"
 
 
+def test_database_initialization_imports_models(monkeypatch):
+    from app.db import init as db_init
+
+    class FakeDBSettings:
+        db_url = "postgresql://unit-test"
+
+    monkeypatch.setattr(db_init.Base.metadata, "create_all", lambda bind: None)
+    monkeypatch.setattr(db_init, "db_settings", FakeDBSettings())
+
+    db_init.initialize_database()
+
+
 def test_readiness_reports_ready_when_dependencies_are_available(monkeypatch):
     class FakeClient:
         def get_collections(self):
@@ -178,7 +191,7 @@ def test_readiness_reports_ready_when_dependencies_are_available(monkeypatch):
     class FakePipeline:
         llm = FakeLLM()
 
-    import retrieval.repository as repository_module
+    import rag.retrieval.repository as repository_module
 
     monkeypatch.setattr(repository_module, "QdrantRepository", FakeRepository)
     previous_pipeline = getattr(server_app.state, "generation_pipeline", None)
