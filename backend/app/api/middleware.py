@@ -74,6 +74,13 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         
         logger.info(f"[Req={request_id}] Incoming {request.method} {request.url.path} from {client_ip}")
 
+        # CORS preflight requests do not carry application authentication
+        # headers yet. Let CORSMiddleware handle OPTIONS before enforcing
+        # API-key authentication and rate limiting for /api/* requests.
+        if request.method == "OPTIONS":
+            response = await call_next(request)
+            return self._apply_response_headers(response, request_id)
+
         # 2. Request Size Limit (1MB)
         content_length = request.headers.get("content-length")
         try:

@@ -1,6 +1,7 @@
 import redis.asyncio as redis_asyncio
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.middleware import SecurityMiddleware
 from app.api.v1.router import api_router
@@ -67,6 +68,38 @@ def test_production_api_key_is_required_and_constant_time_checked(monkeypatch):
     assert wrong.status_code == 401
     assert valid.status_code == 200
     assert missing.headers["X-Request-ID"]
+
+
+def test_cors_preflight_is_not_blocked_by_api_key_auth(monkeypatch):
+    _disable_redis(monkeypatch)
+    monkeypatch.setattr(settings, "environment", "production")
+    monkeypatch.setattr(settings, "api_key", "expected-secret")
+
+    app = FastAPI()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    app.add_middleware(SecurityMiddleware)
+
+    @app.post("/api/v1/ping")
+    def api_ping():
+        return {"ok": True}
+
+    response = TestClient(app).options(
+        "/api/v1/ping",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type,x-api-key",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
 
 
 def test_request_body_limit_uses_configured_setting(monkeypatch):

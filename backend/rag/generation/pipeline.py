@@ -1,5 +1,5 @@
 from rag.generation.ollama_generator import OllamaLegalGenerator
-from rag.generation.models import LegalAnswer
+from rag.generation.models import AnswerSection, LegalAnswer
 from rag.generation.rule_based_generator import RuleBasedLegalGenerator
 from rag.retrieval.models import RetrievalResult
 from rag.retrieval.pipeline import RetrievalPipeline
@@ -68,6 +68,7 @@ class GenerationPipeline:
                 
         answer.retrieval_debug = retrieval_result.retrieval_debug
         answer.confidence = {**retrieval_result.confidence, **answer.confidence}
+        self._apply_grounding_gate(answer)
         return answer, retrieval_result
 
     async def run_stream(self, query: str, history: list = None):
@@ -123,5 +124,55 @@ class GenerationPipeline:
                 
         answer.retrieval_debug = retrieval_result.retrieval_debug
         answer.confidence = {**retrieval_result.confidence, **answer.confidence}
+        self._apply_grounding_gate(answer)
         
         yield f"data: {json.dumps({'type': 'answer', 'data': jsonable_encoder(answer.to_dict())})}\n\n"
+
+    @staticmethod
+    def _apply_grounding_gate(answer: LegalAnswer) -> None:
+        """Prevent unsupported legal conclusions from reaching the user.
+
+        A generator may return fluent text even when it omitted evidence IDs,
+        referenced invalid evidence, or had no retrieved citations. In those
+        cases the UI must show an abstention instead of presenting the text as
+        a legal conclusion.
+        """
+        confidence = answer.confidence or {}
+        gate_reasons = []
+        if confidence.get("claims_without_evidence"):
+            gate_reasons.append("claims_without_evidence")
+        if confidence.get("invalid_evidence_used"):
+            gate_reasons.append("invalid_evidence_used")
+        if confidence.get("short_answer_not_grounded"):
+            gate_reasons.append("short_answer_not_grounded")
+        if not answer.citations:
+            gate_reasons.append("no_legal_citation")
+
+        if not gate_reasons:
+            return
+
+        answer.short_answer = (
+            "Chưa đủ căn cứ pháp lý được truy xuất để đưa ra kết luận đáng tin cậy. "
+            "Vui lòng bổ sung thông tin hoặc kiểm tra trực tiếp văn bản pháp luật liên quan."
+        )
+        answer.sections = [
+            AnswerSection(
+                title="Chưa đủ căn cứ pháp lý",
+                content=(
+                    "Hệ thống không tìm thấy căn cứ hợp lệ gắn với nhận định này. "
+                    "Không nên sử dụng câu trả lời như kết luận pháp lý cuối cùng."
+                ),
+            )
+        ]
+        answer.confidence = {
+            **confidence,
+            "level": "low",
+            "grounding_gate_triggered": True,
+            "grounding_gate_reasons": gate_reasons,
+            "human_review_required": True,
+        }
+        disclaimer = (
+            "Câu trả lời đã được chặn vì chưa có căn cứ pháp lý hợp lệ gắn với nội dung kết luận."
+        )
+        if disclaimer not in answer.disclaimers:
+            answer.disclaimers.append(disclaimer)
