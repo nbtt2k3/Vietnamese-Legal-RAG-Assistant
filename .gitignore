@@ -4,6 +4,10 @@
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.crt
+secrets/
 
 # ==========================================
 # Python (Backend)

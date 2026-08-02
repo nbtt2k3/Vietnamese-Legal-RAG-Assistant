@@ -3,13 +3,12 @@ from datetime import timedelta
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from jose import jwt
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.api.v1.endpoints.auth import router as auth_router
-from app.core.security import create_access_token, validate_password_policy
+from app.core.security import create_access_token, decode_access_token, validate_password_policy
 from app.core.config import Settings, settings
 from app.db.base import Base
 from app.db.session import get_db
@@ -41,7 +40,7 @@ def build_auth_test_client():
 def test_create_access_token_uses_utc_expiration():
     token = create_access_token(data={"sub": "phase0-user"}, expires_delta=timedelta(minutes=5))
 
-    payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+    payload = decode_access_token(token)
 
     assert payload["sub"] == "phase0-user"
     assert "exp" in payload
@@ -63,7 +62,7 @@ def test_register_and_login_return_valid_tokens():
 
     for response in (register_response, login_response):
         body = response.json()
-        payload = jwt.decode(body["access_token"], settings.secret_key, algorithms=[settings.algorithm])
+        payload = decode_access_token(body["access_token"])
         assert body["token_type"] == "bearer"
         assert payload["sub"] == "phase0-user"
 

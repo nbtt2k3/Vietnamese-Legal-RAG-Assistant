@@ -71,6 +71,11 @@ const CitationCard = ({ source }) => {
   const sourceType = source.source_type || source.metadata?.loai_van_ban || 'Văn bản';
   const evidenceId = source.evidence_id;
   const legalRole = source.legal_role || source.metadata?.legal_role;
+  const pageStart = source.page_start ?? source.metadata?.source_location?.page_start;
+  const pageEnd = source.page_end ?? source.metadata?.source_location?.page_end;
+  const pageLabel = pageStart
+    ? (pageEnd && pageEnd !== pageStart ? `Trang ${pageStart}-${pageEnd}` : `Trang ${pageStart}`)
+    : null;
 
   const tagStyle = getSourceTagStyle(sourceType);
   const formattedSourceType = formatSourceType(sourceType);
@@ -104,6 +109,12 @@ const CitationCard = ({ source }) => {
         <div className="flex items-center gap-1 mb-2 text-primary opacity-80">
           <span className="material-symbols-outlined text-[12px]">info</span>
           <span className="text-[10px] font-semibold uppercase">{formatLegalRole(legalRole)}</span>
+        </div>
+      )}
+
+      {pageLabel && (
+        <div className="mb-2 text-[10px] font-semibold text-on-surface-variant">
+          {pageLabel}
         </div>
       )}
 

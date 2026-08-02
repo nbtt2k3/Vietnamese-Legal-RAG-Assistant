@@ -172,11 +172,141 @@ def test_database_initialization_imports_models(monkeypatch):
 
 
 def test_readiness_reports_ready_when_dependencies_are_available(monkeypatch):
+    from types import SimpleNamespace
+
     class FakeClient:
-        def get_collections(self):
-            return []
+        def get_collection(self, collection_name):
+            return SimpleNamespace(
+                config=SimpleNamespace(
+                    params=SimpleNamespace(vectors=SimpleNamespace(size=1024))
+                )
+            )
+
+        def count(self, collection_name, exact):
+            return SimpleNamespace(count=10)
+
+        def scroll(self, collection_name, limit, with_payload, with_vectors):
+            return [SimpleNamespace(payload={"chunk_id": "c1", "text": "Điều 1"})], None
 
     class FakeRepository:
+        collection_name = "legal_docs"
+
+        def __enter__(self):
+            self.client = FakeClient()
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return None
+
+    class FakeLLM:
+        def is_available(self):
+            return True
+
+    class FakePipeline:
+        llm = FakeLLM()
+
+    import rag.retrieval.repository as repository_module
+
+    monkeypatch.setattr(repository_module, "QdrantRepository", FakeRepository)
+    import app.services.health_service as health_service
+
+    monkeypatch.setattr(health_service, "_check_database", lambda: None)
+    monkeypatch.setattr(health_service, "_check_redis", lambda: None)
+    previous_pipeline = getattr(server_app.state, "generation_pipeline", None)
+    server_app.state.generation_pipeline = FakePipeline()
+
+    try:
+        client = TestClient(server_app)
+        response = client.get("/ready")
+    finally:
+        if previous_pipeline is not None:
+            server_app.state.generation_pipeline = previous_pipeline
+        elif hasattr(server_app.state, "generation_pipeline"):
+            delattr(server_app.state, "generation_pipeline")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "ready"
+    assert body["services"]["pipeline"] == "ok"
+    assert body["services"]["qdrant"] == "ok"
+    assert body["services"]["ollama"] == "ok"
+
+
+def test_health_is_degraded_when_database_or_redis_is_down(monkeypatch):
+    from types import SimpleNamespace
+
+    class FakeClient:
+        def get_collection(self, collection_name):
+            return SimpleNamespace(
+                config=SimpleNamespace(
+                    params=SimpleNamespace(vectors=SimpleNamespace(size=1024))
+                )
+            )
+
+        def count(self, collection_name, exact):
+            return SimpleNamespace(count=10)
+
+        def scroll(self, collection_name, limit, with_payload, with_vectors):
+            return [SimpleNamespace(payload={"chunk_id": "c1", "text": "Điều 1"})], None
+
+    class FakeRepository:
+        collection_name = "legal_docs"
+
+        def __enter__(self):
+            self.client = FakeClient()
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return None
+
+    class FakeLLM:
+        def is_available(self):
+            return True
+
+    class FakePipeline:
+        llm = FakeLLM()
+
+    import rag.retrieval.repository as repository_module
+    import app.services.health_service as health_service
+
+    monkeypatch.setattr(repository_module, "QdrantRepository", FakeRepository)
+    monkeypatch.setattr(health_service, "_check_database", lambda: (_ for _ in ()).throw(RuntimeError("db down")))
+    monkeypatch.setattr(health_service, "_check_redis", lambda: (_ for _ in ()).throw(RuntimeError("redis down")))
+
+    previous_pipeline = getattr(server_app.state, "generation_pipeline", None)
+    server_app.state.generation_pipeline = FakePipeline()
+    try:
+        response = TestClient(server_app).get("/ready")
+    finally:
+        if previous_pipeline is not None:
+            server_app.state.generation_pipeline = previous_pipeline
+        elif hasattr(server_app.state, "generation_pipeline"):
+            delattr(server_app.state, "generation_pipeline")
+
+    assert response.status_code == 503
+    body = response.json()
+    assert body["services"]["qdrant"] == "ok"
+    assert body["services"]["postgres"] == "down"
+    assert body["services"]["redis"] == "down"
+
+
+def test_readiness_is_degraded_when_qdrant_collection_is_empty(monkeypatch):
+    from types import SimpleNamespace
+
+    class FakeClient:
+        def get_collection(self, collection_name):
+            return SimpleNamespace(
+                config=SimpleNamespace(
+                    params=SimpleNamespace(vectors=SimpleNamespace(size=1024))
+                )
+            )
+
+        def count(self, collection_name, exact):
+            return SimpleNamespace(count=0)
+
+    class FakeRepository:
+        collection_name = "legal_docs"
+
         def __enter__(self):
             self.client = FakeClient()
             return self
@@ -198,17 +328,29 @@ def test_readiness_reports_ready_when_dependencies_are_available(monkeypatch):
     server_app.state.generation_pipeline = FakePipeline()
 
     try:
-        client = TestClient(server_app)
-        response = client.get("/ready")
+        response = TestClient(server_app).get("/ready")
     finally:
         if previous_pipeline is not None:
             server_app.state.generation_pipeline = previous_pipeline
         elif hasattr(server_app.state, "generation_pipeline"):
             delattr(server_app.state, "generation_pipeline")
 
-    assert response.status_code == 200
+    assert response.status_code == 503
     body = response.json()
-    assert body["status"] == "ready"
-    assert body["services"]["pipeline"] == "ok"
-    assert body["services"]["qdrant"] == "ok"
-    assert body["services"]["ollama"] == "ok"
+    assert body["status"] == "degraded"
+    assert body["services"]["qdrant"] == "down"
+
+
+def test_health_is_degraded_without_pipeline():
+    previous_pipeline = getattr(server_app.state, "generation_pipeline", None)
+    if hasattr(server_app.state, "generation_pipeline"):
+        delattr(server_app.state, "generation_pipeline")
+
+    try:
+        response = TestClient(server_app).get("/health")
+    finally:
+        if previous_pipeline is not None:
+            server_app.state.generation_pipeline = previous_pipeline
+
+    assert response.status_code == 503
+    assert response.json()["status"] == "degraded"

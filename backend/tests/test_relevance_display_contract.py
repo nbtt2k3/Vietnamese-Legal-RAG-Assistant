@@ -35,3 +35,26 @@ def test_citation_record_preserves_display_relevance_contract():
     assert citation.relevance_score == 0.01
     assert citation.relevance_label == "high"
     assert citation.relevance_rank == 1
+
+
+def test_citation_record_propagates_nested_page_location():
+    chunk = _chunk(1)
+    chunk.metadata["source_location"] = {
+        "source_format": "pdf",
+        "page_start": 12,
+        "page_end": 14,
+    }
+
+    citation = chunk_to_citation(chunk)
+
+    assert citation.page_start == 12
+    assert citation.page_end == 14
+    assert citation.to_dict()["page_start"] == 12
+    assert citation.to_dict()["page_end"] == 14
+
+
+def test_citation_record_keeps_pages_optional_for_unpaginated_documents():
+    citation = chunk_to_citation(_chunk(1))
+
+    assert citation.page_start is None
+    assert citation.page_end is None

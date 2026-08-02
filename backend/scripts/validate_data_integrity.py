@@ -8,6 +8,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from ingestion.integrity import compare_chunk_sets, compare_qdrant_chunks
+from app.core.config import settings
 
 
 def main() -> int:
@@ -26,11 +27,27 @@ def main() -> int:
     print(f"Orphan embeddings: {len(result['orphan_embeddings'])}")
     for issue in result["chunks"]["invalid_records"] + result["embeddings"]["invalid_records"]:
         print(f"[ERROR] {issue}")
+    if result["chunks"]["unique_chunk_count"] == 0 or result["embeddings"]["unique_chunk_count"] == 0:
+        print("[UNAVAILABLE] Không tìm thấy snapshot chunks/embeddings để kiểm tra.")
+        print("[HƯỚNG DẪN] Chạy lại scripts.run_chunker và scripts.run_embedding trước khi validate.")
+        return 2
     if not args.skip_qdrant:
         indexed = compare_qdrant_chunks(Path(args.chunks_dir), Path(args.db_path), args.collection)
+        print(f"Qdrant target: {indexed.get('qdrant_target', args.db_path)}")
         print(f"Indexed points: {indexed['indexed_count']}")
         print(f"Missing indexed: {len(indexed['missing_indexed'])}")
         print(f"Orphan indexed: {len(indexed['orphan_indexed'])}")
+        if indexed.get("status") == "unavailable":
+            print("[UNAVAILABLE] Không thể đọc Qdrant; chưa thể kết luận index bị lệch.")
+            print(f"[DETAIL] {indexed.get('error', 'unknown connection error')}")
+            if settings.qdrant_url:
+                print(
+                    "[HƯỚNG DẪN] Qdrant đang là service private. Chạy trong Docker: "
+                    "docker compose exec app python -m scripts.validate_data_integrity"
+                )
+            else:
+                print("[HƯỚNG DẪN] Kiểm tra Qdrant local và đường dẫn --db-path.")
+            return 2
         result["is_consistent"] = result["is_consistent"] and indexed["is_consistent"]
     if not result["is_consistent"]:
         print("[FAIL] Chunk and embedding snapshots are inconsistent.")

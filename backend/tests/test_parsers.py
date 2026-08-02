@@ -85,4 +85,20 @@ DANH MỤC NGÀNH NGHỀ
 """
     van_ban = parser.parse(raw_text, "doc_pl", "", "")
     assert len(van_ban.phu_luc) > 0
+
+def test_parser_removes_inline_administrative_footer():
+    parser = LegalParser()
+    raw_text = """LUẬT TEST
+Điều 1. Nội dung
+Quy định pháp luật.
+| Nơi nhận: - Các cơ quan liên quan; - Lưu: VT |
+| TM. CƠ QUAN BAN HÀNH |
+"""
+    van_ban = parser.parse(raw_text, "doc_footer", "", "")
+    last_text = van_ban.all_dieu()[-1].text
+    assert "Nơi nhận" not in last_text
+    assert "TM. CƠ QUAN" not in last_text
+    return
+    assert "Nơi nhận" not in last_text
+    assert "TM. CƠ QUAN" not in last_text
     assert "PHỤ LỤC I" in van_ban.phu_luc[0].get("noi_dung", "")

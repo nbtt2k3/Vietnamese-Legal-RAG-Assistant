@@ -69,11 +69,24 @@ def main():
             "cleaned": directory_inventory(CLEANED_DIR),
             "metadata": directory_inventory(METADATA_DIR),
         },
-        metadata={"loai_filter": args.loai, "success": stats["success"], "failed": stats["failed"]},
+        metadata={
+            "loai_filter": args.loai,
+            "success": stats["success"],
+            "failed": stats["failed"],
+            "source_review_required": stats.get("source_review_required", []),
+        },
     )
 
     print("\n=== KẾT QUẢ ===")
     print(f"Thành công: {stats['success']}  |  Thất bại: {stats['failed']}")
+
+    review_items = stats.get("source_review_required", [])
+    if review_items:
+        print(f"\n[WARNING] Có {len(review_items)} file chưa được xác minh nguồn chính thức.")
+        for item in review_items:
+            print(f"  - {item['doc_id']}: {item['source_verification_status']} / {item['source_registry_status']}")
+    else:
+        print("\n[OK] Source governance: tất cả file đã official_verified.")
     
     if stats["errors"]:
         print("\n=== CÁC FILE LỖI ===")

@@ -32,7 +32,9 @@ flowchart TD
     subgraph App["Application Layer"]
         FE[React Frontend]
         API[FastAPI API]
-        DB[(SQLite Conversations)]
+        DB[(PostgreSQL Users + Conversations)]
+        REDIS[(Redis Rate Limiting)]
+        QD[(Qdrant Vectors + Payload)]
         OBS[Logs + Metrics]
     end
 
@@ -42,12 +44,14 @@ flowchart TD
     Q --> M
     Q --> L
     Q --> V
-    I --> V
+    I --> QD
+    QD --> V
     M --> R
     L --> R
     V --> R
     R --> EB --> G --> O --> API --> FE
     API --> DB
+    API --> REDIS
     API --> OBS
 ```
 

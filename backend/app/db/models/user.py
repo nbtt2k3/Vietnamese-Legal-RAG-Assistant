@@ -13,6 +13,6 @@ class User(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")

@@ -21,6 +21,18 @@ def test_eval_dataset_v2_loads_extended_case_fields():
     assert any(case.expected_disclaimer_terms for case in cases)
 
 
+def test_default_civil_benchmark_matches_current_corpus_scope():
+    dataset_name, cases = load_eval_dataset("evaluation/datasets/legal_rag_eval_civil_v1.json")
+
+    assert dataset_name == "legal_rag_eval_civil_v1"
+    assert len(cases) >= 40
+    excluded_domains = {"hinh_su", "lao_dong", "hon_nhan_gia_dinh", "hanh_chinh", "tax"}
+    assert not any(excluded_domains.intersection(case.tags) for case in cases)
+    assert any("dan_su" in case.tags for case in cases)
+    assert any("bao_dam" in case.tags for case in cases)
+    assert any("an_le" in case.tags for case in cases)
+
+
 class FakePipeline:
     def __init__(self, answer: LegalAnswer, retrieval: RetrievalResult):
         self.answer = answer

@@ -99,11 +99,36 @@ def _chunk_ids(root: Path, require_embedding: bool = False) -> set[str]:
 
 
 def compare_qdrant_chunks(chunks_dir: Path, db_path: Path, collection_name: str) -> dict[str, Any]:
-    """Compare indexed payload chunk IDs with the current chunk snapshot."""
+    """Compare indexed payload chunk IDs with the current chunk snapshot.
+
+    Use the configured remote Qdrant service when QDRANT_URL is set. This is
+    important in Docker: the mounted ``data/qdrant_db`` directory is only a
+    local artifact and is not the Qdrant server's active storage backend.
+    """
     from qdrant_client import QdrantClient
 
     expected_ids = _chunk_ids(chunks_dir)
-    client = QdrantClient(path=str(db_path))
+    qdrant_target = settings.qdrant_url or str(db_path)
+    client = None
+    try:
+        if settings.qdrant_url:
+            client_kwargs = {"url": settings.qdrant_url}
+            if settings.qdrant_api_key:
+                client_kwargs["api_key"] = settings.qdrant_api_key
+            client = QdrantClient(**client_kwargs)
+        else:
+            client = QdrantClient(path=str(db_path))
+    except Exception as exc:
+        return {
+            "collection_exists": False,
+            "indexed_count": 0,
+            "missing_indexed": sorted(expected_ids),
+            "orphan_indexed": [],
+            "is_consistent": False,
+            "status": "unavailable",
+            "qdrant_target": qdrant_target,
+            "error": str(exc),
+        }
     try:
         indexed_ids: set[str] = set()
         offset = None
@@ -123,16 +148,20 @@ def compare_qdrant_chunks(chunks_dir: Path, db_path: Path, collection_name: str)
                 )
                 if offset is None:
                     break
-        except Exception:
+        except Exception as exc:
             return {
                 "collection_exists": False,
                 "indexed_count": 0,
                 "missing_indexed": sorted(expected_ids),
                 "orphan_indexed": [],
                 "is_consistent": False,
+                "status": "unavailable",
+                "qdrant_target": qdrant_target,
+                "error": str(exc),
             }
     finally:
-        client.close()
+        if client is not None:
+            client.close()
 
     missing = sorted(expected_ids - indexed_ids)
     orphan = sorted(indexed_ids - expected_ids)
@@ -142,6 +171,8 @@ def compare_qdrant_chunks(chunks_dir: Path, db_path: Path, collection_name: str)
         "missing_indexed": missing,
         "orphan_indexed": orphan,
         "is_consistent": not missing and not orphan and len(indexed_ids) == len(expected_ids),
+        "status": "ok",
+        "qdrant_target": qdrant_target,
     }
 
 

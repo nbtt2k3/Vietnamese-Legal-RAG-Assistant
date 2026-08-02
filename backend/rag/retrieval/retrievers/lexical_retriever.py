@@ -14,6 +14,15 @@ _GLOBAL_PAYLOADS_LEN = 0
 _GLOBAL_PAYLOADS = None
 _BM25_LOCK = threading.Lock()
 
+
+def clear_bm25_cache() -> None:
+    """Invalidate the process-wide BM25 index after a collection rebuild."""
+    global _GLOBAL_BM25_INDEX, _GLOBAL_PAYLOADS_LEN, _GLOBAL_PAYLOADS
+    with _BM25_LOCK:
+        _GLOBAL_BM25_INDEX = None
+        _GLOBAL_PAYLOADS_LEN = 0
+        _GLOBAL_PAYLOADS = None
+
 class LexicalRetriever(BaseRetriever):
     name = "lexical"
 

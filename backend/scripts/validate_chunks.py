@@ -72,7 +72,7 @@ def main():
             continue
             
         loai_van_ban = loai_dir.name
-        files = list(loai_dir.glob("*.json"))
+        files = list(loai_dir.rglob("*.json"))
         
         for f in files:
             p, failed, w = check_chunks(f)

@@ -19,7 +19,7 @@ def _error_response(exc: HTTPException) -> JSONResponse:
 
 
 @router.post("/chat")
-async def chat_endpoint(
+def chat_endpoint(
     request: QueryRequest,
     req: Request,
     db: Session = Depends(get_db),

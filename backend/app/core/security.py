@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+import warnings
 
 import bcrypt
 from jose import jwt
@@ -38,3 +39,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+
+
+def decode_access_token(token: str) -> dict:
+    """Decode a token while isolating python-jose's legacy datetime warning."""
+    # python-jose 3.3.0 still calls datetime.utcnow() internally during decode.
+    # Keep this narrowly scoped so unrelated deprecation warnings remain visible.
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning, module=r"jose\.jwt")
+        return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])

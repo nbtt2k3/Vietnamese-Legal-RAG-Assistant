@@ -118,6 +118,65 @@ def test_claim_without_evidence_is_penalized():
     assert not any(" evidence " in f" {d} " for d in answer.disclaimers)
 
 
+def test_short_answer_grounding_is_recorded_when_supported():
+    generator = BaseLLMGenerator()
+    evidence = EvidenceBundle(
+        core_authorities=[
+            RetrievedChunk(
+                chunk_id="1",
+                doc_id="d1",
+                text="Giao dịch dân sự có hiệu lực khi chủ thể có năng lực pháp luật dân sự.",
+            )
+        ]
+    )
+    result = RetrievalResult(query_intent=None, evidence=evidence, confidence={"level": "high"})
+
+    answer = generator._parse_llm_response(
+        {
+            "short_answer": "Giao dịch dân sự có hiệu lực khi chủ thể có năng lực pháp luật dân sự.",
+            "conflict_detected": False,
+        },
+        "Test",
+        result,
+        "test",
+    )
+
+    assert answer.confidence["short_answer_grounded"] is True
+    assert answer.confidence["short_answer_not_grounded"] is False
+    assert "short_answer_not_grounded" not in answer.confidence["human_review_reasons"]
+
+
+def test_ungrounded_short_answer_is_penalized():
+    generator = BaseLLMGenerator()
+    evidence = EvidenceBundle(
+        core_authorities=[
+            RetrievedChunk(
+                chunk_id="1",
+                doc_id="d1",
+                text="Giao dịch dân sự có hiệu lực khi chủ thể có năng lực pháp luật dân sự.",
+            )
+        ]
+    )
+    result = RetrievalResult(query_intent=None, evidence=evidence, confidence={"level": "high"})
+
+    answer = generator._parse_llm_response(
+        {
+            "short_answer": "Người mua chắc chắn được hủy hợp đồng và yêu cầu bồi thường.",
+            "conflict_detected": False,
+        },
+        "Test",
+        result,
+        "test",
+    )
+
+    assert answer.confidence["short_answer_grounded"] is False
+    assert answer.confidence["short_answer_not_grounded"] is True
+    assert answer.confidence["level"] == "low"
+    assert answer.confidence["human_review_required"] is True
+    assert "short_answer_not_grounded" in answer.confidence["human_review_reasons"]
+    assert any("tóm tắt" in disclaimer for disclaimer in answer.disclaimers)
+
+
 def test_weakly_supported_claim_is_penalized_even_with_valid_evidence_id():
     generator = BaseLLMGenerator()
 

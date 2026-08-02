@@ -32,13 +32,14 @@ def readiness_check(request: Request):
                 "services": {
                     "pipeline": "down",
                     "qdrant": "unknown",
+                    "postgres": "unknown",
+                    "redis": "unknown",
                     "ollama": "unknown",
                 },
             },
         )
 
     status = check_pipeline_dependencies(pipeline)
-    status["services"]["pipeline"] = "ok"
     ready = status["status"] == "ok"
     return JSONResponse(
         status_code=200 if ready else 503,

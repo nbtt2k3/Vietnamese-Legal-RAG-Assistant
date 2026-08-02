@@ -57,6 +57,11 @@ class RetrievalPipeline:
             )
         
         with QdrantRepository() as repository:
+            # Request-scoped cache: identical query/chunk pairs receive the
+            # exact same Cross-Encoder score during initial and final rerank.
+            # This changes no ranking semantics and only removes duplicate
+            # model inference after candidate expansion.
+            rerank_score_cache: dict[tuple[str, str], float] = {}
             t1 = time.time()
             merged, debug = self._collect_candidates(repository, query_intent)
             latency["retrievers"] = round(time.time() - t1, 3)
@@ -69,7 +74,12 @@ class RetrievalPipeline:
             candidates_list = candidates_list[:40]
             
             t2 = time.time()
-            initial_ranked = self.reranker.rerank(query_intent, candidates_list, top_k=max(candidate_limit, 12))
+            initial_ranked = self.reranker.rerank(
+                query_intent,
+                candidates_list,
+                top_k=max(candidate_limit, 12),
+                score_cache=rerank_score_cache,
+            )
             latency["reranker_initial"] = round(time.time() - t2, 3)
             
             t3 = time.time()
@@ -88,7 +98,12 @@ class RetrievalPipeline:
             latency["expander"] = round(time.time() - t3, 3)
             
             t4 = time.time()
-            ranked = self.reranker.rerank(query_intent, list(merged.values()), top_k=candidate_limit)
+            ranked = self.reranker.rerank(
+                query_intent,
+                list(merged.values()),
+                top_k=candidate_limit,
+                score_cache=rerank_score_cache,
+            )
             self._enrich_candidate_source_metadata(ranked)
             self._annotate_display_relevance(ranked)
             latency["reranker_final"] = round(time.time() - t4, 3)

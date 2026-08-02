@@ -1,5 +1,6 @@
 import ollama
 import httpx
+import os
 from typing import List
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -8,9 +9,10 @@ class OllamaEmbedder:
     Class giao tiếp với Ollama server để sinh Vector.
     Mặc định sử dụng model bge-m3:latest
     """
-    def __init__(self, model_name: str = "bge-m3:latest", host: str = "http://localhost:11434"):
+    def __init__(self, model_name: str = "bge-m3:latest", host: str | None = None):
         self.model_name = model_name
-        self.client = ollama.Client(host=host, timeout=httpx.Timeout(30.0))
+        resolved_host = host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        self.client = ollama.Client(host=resolved_host, timeout=httpx.Timeout(30.0))
         
     @retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=1, max=2), reraise=False)
     def embed_text(self, text: str) -> List[float]:

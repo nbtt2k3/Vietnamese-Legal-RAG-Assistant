@@ -92,7 +92,8 @@ The project was improved through multiple phases:
 
 Regression checks currently pass:
 
-- Backend full test suite: `88 passed`
+- Backend full test suite: `117 passed`
+- Indexed corpus: `3234 chunks`
 - Targeted RAG/retrieval/evaluation suite: `50 passed`
 - Encoding validation: passed
 - Frontend lint: passed

@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const API_KEY = import.meta.env.VITE_API_KEY || '';
 const TOKEN_STORAGE_KEY = 'access_token';
 
 export const getStoredAccessToken = () => {
@@ -26,7 +27,7 @@ export const clearAccessToken = () => {
 const getAuthHeaders = () => {
   const token = getStoredAccessToken();
   const headers = {
-    'x-api-key': localStorage.getItem('legal_assistant_api_key') || '',
+    'x-api-key': API_KEY || localStorage.getItem('legal_assistant_api_key') || '',
   };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -41,7 +42,10 @@ export const login = async (username, password) => {
   
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'x-api-key': API_KEY || localStorage.getItem('legal_assistant_api_key') || '',
+    },
     body: formData,
   });
   if (!response.ok) {
@@ -54,7 +58,10 @@ export const login = async (username, password) => {
 export const register = async (username, password) => {
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY || localStorage.getItem('legal_assistant_api_key') || '',
+    },
     body: JSON.stringify({ username, password }),
   });
   if (!response.ok) {

@@ -25,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate Legal RAG end-to-end")
     parser.add_argument(
         "--dataset",
-        default="evaluation/datasets/legal_rag_eval_v1.json",
+        default="evaluation/datasets/legal_rag_eval_civil_v1.json",
         help="Đường dẫn tới file benchmark dataset JSON",
     )
     parser.add_argument("--with-llm", action="store_true", help="Bật nhánh generation bằng LLM nếu có cấu hình")

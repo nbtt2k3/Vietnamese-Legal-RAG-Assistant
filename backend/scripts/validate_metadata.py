@@ -156,7 +156,7 @@ def main():
         if args.loai and args.loai != loai_van_ban:
             continue
             
-        files = list(loai_dir.glob("*.json"))
+        files = list(loai_dir.rglob("*.json"))
         if not files:
             continue
             

@@ -32,10 +32,10 @@ class QdrantIndexer:
         # Khởi tạo client lưu vào file cục bộ
         # Nếu muốn dùng in-memory thì truyền location=":memory:"
         if settings.qdrant_url:
-            self.client = QdrantClient(
-                url=settings.qdrant_url,
-                api_key=settings.qdrant_api_key
-            )
+            client_kwargs = {"url": settings.qdrant_url}
+            if settings.qdrant_api_key:
+                client_kwargs["api_key"] = settings.qdrant_api_key
+            self.client = QdrantClient(**client_kwargs)
         else:
             self.client = QdrantClient(path=self.db_path)
         
@@ -73,7 +73,11 @@ class QdrantIndexer:
             ("text", PayloadSchemaType.TEXT),
             ("validity_status", PayloadSchemaType.KEYWORD),
             ("effective_from", PayloadSchemaType.KEYWORD),
-            ("effective_to", PayloadSchemaType.KEYWORD)
+            ("effective_to", PayloadSchemaType.KEYWORD),
+            ("node_type", PayloadSchemaType.KEYWORD),
+            ("parent_id", PayloadSchemaType.KEYWORD),
+            ("node_id", PayloadSchemaType.KEYWORD),
+            ("ancestor_ids", PayloadSchemaType.KEYWORD)
         ]:
             self.client.create_payload_index(
                 collection_name=self.staging_collection,
@@ -125,9 +129,18 @@ class QdrantIndexer:
         
         self.client.update_collection_aliases(change_aliases_operations=operations)
         logger.info(f"Đã cập nhật alias '{self.collection_name}' trỏ vào '{self.staging_collection}'.")
+
+        # Retrieval opens short-lived repository contexts.  Clear the shared
+        # payload/BM25 snapshots after the atomic swap so the next query sees
+        # the new legal corpus even when its point count is unchanged.
+        from rag.retrieval.repository import clear_payload_cache
+        from rag.retrieval.retrievers.lexical_retriever import clear_bm25_cache
+        clear_payload_cache(collection_name=self.collection_name)
+        clear_bm25_cache()
+        logger.info("Đã invalidated payload snapshot và BM25 cache sau khi rebuild index.")
         
         if old_target and old_target != self.staging_collection:
-            logger.info(f"Keeping previous collection for rollback: {old_target}")
+            logger.info(f"Previous collection '{old_target}' will be cleaned after alias swap.")
 
             # BUG-14 FIX: Tạo Payload Index trên staging_collection (collection thực),
             # KHÔNG phải trên self.collection_name (alias). Alias forward request đến
@@ -141,6 +154,10 @@ class QdrantIndexer:
                 ("validity_status", PayloadSchemaType.KEYWORD),
                 ("effective_from",  PayloadSchemaType.KEYWORD),
                 ("effective_to",    PayloadSchemaType.KEYWORD),
+                ("node_type",       PayloadSchemaType.KEYWORD),
+                ("parent_id",       PayloadSchemaType.KEYWORD),
+                ("node_id",         PayloadSchemaType.KEYWORD),
+                ("ancestor_ids",    PayloadSchemaType.KEYWORD),
             ]:
                 self.client.create_payload_index(
                     collection_name=self.staging_collection,
@@ -150,6 +167,38 @@ class QdrantIndexer:
             logger.info("Đã tạo Payload Index thành công.")
         else:
             logger.info(f"Collection '{self.collection_name}' đã tồn tại.")
+
+        self.cleanup_old_staging_collections()
+
+    def cleanup_old_staging_collections(self) -> list[str]:
+        """Delete stale staging collections while protecting every alias target."""
+        prefix = f"{self.collection_name}_staging_"
+        try:
+            aliases = self.client.get_aliases().aliases
+            protected = {alias.collection_name for alias in aliases}
+            protected.add(self.staging_collection)
+            collections = self.client.get_collections().collections
+        except Exception as exc:
+            logger.warning("Không thể liệt kê staging collections để cleanup: %s", exc)
+            return []
+
+        deleted: list[str] = []
+        for collection in collections:
+            name = collection.name
+            if not name.startswith(prefix) or name in protected:
+                continue
+            try:
+                # Collection deletion can take longer than the Qdrant client's
+                # short default timeout while segments are being compacted.
+                self.client.delete_collection(collection_name=name, timeout=60)
+                deleted.append(name)
+                logger.info("Đã dọn staging collection cũ '%s'.", name)
+            except Exception as exc:
+                logger.warning("Không thể dọn staging collection '%s': %s", name, exc)
+
+        if not deleted:
+            logger.info("Không có staging collection cũ cần dọn.")
+        return deleted
 
     def generate_uuid(self, chunk_id: str) -> str:
         """Qdrant yêu cầu ID là UUID hoặc số nguyên nguyên dương. Dùng UUID dựa trên chunk_id."""

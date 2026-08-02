@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     candidate_limit: int = 18
     top_k: int = 40
     embed_batch_size: int = 32
+    pdf_ocr_enabled: bool = True
+    pdf_ocr_min_chars_per_page: int = 40
+    pdf_ocr_language: str = "vie+eng"
 
     groq_api_key: str | None = None
     cohere_api_key: str | None = None
@@ -66,6 +69,12 @@ class Settings(BaseSettings):
             raise ValueError("SECRET_KEY must be overridden with at least 32 characters in production")
         if not self.api_key or len(self.api_key) < 16:
             raise ValueError("API_KEY must be set with at least 16 characters in production")
+        if not self.database_url or not self.database_url.startswith(("postgresql://", "postgresql+psycopg2://")):
+            raise ValueError("DATABASE_URL must point to PostgreSQL in production")
+        if not self.qdrant_url:
+            raise ValueError("QDRANT_URL must be configured in production")
+        if not self.qdrant_api_key or len(self.qdrant_api_key) < 16:
+            raise ValueError("QDRANT_API_KEY must be set with at least 16 characters in production")
         if "*" in self.cors_origins:
             raise ValueError("ALLOWED_ORIGINS must not include '*' in production")
         return self

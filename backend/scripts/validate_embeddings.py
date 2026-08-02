@@ -45,7 +45,7 @@ def main():
     for loai_dir in EMBEDDINGS_DIR.iterdir():
         if not loai_dir.is_dir(): continue
         
-        for f in loai_dir.glob("*.json"):
+        for f in loai_dir.rglob("*.json"):
             p, fail, w = check_file(f)
             total_passed += p
             total_failed += fail

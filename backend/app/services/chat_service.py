@@ -54,6 +54,11 @@ def run_chat(request, pipeline, db: Session, current_user: User, request_id: str
 
 async def stream_chat(request, pipeline, db: Session, current_user: User, request_id: str):
     logger.info("[Req=%s] Received API query stream (length=%s)", request_id, len(request.query))
+    # Keep the service safe even when called outside the HTTP endpoint. The
+    # endpoint also validates for defense in depth, but this check must happen
+    # before history persistence, retrieval, or generation.
+    validate_query_content(request.query, request_id)
+
     history = load_history_and_save_user_message(
         db,
         current_user,

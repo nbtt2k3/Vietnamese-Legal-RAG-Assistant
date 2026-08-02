@@ -12,7 +12,7 @@ class Conversation(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     title = Column(String, default="New Conversation")
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
 
     user = relationship("User", back_populates="conversations")
@@ -27,6 +27,6 @@ class ChatMessage(Base):
     role = Column(String)
     content = Column(Text)
     msg_metadata = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     conversation = relationship("Conversation", back_populates="messages")

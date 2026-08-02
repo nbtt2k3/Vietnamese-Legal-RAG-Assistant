@@ -1,6 +1,6 @@
 # Vietnamese Legal RAG Assistant
 
-Vietnamese Legal RAG Assistant is an end-to-end Retrieval-Augmented Generation system for Vietnamese legal question answering. The first version focuses on the 2015 Civil Code and related legal documents, with a design that can expand to other legal domains without rewriting the core retrieval and generation pipeline.
+Vietnamese Legal RAG Assistant is an end-to-end Retrieval-Augmented Generation system for Vietnamese legal question answering. The current corpus focuses on the 2015 Civil Code and related legal documents, with a design that can expand to other legal domains without rewriting the core retrieval and generation pipeline.
 
 The project demonstrates a practical Legal RAG stack: document ingestion, legal-aware chunking, metadata extraction, embedding, hybrid retrieval, reranking, grounded answer generation, citation control, evaluation, API hardening, and a React chat interface.
 
@@ -43,6 +43,10 @@ flowchart LR
     API --> OBS[Logs + Metrics]
     GEN --> EV[Evaluation Suite]
     R --> EV
+
+    API --> PG[(PostgreSQL<br/>users + conversations)]
+    API --> REDIS[(Redis<br/>rate limiting)]
+    R --> QD[(Qdrant<br/>vectors + payload)]
 ```
 
 For a fuller architecture explanation, see [docs/architecture.md](docs/architecture.md).
@@ -115,6 +119,10 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
+For Docker production-mode demo, configure `GROQ_API_KEY`, `SECRET_KEY`, `API_KEY`, `QDRANT_API_KEY`, `POSTGRES_PASSWORD`, and `ALLOWED_ORIGINS` in `.env`.
+
+Dataset pháp lý, generated artifacts, local model cache và database storage được loại khỏi Git vì kích thước, dữ liệu nhạy cảm/bản quyền và khả năng thay đổi theo môi trường. Repo giữ lại source code, tests, evaluation datasets, source registry và tài liệu governance.
+
 Run the API:
 
 ```bash
@@ -143,6 +151,26 @@ Default frontend API URL:
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
+For the local production-mode demo, also set `VITE_API_KEY` to the backend `API_KEY`. This is suitable for a local portfolio demo only; a public deployment should place the API behind a gateway/BFF instead of exposing a shared key in browser code.
+
+### Prepare local models
+
+Install and start Ollama on the host, then pull the embedding and generator models:
+
+```powershell
+ollama pull bge-m3:latest
+ollama pull llama3:latest
+```
+
+The Cross-Encoder model is intentionally not committed to Git. To enable it locally, download it into the ignored model directory:
+
+```powershell
+cd backend
+..\.venv\Scripts\python.exe -c "from sentence_transformers import CrossEncoder; CrossEncoder('BAAI/bge-reranker-v2-m3').save('data/models/BAAI/bge-reranker-v2-m3')"
+```
+
+If the Cross-Encoder cache is unavailable, the system uses its deterministic hybrid-ranking fallback.
+
 ## Data Pipeline Commands
 
 From `backend/`:
@@ -162,6 +190,12 @@ python scripts/validate_source_registry.py --path data/source_registry.json
 python scripts/validate_chunks.py
 python scripts/validate_embeddings.py
 python scripts/validate_index.py
+```
+
+When Qdrant is running as a private Docker service, run the complete integrity check inside the app container:
+
+```bash
+docker compose exec app python -m scripts.validate_data_integrity
 ```
 
 ## Quality Checks
@@ -184,8 +218,8 @@ npm run build
 
 Current regression status:
 
-- Backend full test suite: `94 passed`
-- Targeted RAG/retrieval/evaluation suite: `50 passed`
+- Backend full test suite: `117 passed`
+- Indexed corpus: `3234 chunks`
 - Encoding validation: passed
 - Frontend lint: passed
 - Frontend build: passed
@@ -234,7 +268,7 @@ The backend includes:
 
 ## Limitations
 
-- Full end-to-end benchmark can be slow because it loads local reranker/model resources.
+- Full end-to-end benchmark and some queries can be slow because the Cross-Encoder runs locally on CPU.
 - The project is suitable for portfolio, demo, staging, or internal pilot usage, not direct legal advice in public production.
 - Human review operations, monitoring dashboards, and full deployment gates still need to be added for production-grade use.
 

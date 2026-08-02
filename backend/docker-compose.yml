@@ -1,16 +1,62 @@
-version: '3.8'
 services:
   app:
     build: .
+    ports:
+      - "127.0.0.1:8000:8000"
     volumes:
-      - .:/app
+      - ./data:/app/data
     environment:
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_API_KEY=${QDRANT_API_KEY:?QDRANT_API_KEY is required}
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+psycopg2://legal_app:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:?POSTGRES_DB is required}
+      - CROSS_ENCODER_RERANKING_ENABLED=${CROSS_ENCODER_RERANKING_ENABLED:-true}
+      - ENVIRONMENT=${ENVIRONMENT:?ENVIRONMENT is required}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required}
+      - API_KEY=${API_KEY:?API_KEY is required}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:?ALLOWED_ORIGINS is required}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      - qdrant
+      qdrant:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
   qdrant:
-    image: qdrant/qdrant:latest
-    ports:
-      - "6333:6333"
+    image: qdrant/qdrant:v1.15.3
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:?QDRANT_API_KEY is required}
     volumes:
-      - ./data/qdrant_db:/qdrant/storage
+      - qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+  redis:
+    image: redis:7.4.2-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:

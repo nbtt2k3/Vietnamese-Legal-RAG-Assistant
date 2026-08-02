@@ -19,8 +19,19 @@ def snippet_from_text(text: str, max_chars: int = 240) -> str:
     return snippet[: max_chars - 3].rstrip() + "..."
 
 
+def _page_number(value) -> int | None:
+    try:
+        page = int(value)
+    except (TypeError, ValueError):
+        return None
+    return page if page > 0 else None
+
+
 def chunk_to_citation(item: RetrievedChunk) -> CitationRecord:
     metadata = item.metadata
+    source_location = metadata.get("source_location") or {}
+    if not isinstance(source_location, dict):
+        source_location = {}
     return CitationRecord(
         citation=str(metadata.get("citation", item.chunk_id)),
         snippet=snippet_from_text(item.text),
@@ -33,6 +44,12 @@ def chunk_to_citation(item: RetrievedChunk) -> CitationRecord:
         source_of_validity=str(metadata.get("source_of_validity", "")),
         validity_basis=str(metadata.get("validity_basis", "")),
         validity_confidence=str(metadata.get("validity_confidence", "")),
+        page_start=_page_number(
+            metadata.get("page_start", source_location.get("page_start"))
+        ),
+        page_end=_page_number(
+            metadata.get("page_end", source_location.get("page_end"))
+        ),
         relevance_score=round(float(item.scores.get("final", 0.0)), 3),
         relevance_label=item.relevance_label,
         relevance_rank=item.relevance_rank,
@@ -124,6 +141,8 @@ def build_human_review_signal(
         reasons.append("claims_without_evidence")
     if confidence.get("weakly_supported_claims"):
         reasons.append("weakly_supported_claims")
+    if confidence.get("short_answer_not_grounded"):
+        reasons.append("short_answer_not_grounded")
     if confidence.get("source_verification_complete") is False:
         reasons.append("unverified_source")
     if confidence.get("validity_verification_complete") is False:

@@ -115,8 +115,11 @@ def validate_van_ban(data: dict, file_path: Path) -> list[str]:
             stub_like = [
                 e.get("ma_mau")
                 for e in phu_luc
-                if e.get("ten_mau", "").strip().startswith("|")
-                or e.get("noi_dung", "").strip().startswith("|")
+                if e.get("ma_mau", "").strip().startswith("|")
+                or (
+                    not e.get("ten_mau", "").strip()
+                    and len(e.get("noi_dung", "").strip()) < 300
+                )
             ]
             if stub_like:
                 issues.append(f"Nghi ngờ entry rác từ mục lục trong phu_luc: {stub_like[:10]}")

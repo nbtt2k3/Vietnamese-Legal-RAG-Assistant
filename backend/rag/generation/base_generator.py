@@ -33,6 +33,12 @@ class BaseLLMGenerator:
         raw_items = core + case_law + supporting
         evidence_by_id = {f"E{i+1}": item for i, item in enumerate(raw_items)}
         valid_e_ids = set(evidence_by_id)
+        short_answer = str(data.get("short_answer", "")).strip()
+        short_answer_grounded = (
+            self._text_is_supported(short_answer, raw_items)
+            if short_answer
+            else None
+        )
         invalid_e_ids_used = False
         claims_without_evidence = False
         weakly_supported_claims = False
@@ -104,6 +110,10 @@ class BaseLLMGenerator:
             disclaimers.append("Cảnh báo: Một số nhận định có trích dẫn nhưng mức khớp nội dung với tài liệu được truy xuất còn yếu; cần đối chiếu lại nguồn.")
         if uncertainty and uncertainty.lower() not in ("không", "none", "", "null"):
             disclaimers.append(f"Chưa chắc chắn: {uncertainty}")
+        if short_answer and short_answer_grounded is False:
+            disclaimers.append(
+                "Cảnh báo: Phần trả lời tóm tắt chưa được đối chiếu đủ với các căn cứ được truy xuất; cần kiểm tra lại nguồn."
+            )
         disclaimers.extend(build_source_validity_disclaimers(raw_items))
         if not valid_e_ids:
             disclaimers.append("Không thể trả lời: Không tìm thấy căn cứ pháp lý phù hợp trong hệ thống.")
@@ -131,6 +141,8 @@ class BaseLLMGenerator:
             "invalid_evidence_used": invalid_e_ids_used,
             "claims_without_evidence": claims_without_evidence,
             "weakly_supported_claims": weakly_supported_claims,
+            "short_answer_grounded": short_answer_grounded,
+            "short_answer_not_grounded": bool(short_answer and short_answer_grounded is False),
             "grounded_claim_count": grounded_claims,
             "total_claim_count": total_claims,
             "grounding_coverage": round(grounded_claims / total_claims, 3) if total_claims else None,
@@ -142,6 +154,7 @@ class BaseLLMGenerator:
             or invalid_e_ids_used
             or claims_without_evidence
             or weakly_supported_claims
+            or (short_answer and short_answer_grounded is False)
             or (uncertainty and uncertainty.lower() not in ("không", "none", "", "null"))
         ):
             confidence_data["level"] = "low"
@@ -152,7 +165,7 @@ class BaseLLMGenerator:
 
         return LegalAnswer(
             query=query,
-            short_answer=str(data.get("short_answer", "")).strip(),
+            short_answer=short_answer,
             sections=sections,
             citations=citations,
             confidence=confidence_data,
@@ -184,6 +197,28 @@ class BaseLLMGenerator:
 
         overlap = claim_tokens & evidence_tokens
         required_overlap = 1 if len(claim_tokens) <= 3 else 2
+        return len(overlap) >= required_overlap
+
+    def _text_is_supported(self, text: str, evidence_items: list) -> bool:
+        """Conservative lexical grounding check for generated summary text."""
+        text_tokens = self._grounding_tokens(text)
+        if not text_tokens or not evidence_items:
+            return False
+
+        evidence_text = " ".join(
+            " ".join(
+                [
+                    item.text or "",
+                    str(item.metadata.get("citation", "")),
+                    str(item.metadata.get("ten", "")),
+                    str(item.metadata.get("dieu_title", "")),
+                ]
+            )
+            for item in evidence_items
+        )
+        evidence_tokens = self._grounding_tokens(evidence_text)
+        overlap = text_tokens & evidence_tokens
+        required_overlap = max(2, min(6, (len(text_tokens) + 4) // 5))
         return len(overlap) >= required_overlap
 
     def _grounding_tokens(self, text: str) -> set[str]:

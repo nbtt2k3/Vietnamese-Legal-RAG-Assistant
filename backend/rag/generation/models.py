@@ -16,6 +16,8 @@ class CitationRecord:
     source_of_validity: str = ""
     validity_basis: str = ""
     validity_confidence: str = ""
+    page_start: int | None = None
+    page_end: int | None = None
     relevance_score: float = 0.0
     relevance_label: str = ""
     relevance_rank: int = 0

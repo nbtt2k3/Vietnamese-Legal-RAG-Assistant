@@ -6,8 +6,7 @@ class DBSettings:
     def db_url(self) -> str:
         if settings.database_url:
             return settings.database_url
-        sqlite_path = settings.data_dir / "legal_rag.db"
-        return f"sqlite:///{sqlite_path}"
+        return "postgresql+psycopg2://legal_app:legal_app_password@localhost:5432/legal_assistant"
 
 
 db_settings = DBSettings()

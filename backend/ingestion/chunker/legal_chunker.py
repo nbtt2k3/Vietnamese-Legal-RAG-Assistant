@@ -19,6 +19,8 @@ class LegalChunker(BaseChunker):
             merged.update(node_meta["statistics"])
         if "legal" in node_meta:
             merged.update(node_meta["legal"])
+        if "source_location" in node_meta:
+            merged["source_location"] = dict(node_meta["source_location"])
             
         return merged
 
@@ -32,6 +34,9 @@ class LegalChunker(BaseChunker):
         # Carry temporal validity and provenance from the document to every chunk.
         # The node-level legal metadata below still supplies article citations.
         global_meta.update(global_legal_meta)
+        source_location = data.get("metadata", {}).get("source_location")
+        if source_location:
+            global_meta["source_location"] = dict(source_location)
         
         # 1. Chunk Điều / Khoản
         for dieu in data.get("dieu", []):
@@ -99,6 +104,14 @@ class LegalChunker(BaseChunker):
                 pl_meta.update(legal_meta)
             pl_meta["legal_unit_type"] = "phu_luc"
             pl_meta["legal_role"] = "appendix_form"
+            appendix_id = f"{doc_id}_phuluc_{i+1}"
+            pl_meta.update({
+                "node_id": appendix_id,
+                "node_type": "phu_luc",
+                "parent_id": f"{doc_id}_document",
+                "ancestor_ids": [f"{doc_id}_document"],
+                "path": [global_meta.get("ten", doc_id), phu_luc.get("ma_mau", "Phụ lục")],
+            })
             
             splits = self.splitter.split_text(pl_text)
             for j, split_txt in enumerate(splits):

@@ -7,7 +7,12 @@ from app.core.logging import logger
 class LegalReranker:
     def __init__(self, model_name: str | None = None):
         if model_name is None:
-            model_name = str(settings.project_root / "data" / "models" / "BAAI" / "bge-reranker-v2-m3")
+            configured_name = settings.reranker_model_name
+            local_model = settings.project_root / "data" / "models" / "BAAI" / "bge-reranker-v2-m3"
+            # Prefer the checked-in/local model when the configured value is a
+            # Hugging Face model id. This keeps production startup offline and
+            # makes the .env setting actually control which model is selected.
+            model_name = str(local_model) if local_model.is_dir() else configured_name
 
         # BUG-01 FIX: Khởi tạo meta_bonus_weights TRƯỚC các early return
         # để tránh AttributeError nếu encoder bị disabled hoặc model không tìm thấy.
@@ -46,7 +51,13 @@ class LegalReranker:
             logger.error(f"Failed to load CrossEncoder: {e}")
             self.encoder = None
 
-    def rerank(self, query_intent: QueryIntent, candidates: list[RetrievedChunk], top_k: int = 12) -> list[RetrievedChunk]:
+    def rerank(
+        self,
+        query_intent: QueryIntent,
+        candidates: list[RetrievedChunk],
+        top_k: int = 12,
+        score_cache: dict[tuple[str, str], float] | None = None,
+    ) -> list[RetrievedChunk]:
         if not candidates:
             return []
 
@@ -62,25 +73,36 @@ class LegalReranker:
             candidates.sort(key=lambda item: item.scores.get("final", 0.0), reverse=True)
             return self._diversify(candidates, top_k)
 
-        # Build pairs for CrossEncoder (query, passage)
-        # Combine title, dieu_title and chunk text for a comprehensive passage
+        # Build only uncached pairs. The same query reranks the initial
+        # candidates and then the expanded candidate set; reusing exact model
+        # scores here preserves ranking while avoiding duplicate inference.
         pairs = []
+        uncached_keys: list[tuple[str, str]] = []
+        active_cache = score_cache if score_cache is not None else {}
         for item in candidates:
+            cache_key = (query_intent.raw_query, item.chunk_id)
+            if cache_key in active_cache:
+                continue
             meta = item.metadata
             title = meta.get("ten", "")
             dieu_title = meta.get("dieu_title", "")
             text = item.text
-            
+
             passage = f"{title} - {dieu_title}. {text}".strip()
             pairs.append([query_intent.raw_query, passage])
+            uncached_keys.append(cache_key)
 
         # Predict relevance scores in batches for better performance
         # Note: num_workers is kept at 0 (default) to prevent PyTorch DataLoader crashing on Windows
-        scores = self.encoder.predict(pairs, batch_size=32)
+        if pairs:
+            scores = self.encoder.predict(pairs, batch_size=32)
+            for cache_key, score in zip(uncached_keys, scores):
+                active_cache[cache_key] = float(score)
         
         # Phase 4 Reranking Features
-        for item, score in zip(candidates, scores):
-            item.scores["cross_encoder"] = float(score)
+        for item in candidates:
+            score = active_cache[(query_intent.raw_query, item.chunk_id)]
+            item.scores["cross_encoder"] = score
             meta_bonus = 0.0
             meta = item.metadata
             
@@ -107,7 +129,7 @@ class LegalReranker:
                 if year_hint in str(meta.get("effective_date", "")) or year_hint in str(meta.get("effective_from", "")):
                     meta_bonus += 0.8
 
-            item.scores["final"] = float(score) + meta_bonus
+            item.scores["final"] = score + meta_bonus
 
         candidates.sort(key=lambda item: item.scores.get("final", 0.0), reverse=True)
         return self._diversify(candidates, top_k)

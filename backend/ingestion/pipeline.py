@@ -74,6 +74,110 @@ def build_raw_text(loaded: dict) -> str:
     return unicodedata.normalize("NFC", text)
 
 
+def _page_ranges(loaded: dict) -> list[tuple[int, int, int]]:
+    """Return (page_number, start_offset, end_offset) in the parser input."""
+    ranges = []
+    cursor = 0
+    for item in loaded.get("documents", []):
+        page_text = str(item.get("text", "") or "")
+        start = cursor
+        end = start + len(page_text)
+        page_number = item.get("page") or len(ranges) + 1
+        ranges.append((int(page_number), start, end))
+        cursor = end + 1  # build_raw_text joins pages with one newline
+    return ranges
+
+
+def _page_for_offset(ranges: list[tuple[int, int, int]], offset: int) -> int | None:
+    for page_number, start, end in ranges:
+        if start <= offset <= end:
+            return page_number
+    return None
+
+
+def _find_text_offset(raw_text: str, value: str) -> int | None:
+    """Find a section in parser text, tolerating line wrapping differences."""
+    value = str(value or "").strip()
+    if not value:
+        return None
+    direct = raw_text.find(value[:160])
+    if direct >= 0:
+        return direct
+    prefix = re.sub(r"\s+", " ", value[:120]).strip()
+    if len(prefix) < 20:
+        return None
+    pattern = re.escape(prefix).replace(r"\ ", r"\s+")
+    match = re.search(pattern, raw_text, flags=re.IGNORECASE)
+    return match.start() if match else None
+
+
+def _set_source_location(node, location: dict):
+    if not hasattr(node, "metadata") or node.metadata is None:
+        node.metadata = {}
+    node.metadata["source_location"] = dict(location)
+
+
+def attach_source_locations(document, raw_text: str, loaded: dict):
+    """Attach page-level provenance to legal nodes without changing node text."""
+    ranges = _page_ranges(loaded)
+    if not ranges:
+        return
+
+    document_location = {
+        "source_format": loaded.get("file_type"),
+        "page_start": ranges[0][0],
+        "page_end": ranges[-1][0],
+        "locator_confidence": "document_span",
+    }
+    _set_source_location(document, document_location)
+
+    if isinstance(document, AnLe):
+        # Án lệ has no Điều/Khoản tree, so locate its semantic sections directly.
+        for field_name in (
+            "tinh_huong_phap_ly",
+            "giai_phap_phap_ly",
+            "noi_dung_an_le_trich_dan",
+            "noi_dung_vu_an",
+        ):
+            offset = _find_text_offset(raw_text, getattr(document, field_name, ""))
+            location = dict(document_location)
+            page = _page_for_offset(ranges, offset) if offset is not None else None
+            if page is not None:
+                location.update({"page_start": page, "page_end": page, "locator_confidence": "section_text"})
+            _set_source_location(document, location)
+            # Keep field-level locations available to downstream citation code.
+            document.metadata.setdefault("section_locations", {})[field_name] = location
+        return
+
+    article_label = "\u0110i\u1ec1u"
+    article_label_upper = "\u0110I\u1ec0U"
+    heading_pattern = re.compile(
+        rf"(?im)^[ \t]*(?:{article_label}|{article_label_upper})[ \t]+\d+[A-Za-z]*\b"
+    )
+    heading_matches = list(heading_pattern.finditer(raw_text))
+
+    for dieu in document.all_dieu() if isinstance(document, VanBan) else []:
+        match = re.search(
+            rf"(?im)^[ \t]*(?:{article_label}|{article_label_upper})[ \t]+{re.escape(str(dieu.number))}\b",
+            raw_text,
+        )
+        location = dict(document_location)
+        if match:
+            next_heading = next((item for item in heading_matches if item.start() > match.start()), None)
+            end_offset = (next_heading.start() - 1) if next_heading else match.end()
+            page_start = _page_for_offset(ranges, match.start())
+            page_end = _page_for_offset(ranges, end_offset)
+            if page_start is not None:
+                location.update({"page_start": page_start, "locator_confidence": "article_span"})
+            if page_end is not None:
+                location["page_end"] = max(location.get("page_start", page_end), page_end)
+        _set_source_location(dieu, location)
+        for khoan in dieu.khoan:
+            _set_source_location(khoan, location)
+            for diem in khoan.diem:
+                _set_source_location(diem, location)
+
+
 def build_source_metadata(file_path: Path, doc_id: str | None = None) -> dict:
     """Record local-source provenance without claiming legal-source verification."""
     resolved_path = file_path.resolve()
@@ -233,12 +337,51 @@ def to_serializable(obj):
             "so_luong_dieu": len(obj.all_dieu()),
             "metadata": obj.metadata,
             "dieu": [d.to_dict() for d in obj.all_dieu()],
+            "hierarchy": _serialize_hierarchy(obj),
         }
     if isinstance(obj, AnLe):
         return obj.to_dict()
     if is_dataclass(obj):
         return asdict(obj)
     raise TypeError(f"Không serialize được: {type(obj)}")
+
+
+def _serialize_hierarchy(document: VanBan) -> list[dict]:
+    """Persist the legal tree separately from retrieval-oriented flat articles."""
+    nodes: list[dict] = []
+
+    def add(node, fallback_type: str):
+        meta = dict(getattr(node, "metadata", {}).get("hierarchy", {}) or {})
+        if meta:
+            nodes.append({
+                "node_id": meta.get("node_id"),
+                "node_type": meta.get("node_type", fallback_type),
+                "parent_id": meta.get("parent_id"),
+                "ancestor_ids": meta.get("ancestor_ids", []),
+                "path": meta.get("path", []),
+                "number": getattr(node, "number", None),
+                "title": getattr(node, "title", None),
+            })
+
+    def add_article(dieu):
+        add(dieu, "dieu")
+        for khoan in dieu.khoan:
+            add(khoan, "khoan")
+            for diem in khoan.diem:
+                add(diem, "diem")
+
+    add(document, "document")
+    for chuong in document.chuong:
+        add(chuong, "chuong")
+        for muc in chuong.muc:
+            add(muc, "muc")
+            for dieu in muc.dieu:
+                add_article(dieu)
+        for dieu in chuong.dieu:
+            add_article(dieu)
+    for dieu in document.dieu:
+        add_article(dieu)
+    return nodes
 
 
 def process_file(file_path: Path, loai_van_ban: str) -> tuple[dict, dict, dict]:  # parsed, cleaned, metadata
@@ -263,6 +406,15 @@ def process_file(file_path: Path, loai_van_ban: str) -> tuple[dict, dict, dict]:
         
         # Giả lập truy xuất CSDL tình trạng hiệu lực pháp luật
     parsed.metadata.setdefault("source", source_metadata)
+    # Preserve page provenance and OCR diagnostics before all copies/enrichment.
+    if loaded.get("file_type") == "pdf":
+        pages = loaded.get("documents", [])
+        source_metadata.update({
+            "pdf_page_count": len(pages),
+            "pdf_ocr_pages": [p.get("page") for p in pages if p.get("ocr_used")],
+            "pdf_ocr_used": any(p.get("ocr_used") for p in pages),
+        })
+    attach_source_locations(parsed, raw_text, loaded)
     parsed_dict = to_serializable(parsed)
 
     parsed_copy = copy.deepcopy(parsed)
@@ -297,7 +449,7 @@ def process_file(file_path: Path, loai_van_ban: str) -> tuple[dict, dict, dict]:
 
 
 def run_pipeline(raw_dir: Path = RAW_DIR, parsed_dir: Path = PARSED_DIR, cleaned_dir: Path = CLEANED_DIR, metadata_dir: Path = METADATA_DIR, loai_filter: str = None):
-    stats = {"success": 0, "failed": 0, "errors": []}
+    stats = {"success": 0, "failed": 0, "errors": [], "source_review_required": []}
 
     try:
         from app.db.init import initialize_database
@@ -397,6 +549,19 @@ def run_pipeline(raw_dir: Path = RAW_DIR, parsed_dir: Path = PARSED_DIR, cleaned
                             ))
                         db.commit()
                     
+                    source = metadata_res.get("metadata", {}).get("source", {})
+                    if source.get("source_verification_status") != "official_verified":
+                        review_item = {
+                            "file": str(file_path),
+                            "doc_id": metadata_res.get("doc_id"),
+                            "source_registry_status": source.get("source_registry_status"),
+                            "source_verification_status": source.get("source_verification_status"),
+                        }
+                        stats["source_review_required"].append(review_item)
+                        logger.warning(
+                            f"SOURCE REVIEW REQUIRED: {file_path.name} "
+                            f"({source.get('source_registry_status') or 'unknown registry status'})"
+                        )
                     stats["success"] += 1
                     logger.info(f"{file_path.name} -> parsed | cleaned | metadata | db")
                 except Exception as e:

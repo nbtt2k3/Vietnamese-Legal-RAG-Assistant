@@ -124,6 +124,18 @@ class LegalParser:
         for i in range(1, len(parts), 2):
             ma_mau = parts[i].strip()
             noi_dung = parts[i+1].strip()
+
+            # Some official DOCX files put a long appendix heading around the
+            # actual form marker, e.g. "Phụ lục DANH - Mẫu số 01a". Keep the
+            # stable form identifier instead of embedding heading noise.
+            compact_marker = re.sub(r"\s+", " ", ma_mau).strip()
+            form_match = re.search(
+                r"Mẫu\s+số\s+([0-9]+[A-Za-z0-9.-]*)",
+                compact_marker,
+                flags=re.IGNORECASE,
+            )
+            if form_match:
+                ma_mau = f"Mẫu số {form_match.group(1)}"
             
             # Cập nhật current_pl nếu ma_mau là "Phụ lục..." (thường xuất hiện khi chuyển sang phụ lục mới trong bảng danh mục)
             if re.match(r'(?i)^Phụ\s+lục[\s:]*[IVX0-9A-Z]+', ma_mau):
@@ -220,6 +232,21 @@ class LegalParser:
                 continue
 
             idx = tail_start + match.start()
+            if candidate_idx is None or idx < candidate_idx:
+                candidate_idx = idx
+
+        # Official DOCX/PDF sources often flatten the footer into a Markdown-like
+        # table line ("| Nơi nhận: ..."), so the anchored patterns above do not
+        # match.  Treat the first such line as the start of the administrative
+        # footer and keep it out of legal content.
+        inline_recipient = re.search(
+            r"(?im)(?:^|\n)\s*\|?\s*Nơi\s+nhận\s*:",
+            text,
+        )
+        if inline_recipient:
+            idx = inline_recipient.start()
+            if text[idx:idx + 1] == "\n":
+                idx += 1
             if candidate_idx is None or idx < candidate_idx:
                 candidate_idx = idx
 

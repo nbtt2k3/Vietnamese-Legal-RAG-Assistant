@@ -20,6 +20,11 @@ class DocumentMetadata:
 
 @dataclass
 class HierarchyMetadata:
+    node_id: Optional[str] = None
+    node_type: Optional[str] = None
+    parent_id: Optional[str] = None
+    ancestor_ids: List[str] = field(default_factory=list)
+    path: List[str] = field(default_factory=list)
     phan_number: Optional[str] = None
     phan_title: Optional[str] = None
     chuong_number: Optional[str] = None
@@ -32,7 +37,10 @@ class HierarchyMetadata:
     diem_id: Optional[str] = None
 
     def to_dict(self):
-        return {k: v for k, v in asdict(self).items() if v is not None}
+        return {
+            k: v for k, v in asdict(self).items()
+            if v is not None and v != []
+        }
 
 @dataclass
 class StatisticsMetadata:
