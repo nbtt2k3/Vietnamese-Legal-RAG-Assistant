@@ -104,7 +104,10 @@ class EvidenceBuilder:
         return score
 
     def _wants_case_law(self, query_intent: QueryIntent) -> bool:
-        return query_intent.loai_yeu_cau in {"scenario_application", "case_law_question"}
+        return (
+            not query_intent.insufficient_facts
+            and query_intent.loai_yeu_cau in {"scenario_application", "case_law_question"}
+        )
 
     def _is_core_eligible(self, item: RetrievedChunk, query_intent: QueryIntent) -> bool:
         if self._is_appendix_noise(item, query_intent):

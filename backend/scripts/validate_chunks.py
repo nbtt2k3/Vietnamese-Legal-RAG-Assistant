@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 from pathlib import Path
 
 CHUNKS_DIR = Path("data/chunks")
@@ -54,6 +55,8 @@ def check_chunks(file_path: Path) -> tuple[int, int, int]:
     return passed, failed, warnings
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     print("=" * 50)
     print("🔍 BẮT ĐẦU KIỂM TRA CHẤT LƯỢNG CHUNKS")
     print(f"Thư mục nguồn: {CHUNKS_DIR}")

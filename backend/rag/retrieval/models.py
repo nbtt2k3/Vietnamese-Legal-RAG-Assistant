@@ -18,6 +18,12 @@ class QueryIntent:
     query_variants: list[str] = field(default_factory=list)
     source_priority: list[str] = field(default_factory=list)
     scenario_terms: list[str] = field(default_factory=list)
+    # The question can be a valid scenario query while still lacking facts
+    # needed for a case-specific conclusion. Keep this separate from the
+    # request type so retrieval/generation can answer cautiously instead of
+    # treating the query as a normal scenario or case-law lookup.
+    insufficient_facts: bool = False
+    missing_fact_hints: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

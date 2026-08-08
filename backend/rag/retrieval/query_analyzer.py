@@ -79,6 +79,8 @@ class QueryAnalyzer:
                 query_variants=query_variants,
                 source_priority=self.SOURCE_AUTHORITY_ORDER.copy(),
                 scenario_terms=rule_result.get("scenario_terms", []),
+                insufficient_facts=bool(rule_result.get("insufficient_facts")),
+                missing_fact_hints=rule_result.get("missing_fact_hints", []),
             )
             
         # 2. Cache Lookup for LLM
@@ -190,6 +192,8 @@ CHỈ TRẢ VỀ JSON HỢP LỆ.
             query_variants=query_variants,
             source_priority=source_priority,
             scenario_terms=scenario_terms,
+            insufficient_facts=bool(rule_result.get("insufficient_facts")),
+            missing_fact_hints=rule_result.get("missing_fact_hints", []),
         )
 
     def _call_llm(self, prompt: str) -> str:

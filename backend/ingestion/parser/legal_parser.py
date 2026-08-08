@@ -213,6 +213,13 @@ class LegalParser:
         """
         footer_patterns = [
             re.compile(r'^\s*Nơi nhận\s*:', re.IGNORECASE | re.MULTILINE),
+            re.compile(r'^\s*TM\.\s*', re.IGNORECASE | re.MULTILINE),
+            re.compile(r'^\s*KT\.\s*', re.IGNORECASE | re.MULTILINE),
+            re.compile(r'^\s*CHỦ TỊCH\b', re.IGNORECASE | re.MULTILINE),
+            re.compile(r'^\s*PHÓ THỦ TƯỚNG\b', re.IGNORECASE | re.MULTILINE),
+            re.compile(r'^\s*BỘ TRƯỞNG\b', re.IGNORECASE | re.MULTILINE),
+            re.compile(r'^\s*THỨ TRƯỞNG\b', re.IGNORECASE | re.MULTILINE),
+            re.compile(r'^\s*Nơi nhận\s*:', re.IGNORECASE | re.MULTILINE),
             re.compile(r'^\s*NƠI NHẬN\s*:', re.IGNORECASE | re.MULTILINE),
             re.compile(r'^\s*TM\.\s*', re.IGNORECASE | re.MULTILINE),
             re.compile(r'^\s*KT\.\s*', re.IGNORECASE | re.MULTILINE),
@@ -247,6 +254,15 @@ class LegalParser:
             idx = inline_recipient.start()
             if text[idx:idx + 1] == "\n":
                 idx += 1
+            if candidate_idx is None or idx < candidate_idx:
+                candidate_idx = idx
+
+        inline_recipient_utf8 = re.search(
+            r"(?im)\|\s*N\u01a1i\s+nh\u1eadn\s*:",
+            text,
+        )
+        if inline_recipient_utf8:
+            idx = inline_recipient_utf8.start()
             if candidate_idx is None or idx < candidate_idx:
                 candidate_idx = idx
 
@@ -320,6 +336,15 @@ class LegalParser:
             if not muc_matches:
                 chuong.dieu = self._parse_dieu_list(chuong_body, phan_number=phan_number, phan_title=phan_title, chuong_number=chuong.number, chuong_title=chuong.title)
             else:
+                # Một số văn bản đặt Điều trước Mục đầu tiên; giữ lại prefix.
+                pre_muc_body = chuong_body[:muc_matches[0].start()]
+                chuong.dieu = self._parse_dieu_list(
+                    pre_muc_body,
+                    phan_number=phan_number,
+                    phan_title=phan_title,
+                    chuong_number=chuong.number,
+                    chuong_title=chuong.title,
+                )
                 for j, mm in enumerate(muc_matches):
                     m_start = mm.end()
                     m_end = muc_matches[j + 1].start() if j + 1 < len(muc_matches) else len(chuong_body)
@@ -420,3 +445,11 @@ class LegalParser:
     def _post_process(self, van_ban: VanBan):
         """Hook cho class con — mặc định không làm gì."""
         pass
+
+
+# Keep chapter titles on one line so an article before the first Mục is not
+# consumed as the chapter title.
+LegalParser.RE_CHUONG = re.compile(
+    r'^\s*Ch\u01b0\u01a1ng\s+([IVXLCDM]+|\d+|nh\u1ea5t|hai|ba|t\u01b0|b\u1ed1n|n\u0103m|s\u00e1u|b\u1ea3y|t\u00e1m|ch\u00edn|m\u01b0\u1eddi[a-z\s]*)\.?[ \t]*(.*)$',
+    re.MULTILINE | re.IGNORECASE,
+)

@@ -35,6 +35,10 @@ class CaseLawParser:
         r"Khái quát nội dung(?:\s+của)?(?:\s+án lệ)?[:\s]*\n?(.*?)(?=\n\s*-?\s*Tình huống|\n\s*Giải pháp|\n\n)",
         re.DOTALL | re.IGNORECASE,
     )
+    RE_KHAI_QUAT_UTF8 = re.compile(
+        r"Kh\u00e1i qu\u00e1t n\u1ed9i dung(?:\s+c\u1ee7a)?(?:\s+\u00e1n l\u1ec7)?[:\s]*\n?(.*?)(?=\n\s*Quy \u0111\u1ecbnh|\n\s*T\u1eeb kh|\n\s*N\u1ed8I DUNG|\n\n)",
+        re.DOTALL | re.IGNORECASE,
+    )
     RE_TINH_HUONG = re.compile(
         r"Tình huống (?:pháp lý|án lệ)[:\s]*\n?(.*?)(?=\n\s*-?\s*Giải pháp)",
         re.DOTALL | re.IGNORECASE,
@@ -68,6 +72,10 @@ class CaseLawParser:
         ten = self._extract_ten(text)
         toa_an = self._search(self.RE_TOA_AN, text)
 
+        khai_quat = (
+            self._search(self.RE_KHAI_QUAT, text)
+            or self._search(self.RE_KHAI_QUAT_UTF8, text)
+        )
         an_le = AnLe(
             doc_id=doc_id,
             so_an_le=so_an_le,
@@ -76,7 +84,7 @@ class CaseLawParser:
             toa_an_ra_quyet_dinh=self._clean_extracted_text(toa_an),
             ngay_cong_bo=self._extract_ngay_cong_bo(toa_an),
             vi_tri_noi_dung=self._clean_extracted_text(self._search(self.RE_VI_TRI, text)),
-            khai_quat_noi_dung=self._clean_extracted_text(self._search(self.RE_KHAI_QUAT, text)),
+            khai_quat_noi_dung=self._clean_extracted_text(khai_quat),
             noi_dung_vu_an=self._clean_extracted_text(self._search(self.RE_NOI_DUNG_VU_AN, text) or ""),
             tinh_huong_phap_ly=self._clean_extracted_text(self._search(self.RE_TINH_HUONG, text) or ""),
             giai_phap_phap_ly=self._clean_extracted_text(self._search(self.RE_GIAI_PHAP, text) or ""),

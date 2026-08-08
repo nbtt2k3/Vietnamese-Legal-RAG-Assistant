@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     embedding_model_name: str = "bge-m3:latest"
     llm_model_name: str = "llama3"
     reranker_model_name: str = "BAAI/bge-reranker-v2-m3"
+    reranker_provider: str = "auto"
+    jina_api_key: str | None = None
+    jina_reranker_model: str = "jina-reranker-v2-base-multilingual"
+    jina_reranker_url: str = "https://api.jina.ai/v1/rerank"
+    jina_timeout_seconds: float = 20.0
     cross_encoder_reranking_enabled: bool = True
 
     candidate_limit: int = 18
@@ -41,7 +46,7 @@ class Settings(BaseSettings):
     rate_limit_ttl_seconds: int = 60
     llm_judge_enabled: bool = False
     llm_judge_timeout_seconds: float = 15.0
-    llm_judge_max_attempts: int = 1
+    llm_judge_max_attempts: int = 2
 
     environment: str = "development"
 

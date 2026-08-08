@@ -1,6 +1,7 @@
 from rag.retrieval.models import QueryIntent, RetrievedChunk
 from rag.retrieval.repository import QdrantRepository
 from qdrant_client.models import Filter, FieldCondition, MatchText
+from rag.retrieval.text_utils import normalize_for_match
 
 
 class CrossDocumentExpander:
@@ -11,7 +12,7 @@ class CrossDocumentExpander:
         repository: QdrantRepository,
         limit: int = 6,
     ) -> list[RetrievedChunk]:
-        seeds = ranked[:4]
+        seeds = ranked[:8]
         target_terms = []
         for item in seeds:
             for rel in item.metadata.get("related_documents", []) or []:
@@ -30,7 +31,38 @@ class CrossDocumentExpander:
         expansions: list[RetrievedChunk] = []
         seen_ids = {item.chunk_id for item in ranked}
         
-        # Build should filters for each target term
+        # Prefer the in-memory payload snapshot. It is deterministic and also
+        # matches normalized Vietnamese names that Qdrant MatchText may miss.
+        try:
+            payloads = repository.all_payloads()
+            for payload in payloads:
+                haystack = normalize_for_match(" ".join(
+                    str(payload.get(key, ""))
+                    for key in ("citation", "so_hieu", "ten", "doc_id")
+                ))
+                matched_term = next((term for term in target_terms if normalize_for_match(term) in haystack), None)
+                if not matched_term:
+                    continue
+                chunk_id = str(payload.get("chunk_id", ""))
+                if not chunk_id or chunk_id in seen_ids:
+                    continue
+                score = 3.0 + (1.0 if payload.get("loai_van_ban") in query_intent.source_priority else 0.0)
+                expansions.append(RetrievedChunk(
+                    chunk_id=chunk_id,
+                    doc_id=str(payload.get("doc_id", "")),
+                    text=payload.get("text", ""),
+                    metadata={k: v for k, v in payload.items() if k not in {"chunk_id", "doc_id", "text"}},
+                    scores={"cross_ref": score},
+                    sources=["cross_ref"],
+                ))
+                seen_ids.add(chunk_id)
+                if len(expansions) >= limit:
+                    return expansions
+        except Exception:
+            pass
+
+        # Fallback for repositories that do not expose a payload snapshot.
+        # Build should filters for each target term.
         should_conditions = []
         for term in target_terms:
             should_conditions.append(FieldCondition(key="citation", match=MatchText(text=term)))

@@ -7,6 +7,11 @@ Chạy: python -m scripts.validate_processed
 import json
 import sys
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from app.core.config import settings
 
 PARSED_DIR = settings.parsed_dir
@@ -130,9 +135,12 @@ def validate_van_ban(data: dict, file_path: Path) -> list[str]:
 def validate_an_le(data: dict, file_path: Path) -> list[str]:
     issues = []
 
-    if not data.get("tinh_huong_phap_ly"):
+    # Legacy án lệ may provide only a “Khái quát nội dung” section.
+    legacy_summary = bool(data.get("khai_quat_noi_dung"))
+
+    if not data.get("tinh_huong_phap_ly") and not legacy_summary:
         issues.append("thiếu tình huống pháp lý")
-    if not data.get("giai_phap_phap_ly"):
+    if not data.get("giai_phap_phap_ly") and not legacy_summary:
         issues.append("thiếu giải pháp pháp lý")
     if not data.get("noi_dung_vu_an"):
         issues.append("thiếu nội dung vụ án")
@@ -173,6 +181,8 @@ def validate_an_le(data: dict, file_path: Path) -> list[str]:
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 

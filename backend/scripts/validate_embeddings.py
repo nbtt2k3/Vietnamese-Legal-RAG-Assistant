@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 
 EMBEDDINGS_DIR = Path("data/embeddings")
@@ -30,6 +31,8 @@ def check_file(file_path: Path) -> tuple[int, int, int]:
     return passed, failed, wrong_dims
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     print("=" * 50)
     print("🔍 KIỂM ĐỊNH CHẤT LƯỢNG VECTOR (EMBEDDINGS)")
     print("=" * 50)

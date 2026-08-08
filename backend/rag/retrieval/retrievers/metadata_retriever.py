@@ -5,6 +5,7 @@ from rag.retrieval.models import QueryIntent, RetrievedChunk
 from rag.retrieval.repository import QdrantRepository
 from rag.retrieval.retrievers.base import BaseRetriever
 from rag.retrieval.text_utils import contains_normalized, normalize_for_match
+from rag.retrieval.temporal import allows_historical, temporal_state
 
 
 class MetadataRetriever(BaseRetriever):
@@ -40,7 +41,7 @@ class MetadataRetriever(BaseRetriever):
         validity = str(payload.get("validity_status", "")).lower()
         constraints = exact_constraints(query_intent)
 
-        if query_intent.loai_yeu_cau not in ("validity_question", "case_law_question") and validity == "het_hieu_luc":
+        if temporal_state(payload, query_intent) == "expired" and not allows_historical(query_intent):
             return 0.0
 
         if constraints["doc_ids"] and payload.get("doc_id") not in constraints["doc_ids"]:
@@ -54,6 +55,12 @@ class MetadataRetriever(BaseRetriever):
                 score += 25.0
             elif article_matches(payload, constraints["article_numbers"]):
                 score += 18.0
+            elif query_intent.loai_yeu_cau == "citation_lookup":
+                return 0.0
+        if constraints.get("clause_numbers"):
+            clause_number = normalize_for_match(str(payload.get("khoan_number", "")))
+            if clause_number in constraints["clause_numbers"]:
+                score += 35.0
             elif query_intent.loai_yeu_cau == "citation_lookup":
                 return 0.0
 

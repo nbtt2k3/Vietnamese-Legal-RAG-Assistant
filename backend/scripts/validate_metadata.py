@@ -131,6 +131,8 @@ def validate_file(file_path: Path) -> tuple[int, int]:
     return passed, failed
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="Validate Metadata JSON files")
     parser.add_argument("--loai", type=str, help="Loại văn bản (bo_luat, nghi_dinh...)")
     args = parser.parse_args()

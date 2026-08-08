@@ -68,6 +68,19 @@ class CaseLawChunker(BaseChunker):
                 text=tinh_huong.strip(),
                 metadata=meta
             ))
+
+        # Legacy án lệ có “Khái quát nội dung” thay cho hai mục cấu trúc mới.
+        khai_quat = data.get("khai_quat_noi_dung")
+        if khai_quat:
+            meta = self._section_metadata(self._merge_metadata(global_meta, keyword_meta, "khai_quat_noi_dung"), doc_id, "khai_quat_noi_dung", section_locations.get("khai_quat_noi_dung"))
+            meta["legal_unit_type"] = "an_le_khai_quat"
+            meta["legal_role"] = "case_summary"
+            chunks.append(Chunk(
+                chunk_id=f"{doc_id}_khai_quat",
+                doc_id=doc_id,
+                text=khai_quat.strip(),
+                metadata=meta
+            ))
             
         # 2. Giải pháp pháp lý
         giai_phap = data.get("giai_phap_phap_ly")

@@ -11,7 +11,10 @@ from ingestion.source_registry import (
 from scripts.validate_source_registry import validate_source_registry_file
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = BACKEND_ROOT.parent
+if (PROJECT_ROOT / "backend").is_dir():
+    BACKEND_ROOT = PROJECT_ROOT / "backend"
 
 
 def _base_source():
@@ -291,7 +294,7 @@ def test_bundled_source_registry_has_no_audit_issues():
 
 
 def test_source_registry_validation_script_passes_bundled_registry():
-    issues = validate_source_registry_file(PROJECT_ROOT / "backend" / "data" / "source_registry.json")
+    issues = validate_source_registry_file(BACKEND_ROOT / "data" / "source_registry.json")
 
     assert issues == []
 

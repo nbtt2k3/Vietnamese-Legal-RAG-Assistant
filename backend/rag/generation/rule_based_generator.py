@@ -9,7 +9,7 @@ from rag.generation.utils import (
 )
 from rag.retrieval.domain_policy import is_scenario_domain_compatible
 from rag.retrieval.models import RetrievalResult, RetrievedChunk
-from rag.retrieval.text_utils import normalize_for_match
+from rag.retrieval.text_utils import citation_matches, normalize_for_match
 
 
 class RuleBasedLegalGenerator:
@@ -39,11 +39,14 @@ class RuleBasedLegalGenerator:
         ][:4]
         case_law = self._select_case_law(retrieval_result)
 
-        short_answer = self._build_short_answer(intent.loai_yeu_cau, primary, case_law)
+        if intent.insufficient_facts:
+            short_answer = self._build_insufficient_short_answer(primary, case_law)
+        else:
+            short_answer = self._build_short_answer(intent.loai_yeu_cau, primary, case_law)
         sections = [
             self._build_conclusion_section(intent.loai_yeu_cau, primary, case_law),
             self._build_analysis_section(intent.loai_yeu_cau, primary, supporting, case_law),
-            self._build_practical_section(intent.loai_yeu_cau, primary, case_law),
+            self._build_practical_section(intent.loai_yeu_cau, primary, case_law, intent.insufficient_facts),
         ]
         sections = [section for section in sections if section.content.strip()]
 
@@ -56,6 +59,10 @@ class RuleBasedLegalGenerator:
         citations = raw_citations
         evidence_items = primary + supporting + case_law
         confidence = self._build_confidence_note(retrieval_result, evidence_items)
+        if intent.insufficient_facts:
+            confidence["level"] = "low"
+            confidence["missing_facts"] = ", ".join(intent.missing_fact_hints)
+            confidence["insufficient_facts"] = True
         review_signal = build_human_review_signal(intent.loai_yeu_cau, confidence, evidence_items)
         confidence.update(review_signal)
         disclaimers = self._build_disclaimers(intent.loai_yeu_cau, ranked, case_law, evidence_items)
@@ -87,6 +94,15 @@ class RuleBasedLegalGenerator:
             reverse=True,
         )
 
+        # Explicit authorities are stronger than generic semantic relevance.
+        # Select one or more hits for each requested document/article before
+        # applying the normal domain preference. This is important for
+        # multi-document questions and for cautious answers whose facts are
+        # incomplete but whose governing article is still known.
+        explicit = self._select_explicit_target_authorities(retrieval_result)
+        if explicit:
+            return self._order_same_article_units(explicit[:4])
+
         if intent.loai_yeu_cau == "citation_lookup":
             # A citation lookup often needs multiple clauses of the same article.
             return self._order_same_article_units(scored[:4])
@@ -107,6 +123,65 @@ class RuleBasedLegalGenerator:
                 continue
             selected.append(item)
             seen_docs.add(item.doc_id)
+            if len(selected) >= 4:
+                break
+        return selected
+
+    def _select_explicit_target_authorities(
+        self,
+        retrieval_result: RetrievalResult,
+    ) -> list[RetrievedChunk]:
+        intent = retrieval_result.query_intent
+        targets = list(dict.fromkeys(intent.citation_targets))
+        if not targets:
+            return []
+
+        # Do not let the scenario domain filter discard an explicitly named
+        # statutory source. The exact target has already been constrained by
+        # retrieval; generation should preserve that evidence.
+        candidates = [
+            item
+            for item in retrieval_result.candidates
+            if item.metadata.get("document_role") != "case_law"
+        ]
+        if not candidates:
+            return []
+        scored = sorted(
+            candidates,
+            key=lambda item: self._generation_priority_score(
+                item,
+                intent.loai_yeu_cau,
+                intent.citation_targets,
+                intent.key_phrases,
+                intent.scenario_terms,
+                intent.normalized_query,
+            ),
+            reverse=True,
+        )
+
+        selected: list[RetrievedChunk] = []
+        selected_ids: set[str] = set()
+        for target in targets:
+            match = next(
+                (
+                    item for item in scored
+                    if item.chunk_id not in selected_ids
+                    and self._matches_generation_target(item, [target])
+                ),
+                None,
+            )
+            if match:
+                selected.append(match)
+                selected_ids.add(match.chunk_id)
+
+        # Add adjacent parent/child units from an explicitly selected article
+        # while keeping a hard bound on answer evidence size.
+        for item in scored:
+            if item.chunk_id in selected_ids:
+                continue
+            if any(self._matches_generation_target(item, [target]) for target in targets):
+                selected.append(item)
+                selected_ids.add(item.chunk_id)
             if len(selected) >= 4:
                 break
         return selected
@@ -152,6 +227,8 @@ class RuleBasedLegalGenerator:
             )
         )
         for target in citation_targets:
+            if citation_matches(str(metadata.get("citation", "")), target):
+                return True
             target_norm = normalize_for_match(target)
             if target_norm and target_norm in haystack:
                 return True
@@ -214,7 +291,7 @@ class RuleBasedLegalGenerator:
 
         for target in citation_targets:
             target_lower = normalize_for_match(target)
-            if target_lower and target_lower in normalized_haystack:
+            if citation_matches(str(metadata.get("citation", "")), target):
                 score += 12.0
             if "nghi dinh" in target_lower and target_lower.replace("nghi dinh ", "") in normalized_haystack:
                 score += 12.0
@@ -285,6 +362,35 @@ class RuleBasedLegalGenerator:
             )
         return "Tình huống này cần đối chiếu thêm hồ sơ, chứng cứ và các căn cứ pháp luật trực tiếp liên quan trước khi kết luận."
 
+    def _build_insufficient_short_answer_legacy(self, primary: list[RetrievedChunk]) -> str:
+        citation = str(primary[0].metadata.get("citation", primary[0].chunk_id)) if primary else "Điều 117 Bộ luật Dân sự"
+        return (
+            "Chưa đủ tình tiết để kết luận hợp đồng vô hiệu. Cần đối chiếu điều kiện về chủ thể, "
+            "sự tự nguyện, mục đích và nội dung của giao dịch theo "
+            + citation
+            + "."
+        )
+
+    def _build_insufficient_short_answer(
+        self,
+        primary: list[RetrievedChunk],
+        case_law: list[RetrievedChunk] | None = None,
+    ) -> str:
+        evidence = [*primary[:2], *(case_law or [])[:1]]
+        citations = [
+            str(item.metadata.get("citation", item.chunk_id))
+            for item in evidence
+        ]
+        citation_text = "; ".join(dict.fromkeys(citations))
+        if not citation_text:
+            citation_text = "Điều 117 Bộ luật Dân sự"
+        return (
+            "Chưa đủ tình tiết để kết luận chính xác. Cần đối chiếu chủ thể, thời điểm, "
+            "giấy tờ, hành vi và nội dung giao dịch theo "
+            + citation_text
+            + "."
+        )
+
     def _build_citation_short_answer(self, primary: list[RetrievedChunk]) -> str:
         if primary:
             citations = ", ".join(str(item.metadata.get("citation", item.chunk_id)) for item in primary[:3])
@@ -353,12 +459,15 @@ class RuleBasedLegalGenerator:
         request_type: str,
         primary: list[RetrievedChunk],
         case_law: list[RetrievedChunk],
+        insufficient_facts: bool = False,
     ) -> AnswerSection:
         notes = []
         citations = []
         if request_type == "scenario_application":
             notes.append("- Cần kiểm tra thêm hồ sơ, chứng cứ, thời điểm phát sinh sự kiện và vai trò của từng chủ thể trước khi áp dụng căn cứ pháp luật.")
             notes.append("- Nếu tình huống có nhiều quan hệ pháp luật chồng lấn, cần tách từng vấn đề để tránh dùng nhầm căn cứ giữa các lĩnh vực.")
+            if insufficient_facts:
+                notes.append("- Với dữ kiện hiện có, chưa thể kết luận hợp đồng vô hiệu; cần làm rõ chủ thể, sự tự nguyện, mục đích và nội dung giao dịch.")
         elif request_type == "validity_question":
             notes.append("- Nên tách bạch giữa hiệu lực của hợp đồng/giao dịch và hiệu lực đối kháng với người thứ ba vì đây là hai lớp pháp lý khác nhau.")
             notes.append("- Nếu văn bản có yêu cầu công chứng, chứng thực hoặc đăng ký, cần kiểm tra thêm mốc thời gian thực tế của từng thủ tục.")

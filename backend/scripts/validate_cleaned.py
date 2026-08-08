@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 import re
 
@@ -60,6 +61,8 @@ def validate_doc(data: dict) -> list:
     return issues
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     total, ok, warn = 0, 0, 0
     if not CLEANED_DIR.exists():
         print(f"Thư mục {CLEANED_DIR} không tồn tại.")

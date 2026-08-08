@@ -15,9 +15,30 @@ class FakeJudgeClient:
         return {"message": {"content": json.dumps(self.payload)}}
 
 
+class CountingJudgeClient(FakeJudgeClient):
+    def __init__(self, payload):
+        super().__init__(payload)
+        self.calls = 0
+
+    def chat(self, **kwargs):
+        self.calls += 1
+        return super().chat(**kwargs)
+
+
 class FailingJudgeClient:
     def chat(self, **kwargs):
         raise RuntimeError("judge unavailable")
+
+
+class SequenceJudgeClient:
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.calls = 0
+
+    def chat(self, **kwargs):
+        response = self.responses[min(self.calls, len(self.responses) - 1)]
+        self.calls += 1
+        return {"message": {"content": response}}
 
 
 class FakeJudge:
@@ -113,6 +134,50 @@ def test_llm_judge_returns_safe_zero_when_unavailable():
     assert "unavailable" in judge.last_reasons["faithfulness"]
 
 
+def test_llm_judge_repairs_fenced_json_with_trailing_comma():
+    judge = LLMJudge(
+        client=SequenceJudgeClient(['```json\n{"score": 0.8, "reason": "ok",}\n```']),
+        timeout_seconds=1,
+        max_attempts=1,
+    )
+
+    assert judge.evaluate_answer_relevance("q", "a") == 0.8
+
+
+def test_llm_judge_retries_with_repair_prompt_after_invalid_json():
+    client = SequenceJudgeClient([
+        '{"score": 0.8, "reason": "broken",',
+        '{"score": 0.7, "reason": "repaired"}',
+    ])
+    judge = LLMJudge(client=client, timeout_seconds=1, max_attempts=2)
+
+    assert judge.evaluate_answer_relevance("q", "a") == 0.7
+    assert client.calls == 2
+    assert judge.last_reasons["answer_relevance"] == "repaired"
+
+
+def test_llm_judge_triad_uses_one_call_and_returns_three_scores():
+    client = CountingJudgeClient(
+        {
+            "answer_relevance": 0.9,
+            "faithfulness": 0.8,
+            "context_precision": 0.7,
+            "reasons": {
+                "answer_relevance": "direct",
+                "faithfulness": "grounded",
+                "context_precision": "useful",
+            },
+        }
+    )
+    judge = LLMJudge(client=client, timeout_seconds=1)
+
+    metrics = judge.evaluate_triad("q", "a", "context")
+
+    assert client.calls == 1
+    assert metrics == {"answer_relevance": 0.9, "faithfulness": 0.8, "context_precision": 0.7}
+    assert judge.last_reasons["faithfulness"] == "grounded"
+
+
 def test_evaluator_records_llm_judge_metrics_and_reasons(tmp_path):
     evaluator = LegalRAGEvaluator(
         dataset_path=_dataset(tmp_path),
@@ -129,6 +194,61 @@ def test_evaluator_records_llm_judge_metrics_and_reasons(tmp_path):
     assert case.metrics["faithfulness"] == 0.8
     assert case.metrics["context_precision"] == 0.7
     assert case.observed["llm_judge_reasons"]["faithfulness"] == "grounded"
+
+
+def test_evaluator_skips_llm_judge_for_correct_abstention(tmp_path):
+    dataset = {
+        "dataset_name": "abstention_judge",
+        "cases": [
+            {
+                "case_id": "unsupported",
+                "query": "unsupported question",
+                "expected_request_type": "out_of_scope",
+                "should_answer": False,
+                "min_confidence_level": "low",
+            }
+        ],
+    }
+    dataset_path = tmp_path / "dataset.json"
+    dataset_path.write_text(json.dumps(dataset), encoding="utf-8")
+
+    class AbstainingPipeline:
+        def run(self, query: str):
+            intent = QueryIntent(
+                raw_query=query,
+                normalized_query=query,
+                loai_yeu_cau="out_of_scope",
+            )
+            retrieval = RetrievalResult(query_intent=intent)
+            answer = LegalAnswer(
+                query=query,
+                short_answer="No reliable legal basis is available.",
+                confidence={"level": "low"},
+                disclaimers=["Outside supported scope."],
+                answer_method="guardrail",
+            )
+            return answer, retrieval
+
+    class NoCallJudge:
+        last_reasons = {}
+
+        def evaluate_triad(self, *args, **kwargs):
+            raise AssertionError("LLM judge must not run for a correct abstention")
+
+    evaluator = LegalRAGEvaluator(
+        dataset_path=str(dataset_path),
+        use_llm=False,
+        use_llm_judge=True,
+        pipeline=AbstainingPipeline(),
+        llm_judge=NoCallJudge(),
+    )
+
+    report = evaluator.run()
+    case = report.cases[0]
+
+    assert case.passed is True
+    assert case.observed["llm_judge_applicable"] is False
+    assert case.metrics["answer_relevance"] == 1.0
 
 
 def test_evaluator_does_not_leak_stale_llm_judge_reasons(tmp_path):

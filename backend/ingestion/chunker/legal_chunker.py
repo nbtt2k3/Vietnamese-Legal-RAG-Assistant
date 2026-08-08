@@ -43,16 +43,36 @@ class LegalChunker(BaseChunker):
             dieu_number = dieu.get("number", "")
             dieu_meta_raw = dieu.get("metadata", {})
             dieu_merged_meta = self._merge_metadata(global_meta, dieu_meta_raw)
+            article_node_id = f"{doc_id}_dieu_{dieu_number}"
+            article_parent_id = f"{doc_id}_document"
+            article_context = " - ".join(
+                part for part in [
+                    f"Chuong {dieu.get('chuong_number', '')}: {dieu.get('chuong_title', '')}" if dieu.get("chuong_title") else "",
+                    f"Dieu {dieu_number}. {dieu.get('title', '')}".strip(),
+                ] if part
+            )
             
             # 1a. Intro text của Điều (phần chữ trước khi vào các khoản)
             dieu_text = dieu.get("text", "").strip()
             if dieu_text:
+                intro_meta = dict(dieu_merged_meta)
+                intro_meta.update({
+                    "node_id": article_node_id,
+                    "node_type": "dieu",
+                    "parent_id": article_parent_id,
+                    "ancestor_ids": [article_parent_id],
+                    "path": [global_meta.get("ten", doc_id), article_context],
+                    "parent_context": article_context,
+                    "parent_chunk_id": None,
+                    "chunk_part": 1,
+                    "chunk_parts": 1,
+                })
                 full_intro = f"Điều {dieu_number}. {dieu.get('title', '')}\n{dieu_text}".strip()
                 chunks.append(Chunk(
                     chunk_id=f"{doc_id}_dieu_{dieu_number}_intro",
                     doc_id=doc_id,
                     text=full_intro,
-                    metadata=dieu_merged_meta
+                    metadata=intro_meta
                 ))
             
             # 1b. Các Khoản (và Điểm bên trong)
@@ -71,23 +91,40 @@ class LegalChunker(BaseChunker):
                     parts.append(f"  Điểm {diem.get('id', '')}) {diem.get('text', '')}")
                 
                 khoan_full_text = "\n".join(parts).strip()
+                khoan_node_id = khoan_merged_meta.get(
+                    "node_id",
+                    f"{doc_id}_dieu_{dieu_number}_khoan_{khoan_number}",
+                )
+                khoan_metadata = dict(khoan_merged_meta)
+                khoan_metadata.update({
+                    "node_id": khoan_node_id,
+                    "node_type": "khoan",
+                    "parent_id": article_node_id,
+                    "ancestor_ids": [article_parent_id, article_node_id],
+                    "path": [global_meta.get("ten", doc_id), article_context, f"Khoan {khoan_number}"],
+                    "parent_context": article_context,
+                    "parent_chunk_id": f"{doc_id}_dieu_{dieu_number}_intro",
+                })
                 
                 # Check nếu Khoản quá dài, cần split. Thường thì Khoản khá ngắn (dưới 1500 char)
                 if len(khoan_full_text) > self.splitter.chunk_size:
                     splits = self.splitter.split_text(khoan_full_text)
                     for i, split_txt in enumerate(splits):
+                        split_metadata = dict(khoan_metadata)
+                        split_metadata.update({"chunk_part": i + 1, "chunk_parts": len(splits)})
                         chunks.append(Chunk(
                             chunk_id=f"{doc_id}_dieu_{dieu_number}_khoan_{khoan_number}_p{i+1}",
                             doc_id=doc_id,
                             text=split_txt,
-                            metadata=khoan_merged_meta
+                            metadata=split_metadata
                         ))
                 else:
+                    khoan_metadata.update({"chunk_part": 1, "chunk_parts": 1})
                     chunks.append(Chunk(
                         chunk_id=f"{doc_id}_dieu_{dieu_number}_khoan_{khoan_number}",
                         doc_id=doc_id,
                         text=khoan_full_text,
-                        metadata=khoan_merged_meta
+                        metadata=khoan_metadata
                     ))
 
         # 2. Chunk Phụ lục

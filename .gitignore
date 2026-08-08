@@ -79,6 +79,10 @@ backend/data/*.db
 backend/data/*.sqlite
 backend/data/*.sqlite3
 
+# Evaluation artifacts generated locally
+backend/evaluation/datasets/legal_rag_eval_v3.json
+backend/evaluation/reports/
+
 # Logs
 logs/
 *.log

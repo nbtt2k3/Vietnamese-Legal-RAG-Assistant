@@ -1,13 +1,14 @@
 from rag.retrieval.models import QueryIntent, RetrievalResult, RetrievedChunk
 from rag.retrieval.evidence_builder import EvidenceBuilder
 from rag.retrieval.pipeline import RetrievalPipeline
+from rag.retrieval.constraints import exact_constraints, payload_matches_exact_constraints
 from rag.retrieval.query_analyzer import QueryAnalyzer
-from rag.retrieval.constraints import exact_constraints
 from rag.retrieval.document_resolver import resolve_document_ids, source_types_from_text
 from rag.retrieval.retrievers.lexical_retriever import LexicalRetriever
 from rag.retrieval.retrievers.metadata_retriever import MetadataRetriever
 from rag.retrieval.text_utils import contains_normalized, tokenize_for_bm25
 from rag.generation.rule_based_generator import RuleBasedLegalGenerator
+from evaluation.utils import citation_matches
 
 
 def test_document_resolver_uses_registry_aliases_instead_of_code_doc_id_constants():
@@ -53,6 +54,64 @@ def test_exact_constraints_resolves_numbered_documents_from_registry_metadata():
 
     assert constraints["doc_ids"] == {"nghi_dinh_21_2021_ND_CP"}
     assert constraints["source_types"] == {"nghi_dinh"}
+
+
+def test_target_constraints_do_not_inherit_another_document_id():
+    pipeline = RetrievalPipeline.__new__(RetrievalPipeline)
+    intent = QueryIntent(
+        raw_query="tai nan giao thong",
+        normalized_query="tai nan giao thong",
+        loai_yeu_cau="scenario_application",
+        citation_targets=[
+            "Bộ luật Hình sự, Điều 260",
+            "Bộ luật Dân sự, Điều 590",
+        ],
+    )
+
+    criminal = pipeline._target_constraints(intent, intent.citation_targets[0])
+    civil = pipeline._target_constraints(intent, intent.citation_targets[1])
+
+    assert "bo_luat_91_2015_QH13" not in criminal["doc_ids"]
+    assert "bo_luat_91_2015_QH13" in civil["doc_ids"]
+
+
+def test_explicit_authority_injection_deduplicates_parent_payloads():
+    pipeline = RetrievalPipeline.__new__(RetrievalPipeline)
+    intent = QueryIntent(
+        raw_query="dang ky bien phap bao dam",
+        normalized_query="dang ky bien phap bao dam",
+        loai_yeu_cau="validity_question",
+        citation_targets=["Bộ luật Dân sự, Điều 319, Khoản 2"],
+    )
+
+    class RepositoryStub:
+        def all_payloads(self):
+            return [
+                {
+                    "chunk_id": "civil-319-parent",
+                    "doc_id": "bo_luat_91_2015_QH13",
+                    "text": "Điều 319. Hiệu lực đối kháng với người thứ ba.",
+                    "citation": "Bộ luật Dân sự, Điều 319",
+                    "dieu_number": "319",
+                    "node_type": "dieu",
+                    "loai_van_ban": "bo_luat",
+                },
+                {
+                    "chunk_id": "civil-319-k2",
+                    "doc_id": "bo_luat_91_2015_QH13",
+                    "text": "Khoản 2. Hiệu lực đối kháng phát sinh từ thời điểm đăng ký.",
+                    "citation": "Bộ luật Dân sự, Điều 319, Khoản 2",
+                    "dieu_number": "319",
+                    "khoan_number": "2",
+                    "node_type": "khoan",
+                    "loai_van_ban": "bo_luat",
+                },
+            ]
+
+    merged = {}
+    pipeline._inject_explicit_authority_candidates(RepositoryStub(), intent, merged, {})
+
+    assert list(merged) == ["civil-319-parent", "civil-319-k2"]
 
 
 def test_source_type_detection_does_not_require_doc_id_mapping():
@@ -474,3 +533,271 @@ def test_vector_fallback_is_skipped_when_exact_retrievers_are_sufficient():
     _, debug = pipeline._collect_candidates(repository=object(), query_intent=intent)
 
     assert "vector_fallback" not in debug["retriever_hits"]
+
+def test_exact_constraints_require_the_requested_clause():
+    intent = QueryAnalyzer().analyze(
+        "Theo Kho\u1ea3n 1 \u0110i\u1ec1u 117 B\u1ed9 lu\u1eadt D\u00e2n s\u1ef1, giao d\u1ecbch c\u00f3 hi\u1ec7u l\u1ef1c kh\u00f4ng?",
+        force_deterministic=True,
+    )
+    constraints = exact_constraints(intent)
+    base = {
+        "doc_id": "bo_luat_91_2015_QH13",
+        "loai_van_ban": "bo_luat",
+        "dieu_number": "117",
+        "citation": "B\u1ed9 lu\u1eadt D\u00e2n s\u1ef1, \u0110i\u1ec1u 117",
+    }
+    assert payload_matches_exact_constraints({**base, "khoan_number": "1"}, constraints)
+    assert not payload_matches_exact_constraints({**base, "khoan_number": "2"}, constraints)
+
+def test_rule_analyzer_routes_unseen_article_query_to_citation_lookup():
+    intent = QueryAnalyzer().analyze(
+        "\u0110i\u1ec1u 352 B\u1ed9 lu\u1eadt H\u00ecnh s\u1ef1 quy \u0111\u1ecbnh g\u00ec?",
+        force_deterministic=True,
+    )
+    assert intent.loai_yeu_cau == "citation_lookup"
+    assert "352" in intent.citation_targets[0]
+
+def test_rule_analyzer_routes_natural_language_paraphrases():
+    analyzer = QueryAnalyzer()
+    assert analyzer.analyze(
+        "Khi nào hợp đồng phải lập bằng văn bản hoặc phải công chứng, chứng thực?",
+        force_deterministic=True,
+    ).loai_yeu_cau == "validity_question"
+    assert analyzer.analyze(
+        "Người làm hư hỏng tài sản của người khác phải bồi thường những khoản nào?",
+        force_deterministic=True,
+    ).loai_yeu_cau == "scenario_application"
+    assert analyzer.analyze(
+        "Quyền sử dụng đất và tài sản gắn liền với đất có thể dùng để bảo đảm nghĩa vụ như thế nào?",
+        force_deterministic=True,
+    ).loai_yeu_cau == "citation_lookup"
+
+def test_scenario_promotes_existing_case_law_candidate_into_top_eight():
+    pipeline = RetrievalPipeline.__new__(RetrievalPipeline)
+    intent = QueryAnalyzer().analyze("Tình huống thế chấp tài sản", force_deterministic=True)
+    ranked = [
+        RetrievedChunk(str(i), f"doc-{i}", "text", {"loai_van_ban": "bo_luat"}, {"final": 10.0 - i})
+        for i in range(8)
+    ]
+    ranked.append(
+        RetrievedChunk(
+            "case",
+            "case-doc",
+            "case text",
+            {"loai_van_ban": "an_le", "document_role": "case_law"},
+            {"final": 2.0},
+        )
+    )
+    result = pipeline._promote_case_law_coverage(intent, ranked)
+    assert result[0].chunk_id == "case"
+
+
+def test_insufficient_scenario_does_not_promote_case_law():
+    pipeline = RetrievalPipeline.__new__(RetrievalPipeline)
+    intent = QueryAnalyzer().analyze(
+        "Hợp đồng của tôi có vô hiệu không nếu tôi chỉ nói là bên kia không giữ lời?",
+        force_deterministic=True,
+    )
+    ranked = [
+        RetrievedChunk(str(i), f"doc-{i}", "text", {"loai_van_ban": "bo_luat"}, {"final": 10.0 - i})
+        for i in range(8)
+    ]
+    ranked.append(
+        RetrievedChunk(
+            "case",
+            "case-doc",
+            "case text",
+            {"loai_van_ban": "an_le", "document_role": "case_law"},
+            {"final": 2.0},
+        )
+    )
+    result = pipeline._promote_case_law_coverage(intent, ranked)
+    assert result[0].chunk_id == "0"
+
+
+def test_insufficient_facts_keeps_retrieved_case_law_as_citation():
+    intent = QueryIntent(
+        raw_query="Tình huống thế chấp nhưng chưa đủ tình tiết",
+        normalized_query="tinh huong the chap nhung chua du tinh tiet",
+        loai_yeu_cau="scenario_application",
+        insufficient_facts=True,
+        missing_fact_hints=["thời điểm", "chủ thể"],
+        scenario_terms=["thế chấp"],
+    )
+    case_law = RetrievedChunk(
+        chunk_id="case-43",
+        doc_id="an_le_43_2021_AL",
+        text="Án lệ số 43/2021/AL về hợp đồng thế chấp.",
+        metadata={
+            "citation": "Án lệ số 43/2021/AL",
+            "loai_van_ban": "an_le",
+            "document_role": "case_law",
+            "legal_domain_tags": ["bao_dam", "hop_dong"],
+        },
+        scores={"final": 1.0},
+    )
+    result = RetrievalResult(
+        query_intent=intent,
+        candidates=[case_law],
+        confidence={"level": "low"},
+    )
+
+    answer = RuleBasedLegalGenerator().generate(intent.raw_query, result)
+
+    assert answer.citations
+    assert any("43/2021/AL" in item.citation for item in answer.citations)
+    assert "43/2021/AL" in answer.short_answer
+
+
+def test_exact_third_party_scenario_anchor_filters_to_civil_code_clause():
+    pipeline = RetrievalPipeline.__new__(RetrievalPipeline)
+    intent = QueryAnalyzer().analyze(
+        "Neu tai san the chap chua dang ky thi co doi khang voi nguoi thu ba khong?",
+        force_deterministic=True,
+    )
+    debug = {}
+    ranked = {
+        "civil-319-2": RetrievedChunk(
+            "civil-319-2", "bo_luat_91_2015_QH13", "text",
+            {"loai_van_ban": "bo_luat", "dieu_number": "319", "khoan_number": "2", "citation": "Bộ luật Dân sự, Điều 319, Khoản 2"},
+            {"metadata": 10.0},
+        ),
+        "criminal-319-2": RetrievedChunk(
+            "criminal-319-2", "bo_luat_100_2015_QH13", "text",
+            {"loai_van_ban": "bo_luat", "dieu_number": "319", "khoan_number": "2", "citation": "Bộ luật Hình sự, Điều 319, Khoản 2"},
+            {"metadata": 10.0},
+        ),
+    }
+
+    filtered = pipeline._filter_exact_lookup_candidates(intent, ranked, debug)
+
+    assert list(filtered) == ["civil-319-2"]
+
+
+def test_case_law_question_with_explicit_target_still_promotes_case_law():
+    pipeline = RetrievalPipeline.__new__(RetrievalPipeline)
+    intent = QueryIntent(
+        raw_query="Án lệ số 43/2021/AL",
+        normalized_query="Án lệ số 43/2021/AL",
+        loai_yeu_cau="case_law_question",
+        citation_targets=["Án lệ số 43/2021/AL"],
+    )
+    ranked = [
+        RetrievedChunk(str(i), f"doc-{i}", "text", {"loai_van_ban": "bo_luat"}, {"final": 10.0 - i})
+        for i in range(8)
+    ]
+    ranked.append(
+        RetrievedChunk(
+            "case",
+            "case-doc",
+            "case text",
+            {"loai_van_ban": "an_le", "document_role": "case_law"},
+            {"final": 2.0},
+        )
+    )
+    result = pipeline._promote_case_law_coverage(intent, ranked)
+    assert result[0].chunk_id == "case"
+
+
+def test_exact_case_law_target_filters_semantically_similar_case_law_noise():
+    pipeline = RetrievalPipeline.__new__(RetrievalPipeline)
+    intent = QueryIntent(
+        raw_query="Án lệ số 43/2021/AL liên quan gì đến thế chấp?",
+        normalized_query="Án lệ số 43/2021/AL liên quan gì đến thế chấp?",
+        loai_yeu_cau="case_law_question",
+        citation_targets=["Án lệ số 43/2021/AL"],
+    )
+    merged = {
+        "case-43": RetrievedChunk(
+            "case-43", "an_le_so_43_2021_AL", "case text",
+            {"loai_van_ban": "an_le", "document_role": "case_law", "citation": "Án lệ số 43/2021/AL"},
+        ),
+        "case-50": RetrievedChunk(
+            "case-50", "an_le_so_50_2021_AL", "similar case text",
+            {"loai_van_ban": "an_le", "document_role": "case_law", "citation": "Án lệ số 50/2021/AL"},
+        ),
+    }
+
+    filtered = pipeline._filter_exact_case_law_candidates(intent, merged, {})
+
+    assert list(filtered) == ["case-43"]
+
+
+def test_citation_match_ignores_inserted_document_title():
+    observed = "Nghị định 21/2021/NĐ-CP - NGHỊ ĐỊNH quy định thi hành Bộ luật Dân sự, Điều 7, Khoản 3"
+    expected = "Nghị định 21/2021/NĐ-CP, Điều 7"
+
+    assert citation_matches(observed, expected)
+
+
+def test_exact_article_target_prefers_article_parent_over_child_clause():
+    pipeline = RetrievalPipeline.__new__(RetrievalPipeline)
+    intent = QueryIntent(
+        raw_query="Người làm hư hỏng tài sản phải bồi thường những khoản nào?",
+        normalized_query="Người làm hư hỏng tài sản phải bồi thường những khoản nào?",
+        loai_yeu_cau="scenario_application",
+        citation_targets=["Bộ luật Dân sự, Điều 589"],
+        source_priority=["bo_luat"],
+    )
+    ranked = [
+        RetrievedChunk(
+            "child", "bo_luat_91_2015_QH13", "Khoản 1",
+            {"loai_van_ban": "bo_luat", "dieu_number": "589", "khoan_number": "1", "citation": "Bộ luật Dân sự, Điều 589, Khoản 1"},
+            {"final": 10.0},
+        ),
+        RetrievedChunk(
+            "parent", "bo_luat_91_2015_QH13", "Điều 589",
+            {"loai_van_ban": "bo_luat", "dieu_number": "589", "node_type": "dieu", "citation": "Bộ luật Dân sự, Điều 589"},
+            {"final": 9.0},
+        ),
+    ]
+
+    result = pipeline._ensure_exact_authority_coverage(intent, ranked)
+
+    assert [item.chunk_id for item in result[:2]] == ["parent", "child"]
+
+
+def test_exact_document_identity_excludes_same_number_article_from_other_code():
+    pipeline = RetrievalPipeline.__new__(RetrievalPipeline)
+    intent = QueryIntent(
+        raw_query="Người từ đủ 14 tuổi đến dưới 16 tuổi chịu trách nhiệm hình sự",
+        normalized_query="Người từ đủ 14 tuổi đến dưới 16 tuổi chịu trách nhiệm hình sự",
+        loai_yeu_cau="validity_question",
+        citation_targets=["Bộ luật Hình sự, Điều 12"],
+    )
+    merged = {
+        "criminal-12": RetrievedChunk(
+            "criminal-12",
+            "bo_luat_100_2015_QH13",
+            "text",
+            {
+                "loai_van_ban": "bo_luat",
+                "citation": "Bộ luật Hình sự, Điều 12",
+                "dieu_number": "12",
+            },
+        ),
+        "civil-12": RetrievedChunk(
+            "civil-12",
+            "bo_luat_91_2015_QH13",
+            "text",
+            {
+                "loai_van_ban": "bo_luat",
+                "citation": "Bộ luật Dân sự, Điều 12",
+                "dieu_number": "12",
+            },
+        ),
+        "criminal-122": RetrievedChunk(
+            "criminal-122",
+            "bo_luat_100_2015_QH13",
+            "text",
+            {
+                "loai_van_ban": "bo_luat",
+                "citation": "Bộ luật Hình sự, Điều 122",
+                "dieu_number": "122",
+            },
+        ),
+    }
+
+    filtered = pipeline._filter_exact_lookup_candidates(intent, merged, {})
+
+    assert list(filtered) == ["criminal-12"]

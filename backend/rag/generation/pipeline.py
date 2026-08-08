@@ -43,6 +43,7 @@ class GenerationPipeline:
                 retrieval_debug=retrieval_result.retrieval_debug,
                 answer_method="guardrail"
             )
+            answer = self._build_guardrail_answer(query, retrieval_result)
             return answer, retrieval_result
 
         t0 = time.time()
@@ -94,6 +95,7 @@ class GenerationPipeline:
                 retrieval_debug=retrieval_result.retrieval_debug,
                 answer_method="guardrail"
             )
+            answer = self._build_guardrail_answer(query, retrieval_result)
             yield f"data: {json.dumps({'type': 'retrieval', 'data': jsonable_encoder(retrieval_result.to_dict())})}\n\n"
             yield f"data: {json.dumps({'type': 'answer', 'data': jsonable_encoder(answer.to_dict())})}\n\n"
             return
@@ -127,6 +129,35 @@ class GenerationPipeline:
         self._apply_grounding_gate(answer)
         
         yield f"data: {json.dumps({'type': 'answer', 'data': jsonable_encoder(answer.to_dict())})}\n\n"
+
+    @staticmethod
+    def _build_guardrail_answer(query: str, retrieval_result: RetrievalResult) -> LegalAnswer:
+        """Build a clear abstention that is useful to users and evaluators."""
+        return LegalAnswer(
+            query=query,
+            short_answer=(
+                "Xin lỗi, câu hỏi này không phù hợp hoặc nằm ngoài phạm vi dữ liệu pháp luật hiện có. "
+                "Hệ thống chưa cập nhật đủ căn cứ để đưa ra kết luận đáng tin cậy và chỉ hỗ trợ các vấn đề pháp lý "
+                "có nguồn phù hợp trong kho dữ liệu."
+            ),
+            sections=[
+                AnswerSection(
+                    title="Phạm vi hỗ trợ",
+                    content=(
+                        "Vui lòng đặt câu hỏi thuộc nhóm văn bản pháp luật mà hệ thống đang hỗ trợ. "
+                        "Không nên dùng câu trả lời này thay cho tư vấn pháp lý chính thức."
+                    ),
+                )
+            ],
+            citations=[],
+            confidence={"level": "high", "note": "Guardrail triggered"},
+            disclaimers=[
+                "Câu hỏi nằm ngoài phạm vi hỗ trợ hoặc chưa đủ căn cứ pháp luật trong hệ thống.",
+                "Hệ thống không đưa ra kết luận pháp lý cho nội dung này.",
+            ],
+            retrieval_debug=retrieval_result.retrieval_debug,
+            answer_method="guardrail",
+        )
 
     @staticmethod
     def _apply_grounding_gate(answer: LegalAnswer) -> None:

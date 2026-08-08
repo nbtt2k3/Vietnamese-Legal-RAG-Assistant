@@ -6,6 +6,7 @@ from typing import Any
 class EvalCase:
     case_id: str
     query: str
+    generated_from: str | None = None
     tags: list[str] = field(default_factory=list)
     expected_request_type: str = ""
     expected_citations: list[str] = field(default_factory=list)

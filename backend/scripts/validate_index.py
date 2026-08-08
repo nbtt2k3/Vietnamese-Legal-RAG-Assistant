@@ -7,12 +7,15 @@ from qdrant_client import QdrantClient
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
+from app.core.config import settings
+
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
     parser = argparse.ArgumentParser(description="Kiểm tra xem dữ liệu đã được index vào Qdrant thành công chưa.")
-    parser.add_argument("--db-path", type=str, default="data/qdrant_db", help="Thư mục lưu trữ database local")
+    parser.add_argument("--db-path", type=str, default=str(settings.qdrant_db_path), help="Thư mục lưu trữ database local")
+    parser.add_argument("--qdrant-url", type=str, default=settings.qdrant_url, help="Qdrant URL; Docker thường là http://qdrant:6333")
     parser.add_argument("--sample-only", action="store_true", help="Kiểm tra collection sample")
     
     args = parser.parse_args()
@@ -20,9 +23,16 @@ def main():
     collection_name = "legal_docs_sample" if args.sample_only else "legal_docs"
     vector_size = 100 if args.sample_only else 1024
     
-    print(f"[INFO] Đang kết nối Qdrant tại {args.db_path}...")
+    target = args.qdrant_url or args.db_path
+    print(f"[INFO] Đang kết nối Qdrant tại {target}...")
     try:
-        client = QdrantClient(path=str(Path(project_root) / args.db_path))
+        if args.qdrant_url:
+            client_kwargs = {"url": args.qdrant_url}
+            if settings.qdrant_api_key:
+                client_kwargs["api_key"] = settings.qdrant_api_key
+            client = QdrantClient(**client_kwargs)
+        else:
+            client = QdrantClient(path=str(Path(project_root) / args.db_path))
     except Exception as e:
         print(f"[ERROR] Không thể kết nối Qdrant: {e}")
         return

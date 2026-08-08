@@ -20,12 +20,32 @@ from app.core.config import settings
 from app.core.logging import logger
 from app.db.models import Document, DocumentRelationship
 from app.db.session import SessionLocal
+from sqlalchemy import text
 import copy
 
 RAW_DIR = settings.raw_dir
 PARSED_DIR = settings.parsed_dir
 CLEANED_DIR = settings.cleaned_dir
 METADATA_DIR = settings.metadata_dir
+
+
+def _synchronize_document_relationship_sequence(db) -> None:
+    """Align PostgreSQL's auto-increment sequence with existing rows.
+
+    A previous import left the sequence behind the table's MAX(id), causing
+    re-ingestion of case-law relationships to fail with duplicate primary-key
+    errors. This is safe to run before each document's relationship upsert and
+    also handles an empty table.
+    """
+    db.execute(text(
+        """
+        SELECT setval(
+            pg_get_serial_sequence('document_relationships', 'id'),
+            COALESCE((SELECT MAX(id) FROM document_relationships), 0) + 1,
+            false
+        )
+        """
+    ))
 
 # "Luật số:", "Bộ luật số:", "Nghị định số:"... hoặc chỉ "Số:" trơn (Nghị định/Thông tư thường ghi kiểu này)
 RE_SO_HIEU = re.compile(
@@ -534,6 +554,7 @@ def run_pipeline(raw_dir: Path = RAW_DIR, parsed_dir: Path = PARSED_DIR, cleaned
                         doc.validity_confidence = legal_meta.get("validity_confidence")
                         doc.validity_checked_at = legal_meta.get("validity_checked_at")
 
+                        _synchronize_document_relationship_sequence(db)
                         db.query(DocumentRelationship).filter(
                             DocumentRelationship.source_doc_id == metadata_res["doc_id"]
                         ).delete()

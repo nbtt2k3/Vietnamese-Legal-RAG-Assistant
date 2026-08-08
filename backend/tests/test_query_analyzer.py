@@ -139,3 +139,71 @@ def test_evidence_builder_keeps_appendix_out_of_core_unless_requested():
 
     assert [item.doc_id for item in evidence.core_authorities] == ["law-doc"]
     assert all(item.doc_id != "appendix-doc" for item in evidence.supporting_authorities)
+
+
+def test_query_analyzer_marks_insufficient_contract_facts_without_promoting_case_law():
+    intent = QueryAnalyzer().analyze(
+        "Hợp đồng của tôi có vô hiệu không nếu tôi chỉ nói là bên kia không giữ lời?",
+        force_deterministic=True,
+    )
+
+    assert intent.loai_yeu_cau == "scenario_application"
+    assert intent.insufficient_facts is True
+    assert "Điều 117" in intent.citation_targets
+    assert set(intent.missing_fact_hints) >= {"chủ thể", "tự nguyện", "mục đích", "nội dung"}
+
+
+def test_query_analyzer_routes_unaccented_third_party_security_to_article_319_clause_2():
+    intent = QueryAnalyzer().analyze(
+        "Neu tai san the chap chua dang ky thi co doi khang voi nguoi thu ba khong?",
+        force_deterministic=True,
+    )
+
+    assert intent.loai_yeu_cau == "scenario_application"
+    assert "Khoản 2 Điều 319" in intent.citation_targets
+    assert "đối kháng" in intent.scenario_terms
+
+
+def test_query_analyzer_routes_high_signal_new_failure_clusters():
+    analyzer = QueryAnalyzer()
+
+    criminal_age = analyzer.analyze(
+        "Người từ đủ 14 tuổi đến dưới 16 tuổi phải chịu trách nhiệm hình sự về những tội gì?",
+        force_deterministic=True,
+    )
+    assert criminal_age.loai_yeu_cau == "validity_question"
+    assert criminal_age.citation_targets == ["Bộ luật Hình sự, Điều 12"]
+
+    decree_registration = analyzer.analyze(
+        "Những trường hợp nào phải đăng ký biện pháp bảo đảm?",
+        force_deterministic=True,
+    )
+    assert decree_registration.loai_yeu_cau == "citation_lookup"
+    assert decree_registration.citation_targets == ["Nghị định 99/2022/NĐ-CP, Điều 4"]
+
+    standard_contract = analyzer.analyze(
+        "Điều khoản mẫu trong hợp đồng theo mẫu có ràng buộc người giao kết không?",
+        force_deterministic=True,
+    )
+    assert standard_contract.loai_yeu_cau == "validity_question"
+    assert "Điều 405" in standard_contract.citation_targets[0]
+
+
+def test_query_analyzer_marks_missing_facts_after_topic_routing():
+    intent = QueryAnalyzer().analyze(
+        "Tôi chưa rõ thời điểm, chủ thể, giấy tờ và hành vi cụ thể của người từ đủ 14 tuổi đến dưới 16 tuổi phải chịu trách nhiệm hình sự. Có thể kết luận ngay không?",
+        force_deterministic=True,
+    )
+
+    assert intent.loai_yeu_cau == "scenario_application"
+    assert intent.insufficient_facts is True
+    assert "Bộ luật Hình sự, Điều 12" in intent.citation_targets
+
+
+def test_query_analyzer_routes_unsupported_domains_to_guardrail():
+    intent = QueryAnalyzer().analyze(
+        "Người lao động bị sa thải trái pháp luật được nhận lại việc và bồi thường thế nào?",
+        force_deterministic=True,
+    )
+
+    assert intent.loai_yeu_cau == "out_of_scope"

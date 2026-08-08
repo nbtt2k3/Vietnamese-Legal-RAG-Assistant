@@ -8,6 +8,8 @@ from rag.retrieval.retrievers.base import BaseRetriever
 import threading
 from rank_bm25 import BM25Okapi
 from rag.retrieval.text_utils import contains_normalized, normalize_for_match, tokenize_for_bm25
+from rag.retrieval.temporal import allows_historical, temporal_state
+from rag.retrieval.constraints import article_matches, exact_constraints
 
 _GLOBAL_BM25_INDEX = None
 _GLOBAL_PAYLOADS_LEN = 0
@@ -64,14 +66,19 @@ class LexicalRetriever(BaseRetriever):
         if not all_payloads or bm25 is None:
             return []
             
-        query_text = " ".join(query_intent.keywords + query_intent.key_phrases).lower()
+        # Keep the complete query in BM25. Previously only extracted keywords
+        # were indexed, which dropped important natural-language legal terms
+        # and made unrelated high-frequency articles dominate the top ranks.
+        query_text = " ".join(
+            [query_intent.normalized_query, *query_intent.query_variants, *query_intent.keywords, *query_intent.key_phrases]
+        ).lower()
         tokenized_query = tokenize_for_bm25(query_text)
         bm25_scores = bm25.get_scores(tokenized_query) if tokenized_query else [0]*len(all_payloads)
 
         results = []
         for idx, payload in enumerate(all_payloads):
             validity = str(payload.get("validity_status", "")).lower()
-            if query_intent.loai_yeu_cau not in ("validity_question", "case_law_question") and validity == "het_hieu_luc":
+            if temporal_state(payload, query_intent) == "expired" and not allows_historical(query_intent):
                 continue
                 
             # Phase 3 Temporal/Graph filter
@@ -128,6 +135,12 @@ class LexicalRetriever(BaseRetriever):
         for target in query_intent.citation_targets:
             if contains_normalized(normalized_haystack, target):
                 score += 6.0
+
+        constraints = exact_constraints(query_intent)
+        if constraints.get("clause_numbers"):
+            clause_number = normalize_for_match(str(payload.get("khoan_number", "")))
+            if clause_number in constraints["clause_numbers"] and article_matches(payload, constraints["article_numbers"]):
+                score += 12.0
 
         dieu_title = normalize_for_match(str(payload.get("dieu_title", "")))
         citation = normalize_for_match(str(payload.get("citation", "")))

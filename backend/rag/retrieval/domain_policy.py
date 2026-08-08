@@ -9,7 +9,7 @@ CRIMINAL_TERMS = {
     "trom cap",
     "an trom",
     "hinh phat",
-    "tu",
+    "di tu",
     "mien trach nhiem hinh su",
 }
 

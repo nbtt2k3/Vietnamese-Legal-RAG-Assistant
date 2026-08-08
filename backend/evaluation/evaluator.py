@@ -1,11 +1,13 @@
 from statistics import mean
 import time
+from collections.abc import Callable
 
 from evaluation.dataset_loader import load_eval_dataset
 from evaluation.models import CaseEvaluation, EvalCase, EvaluationReport
-from evaluation.utils import best_match_ratio, confidence_at_least
+from evaluation.utils import best_match_ratio, citation_matches, confidence_at_least
 from app.core.config import settings
 from rag.generation.pipeline import GenerationPipeline
+from rag.retrieval.error_taxonomy import classify_retrieval_errors
 
 
 from evaluation.llm_judge import LLMJudge
@@ -26,8 +28,14 @@ class LegalRAGEvaluator:
         self.llm_judge = llm_judge or (LLMJudge() if self.use_llm_judge else None)
         self.case_pass_threshold = case_pass_threshold
 
-    def run(self) -> EvaluationReport:
-        case_reports = [self._evaluate_case(case) for case in self.cases]
+    def run(self, progress_callback: Callable[[int, int, CaseEvaluation], None] | None = None) -> EvaluationReport:
+        case_reports = []
+        total = len(self.cases)
+        for index, case in enumerate(self.cases, start=1):
+            result = self._evaluate_case(case)
+            case_reports.append(result)
+            if progress_callback:
+                progress_callback(index, total, result)
         total_cases = len(case_reports)
         average_score = mean([item.score for item in case_reports]) if case_reports else 0.0
         pass_rate = (sum(1 for item in case_reports if item.passed) / total_cases) if total_cases else 0.0
@@ -57,6 +65,7 @@ class LegalRAGEvaluator:
         grounding_coverage = float(grounding_coverage)
         should_abstain = not case.should_answer
         abstained = self._answer_abstained(answer, generation_citations)
+        judge_applicable = not (should_abstain and abstained)
 
         metrics = {
             "request_type_match": 1.0 if retrieval.query_intent.loai_yeu_cau == case.expected_request_type else 0.0,
@@ -80,15 +89,31 @@ class LegalRAGEvaluator:
             "recall_at_5": self._calculate_recall_at_k(retrieval_citations, case.expected_citations, 5),
             "ndcg": self._calculate_ndcg(retrieval_citations, case.expected_citations),
         }
+        retrieval_errors = classify_retrieval_errors(case, retrieval)
+        metrics["retrieval_error_free"] = 1.0 if not retrieval_errors else 0.0
         
         # Phase 7 TruLens-like Triad (LLM-as-a-judge)
         if self.use_llm_judge:
             if hasattr(self.llm_judge, "last_reasons"):
                 self.llm_judge.last_reasons.clear()
-            context_text = "\n".join([item.text for item in retrieval.candidates[:5]])
-            metrics["answer_relevance"] = self.llm_judge.evaluate_answer_relevance(case.query, answer_text)
-            metrics["faithfulness"] = self.llm_judge.evaluate_faithfulness(answer_text, context_text)
-            metrics["context_precision"] = self.llm_judge.evaluate_context_precision(case.query, context_text)
+            if judge_applicable:
+                context_text = "\n".join([item.text for item in retrieval.candidates[:5]])
+                if hasattr(self.llm_judge, "evaluate_triad"):
+                    metrics.update(self.llm_judge.evaluate_triad(case.query, answer_text, context_text))
+                else:
+                    metrics["answer_relevance"] = self.llm_judge.evaluate_answer_relevance(case.query, answer_text)
+                    metrics["faithfulness"] = self.llm_judge.evaluate_faithfulness(answer_text, context_text)
+                    metrics["context_precision"] = self.llm_judge.evaluate_context_precision(case.query, context_text)
+            else:
+                # A correctly abstained out-of-scope answer has no legal
+                # context to judge. Do not send it to the LLM judge and do
+                # not penalize it as if an empty context were a bad answer.
+                abstention_score = 1.0 if abstained == should_abstain else 0.0
+                metrics.update({
+                    "answer_relevance": abstention_score,
+                    "faithfulness": abstention_score,
+                    "context_precision": abstention_score,
+                })
             
         score = self._score_case(metrics, case)
         notes = self._build_notes(case, retrieval.query_intent.loai_yeu_cau, retrieval_citations, generation_citations, observed_confidence, metrics)
@@ -103,8 +128,10 @@ class LegalRAGEvaluator:
             "grounding_coverage": round(grounding_coverage, 4),
             "disclaimer_count": len(answer.disclaimers),
             "abstained": abstained,
+            "retrieval_error_types": retrieval_errors,
         }
         if self.use_llm_judge and self.llm_judge:
+            observed["llm_judge_applicable"] = judge_applicable
             observed["llm_judge_reasons"] = dict(getattr(self.llm_judge, "last_reasons", {}))
         return CaseEvaluation(
             case_id=case.case_id,
@@ -121,7 +148,7 @@ class LegalRAGEvaluator:
             return 1.0
         for idx, obs in enumerate(retrieval_citations):
             for exp in expected_citations:
-                if exp.lower() in obs.lower() or obs.lower() in exp.lower():
+                if citation_matches(obs, exp):
                     return 1.0 / (idx + 1)
         return 0.0
 
@@ -131,7 +158,7 @@ class LegalRAGEvaluator:
         hits = set()
         for obs in retrieval_citations[:k]:
             for exp in expected_citations:
-                if exp.lower() in obs.lower() or obs.lower() in exp.lower():
+                if citation_matches(obs, exp):
                     hits.add(exp)
         return len(hits) / len(expected_citations)
 
@@ -147,7 +174,7 @@ class LegalRAGEvaluator:
             for exp in expected_citations:
                 if exp in matched_expected:
                     continue
-                if exp.lower() in obs.lower() or obs.lower() in exp.lower():
+                if citation_matches(obs, exp):
                     hit = exp
                     break
             if hit:
@@ -182,7 +209,19 @@ class LegalRAGEvaluator:
         return not generation_citations and str(answer.confidence.get("level", "low")) == "low"
 
     def _score_case(self, metrics: dict[str, float], case: EvalCase) -> float:
-        if self.use_llm_judge:
+        if not case.should_answer:
+            # Abstention cases are evaluated by guardrail correctness and
+            # scope messaging, not by answer relevance to an intentionally
+            # unsupported question.
+            weights = {
+                "request_type_match": 0.20,
+                "abstention_correctness": 0.35,
+                "confidence_sufficiency": 0.15,
+                "disclaimer_presence": 0.15,
+                "answer_term_coverage": 0.10,
+                "latency_budget_met": 0.05,
+            }
+        elif self.use_llm_judge:
             weights = {
                 "request_type_match": 0.05,
                 "mrr": 0.15,
@@ -212,15 +251,6 @@ class LegalRAGEvaluator:
                 weights["answer_term_coverage"] = 0.17
                 weights["generation_citation_recall"] = 0.09
                 weights["mrr"] = 0.18
-            if not case.should_answer:
-                weights = {
-                    "request_type_match": 0.20,
-                    "abstention_correctness": 0.35,
-                    "confidence_sufficiency": 0.15,
-                    "disclaimer_presence": 0.15,
-                    "answer_term_coverage": 0.10,
-                    "latency_budget_met": 0.05,
-                }
         
         total_weight = sum(weights.values())
         if total_weight <= 0:
@@ -270,10 +300,25 @@ class LegalRAGEvaluator:
         if not case_reports:
             return {}
         keys = sorted({key for item in case_reports for key in item.metrics})
-        aggregate = {
-            key: round(mean([item.metrics[key] for item in case_reports if key in item.metrics]), 4)
-            for key in keys
-        }
+        judge_only_metrics = {"answer_relevance", "faithfulness", "context_precision"}
+        aggregate = {}
+        for key in keys:
+            values = [
+                item.metrics[key]
+                for item in case_reports
+                if key in item.metrics
+                and (
+                    key not in judge_only_metrics
+                    or item.observed.get("llm_judge_applicable", True)
+                )
+            ]
+            if values:
+                aggregate[key] = round(mean(values), 4)
+        error_cases = sum(
+            1 for item in case_reports
+            if item.observed.get("retrieval_error_types")
+        )
+        aggregate["retrieval_error_rate"] = round(error_cases / len(case_reports), 4)
         latencies = sorted(
             item.observed.get("latency_seconds", 0.0)
             for item in case_reports

@@ -76,6 +76,7 @@ class QdrantIndexer:
             ("effective_to", PayloadSchemaType.KEYWORD),
             ("node_type", PayloadSchemaType.KEYWORD),
             ("parent_id", PayloadSchemaType.KEYWORD),
+            ("parent_chunk_id", PayloadSchemaType.KEYWORD),
             ("node_id", PayloadSchemaType.KEYWORD),
             ("ancestor_ids", PayloadSchemaType.KEYWORD)
         ]:
@@ -156,6 +157,7 @@ class QdrantIndexer:
                 ("effective_to",    PayloadSchemaType.KEYWORD),
                 ("node_type",       PayloadSchemaType.KEYWORD),
                 ("parent_id",       PayloadSchemaType.KEYWORD),
+                ("parent_chunk_id", PayloadSchemaType.KEYWORD),
                 ("node_id",         PayloadSchemaType.KEYWORD),
                 ("ancestor_ids",    PayloadSchemaType.KEYWORD),
             ]:

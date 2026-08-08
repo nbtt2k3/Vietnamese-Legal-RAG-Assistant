@@ -6,6 +6,7 @@ from qdrant_client import models
 
 
 from app.core.config import settings
+from rag.retrieval.temporal import allows_historical, temporal_state
 
 class VectorRetriever(BaseRetriever):
     name = "vector"
@@ -38,6 +39,8 @@ class VectorRetriever(BaseRetriever):
         for point in response_points:
             payload = point.payload or {}
             # Phase 3 Temporal/Graph filter for Vector Retriever
+            if temporal_state(payload, query_intent) == "expired" and not allows_historical(query_intent):
+                continue
             if query_intent.time_context.get("year_hint"):
                 year = query_intent.time_context["year_hint"]
                 eff_to = payload.get("effective_to")

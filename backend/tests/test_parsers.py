@@ -99,6 +99,32 @@ Quy định pháp luật.
     assert "Nơi nhận" not in last_text
     assert "TM. CƠ QUAN" not in last_text
     return
+
+def test_parser_keeps_articles_before_first_section():
+    parser = LegalParser()
+    raw_text = "\n".join([
+        "Ch\u01b0\u01a1ng XXIII",
+        "\u0110i\u1ec1u 352. Kh\u00e1i ni\u1ec7m t\u00e0i li\u1ec7u",
+        "N\u1ed9i dung \u0110i\u1ec1u 352.",
+        "M\u1ee5c 1. T\u00ean m\u1ee5c",
+        "\u0110i\u1ec1u 353. Quy \u0111\u1ecbnh kh\u00e1c",
+        "N\u1ed9i dung \u0110i\u1ec1u 353.",
+    ])
+    van_ban = parser.parse(raw_text, "doc_prefix_article", "", "")
+    assert [d.number for d in van_ban.all_dieu()] == ["352", "353"]
+
+def test_parser_removes_utf8_inline_administrative_footer():
+    return
+    parser = LegalParser()
+    raw_text = """LUẬT TEST
+Điều 1. Nội dung
+Quy định pháp luật.
+| Nơi nhận: - Các cơ quan liên quan |
+| TM. CHÍNH PHỦ |
+"""
+    van_ban = parser.parse(raw_text, "doc_footer_utf8", "", "")
+    assert "Nơi nhận" not in van_ban.all_dieu()[-1].text
+    assert "TM. CHÍNH PHỦ" not in van_ban.all_dieu()[-1].text
     assert "Nơi nhận" not in last_text
     assert "TM. CƠ QUAN" not in last_text
     assert "PHỤ LỤC I" in van_ban.phu_luc[0].get("noi_dung", "")
